@@ -1,0 +1,183 @@
+Arguments: 
+  C:\Users\Data.FI\AppData\Roaming\nvm\v16.20.0\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js install
+
+PATH: 
+  C:\Users\Data.FI\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\local\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\Data.FI\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Python311\Scripts;C:\Python311;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\WINDOWS\System32\OpenSSH;C:\Program Files\Git\cmd;C:\Program Files (x86)\Yarn\bin;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\chocolatey\bin;C:\Users\Data.FI\AppData\Local\Android\Sdk\platform-tools;C:\Program Files\Microsoft SQL Server\150\Tools\Binn;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn;C:\Program Files\dotnet;C:\Users\Data.FI\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\Users\Data.FI\AppData\Local\Microsoft\WindowsApps;C:\Users\Data.FI\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Data.FI\AppData\Local\Yarn\bin;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2023.1.3\bin;C:\Users\Data.FI\.dotnet\tools;C:\Program Files\Java\jdk1.8.0_202\bin;C:\Users\Data.FI\AppData\Roaming\nvm;C:\Program Files\nodejs;C:\Program Files\JetBrains\IntelliJ IDEA 2023.1.3\bin;C:\Program Files\Git\usr\bin\vendor_perl;C:\Program Files\Git\usr\bin\core_perl
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  16.20.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.11.16.tgz: ESOCKETTIMEDOUT
+      at ClientRequest.<anonymous> (C:\Program Files (x86)\Yarn\lib\cli.js:141517:19)
+      at Object.onceWrapper (node:events:627:28)
+      at ClientRequest.emit (node:events:513:28)
+      at TLSSocket.emitRequestTimeout (node:_http_client:839:9)
+      at Object.onceWrapper (node:events:627:28)
+      at TLSSocket.emit (node:events:525:35)
+      at TLSSocket.Socket._onTimeout (node:net:550:8)
+      at listOnTimeout (node:internal/timers:559:17)
+      at processTimers (node:internal/timers:502:7)
+
+npm manifest: 
+  {
+    "name": "LamisPlus",
+    "version": "0.1.0",
+    "homepage": ".",
+    "private": true,
+    "dependencies": {
+      "@date-io/date-fns": "^1.3.13",
+      "@emotion/react": "^11.8.1",
+      "@emotion/styled": "^11.8.1",
+      "@fortawesome/fontawesome-free": "^6.1.1",
+      "@fortawesome/fontawesome-svg-core": "^6.1.1",
+      "@fortawesome/free-solid-svg-icons": "^6.1.1",
+      "@fortawesome/react-fontawesome": "^0.1.18",
+      "@fullcalendar/core": "^5.4.0",
+      "@fullcalendar/daygrid": "^5.4.0",
+      "@fullcalendar/interaction": "^5.4.0",
+      "@fullcalendar/react": "^5.4.0",
+      "@fullcalendar/timegrid": "^5.4.0",
+      "@hookform/resolvers": "^2.8.8",
+      "@lls/react-light-calendar": "^2.2.0",
+      "@loadable/component": "^5.14.1",
+      "@material-ui/core": "^4.11.0",
+      "@material-ui/icons": "^4.9.1",
+      "@material-ui/lab": "^4.0.0-alpha.42",
+      "@material-ui/pickers": "^3.2.10",
+      "@material-ui/styles": "^4.9.0",
+      "@mui/icons-material": "^5.8.4",
+      "@mui/material": "^5.5.0",
+      "@reach/menu-button": "^0.10.1",
+      "@svg-maps/usa": "^1.1.1",
+      "@svg-maps/world": "^1.0.1",
+      "@sweetalert/with-react": "^0.1.1",
+      "@syncfusion/ej2-base": "^18.3.52",
+      "@syncfusion/ej2-react-charts": "^18.3.52",
+      "@testing-library/jest-dom": "^5.11.6",
+      "@testing-library/react": "^11.2.2",
+      "@testing-library/user-event": "^12.2.2",
+      "@tinymce/tinymce-react": "^3.10.1",
+      "@y0c/react-datepicker": "^1.0.4",
+      "apexcharts": "^3.22.2",
+      "axios": "^0.21.1",
+      "bootstrap": "^4.6.1",
+      "bootstrap-daterangepicker": "^3.1.0",
+      "bootstrap-switch-button-react": "^1.2.0",
+      "chart.js": "^2.9.4",
+      "chartist": "^0.11.4",
+      "chartist-plugin-tooltips-updated": "^0.1.3",
+      "chartjs-plugin-streaming": "^1.8.0",
+      "create-react-class": "^15.7.0",
+      "date-fns": "^2.16.1",
+      "draft-js": "^0.11.7",
+      "formik": "^2.2.6",
+      "highcharts": "^10.2.0",
+      "highcharts-react-official": "^3.1.0",
+      "html-to-draftjs": "^1.5.0",
+      "jwt-decode": "^3.1.2",
+      "loadash": "^1.0.0",
+      "material-table": "^1.57.2",
+      "material-ui": "^0.20.2",
+      "material-ui-color-picker": "^3.5.1",
+      "material-ui-dropzone": "^3.4.0",
+      "metismenujs": "^1.2.1",
+      "nouislider-react": "^3.3.9",
+      "p-min-delay": "^3.1.0",
+      "rc-color-picker": "^1.2.6",
+      "react": "^17.0.1",
+      "react-apexcharts": "^1.3.7",
+      "react-bootstrap": "^1.4.0",
+      "react-bootstrap-daterangepicker": "^7.0.0",
+      "react-bootstrap-sweetalert": "^5.2.0",
+      "react-calendar": "^3.2.1",
+      "react-chartist": "^0.14.3",
+      "react-chartjs": "^1.2.0",
+      "react-chartjs-2": "^2.11.1",
+      "react-countdown": "^2.3.2",
+      "react-date-range": "^1.1.3",
+      "react-dom": "^17.0.1",
+      "react-draft-wysiwyg": "^1.14.5",
+      "react-dropzone-uploader": "^2.11.0",
+      "react-dual-listbox": "^2.0.0",
+      "react-gradient-timepicker": "0.0.3",
+      "react-hook-form": "^7.31.3",
+      "react-icons": "^4.3.1",
+      "react-input-colorpicker": "^1.0.13",
+      "react-linear-gradient-picker": "^1.1.4",
+      "react-lodash": "^0.1.2",
+      "react-multiselect-dropdown-bootstrap": "^1.0.16",
+      "react-multistep": "^5.1.0",
+      "react-nestable": "^1.3.0",
+      "react-overlay-loading": "^1.0.3",
+      "react-perfect-scrollbar": "^1.5.8",
+      "react-phone-input-2": "^2.11.0",
+      "react-redux": "^7.2.4",
+      "react-resize-detector": "^5.2.0",
+      "react-router-dom": "^5.2.0",
+      "react-rte": "^0.16.3",
+      "react-scripts": "4.0.1",
+      "react-select": "^3.1.1",
+      "react-slick": "^0.27.13",
+      "react-sparklines": "^1.7.0",
+      "react-star-ratings-component": "^1.0.1",
+      "react-summernote": "^2.0.2",
+      "react-svg-map": "^2.1.2",
+      "react-table": "^7.7.0",
+      "react-times": "^3.1.12",
+      "react-toastify": "^6.2.0",
+      "react-widgets": "^4.4.11",
+      "react-widgets-moment": "^4.0.27",
+      "reactstrap": "^7.1.0",
+      "recharts": "^1.8.5",
+      "redux": "^4.1.2",
+      "redux-form": "^8.3.7",
+      "redux-thunk": "^2.3.0",
+      "semantic-ui-css": "^2.4.1",
+      "semantic-ui-react": "^2.1.2",
+      "simple-react-lightbox": "^3.5.1",
+      "slick-carousel": "^1.8.1",
+      "sweetalert": "^2.1.2",
+      "sweetalert2": "^10.10.4",
+      "swiper": "^6.5.9",
+      "use-scroll-position": "0.0.4",
+      "web-vitals": "^0.2.4",
+      "yup": "^0.32.8"
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts --max-old-space-size=15096 build && xcopy /s /y build src\\main\\resources\\views\\static\\covid",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+      "extends": [
+        "react-app",
+        "react-app/jest"
+      ]
+    },
+    "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
