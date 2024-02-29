@@ -1,68 +1,57 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { MemoryRouter as Router, Switch, Route } from "react-router-dom";
-import RegisterPatient from "./main/webapp/components/RegisterPatient";
-import ViewPatient from "./main/webapp/components/ViewPatient";
-import PatientDashboard from "./main/webapp/components/PatientDashboard";
-import Dashboard from "./main/webapp/components/ClientDashboard";
-import ClientDashboard from "./main/webapp/components/ClientDashboard";
-import BiometricsDashboard from "./main/webapp/components/biometrics/";
-/*import PatientVitals from './main/webapp/components/PatientVitals';
-import AddPatientVitals from './main/webapp/components/Add-Patient-Vitals';*/
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "./main/webapp/css/style.css";
-import DualListBox from "react-dual-listbox";
-import "react-dual-listbox/lib/react-dual-listbox.css";
-import Components from "./main/webapp/components";
+import React from "react";
+import {
+  MemoryRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
+
+import { ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import "./main/webapp/vendor/bootstrap-select/dist/css/bootstrap-select.min.css";
+import "./../src/main/webapp/css/style.css";
+import 'bootstrap/dist/css/bootstrap.css';
+import Home from './main/webapp/jsx/components/Home'
+import PatientDetail from './main/webapp/jsx/components/Patient/PatientDetail'
+import RegisterPatientPage from './main/webapp/jsx/components/Patient/RegisterPatient';
+import EnrollPatientPage from './main/webapp/jsx/components/Patient/EnrollPatient';
+import UpdatePatientEnrollment from './main/webapp/jsx/components/Patient/UpdatePatientEnrollment';
+import KpPrev from "./main/webapp/jsx/components/KpPrev";
+
 export default function App() {
   return (
     <Router>
       <div>
-        <ToastContainer />
-        {/*          <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL.*/}
+      <ToastContainer />
+        {/* A <Switch> looks through its children <Route>s and
+            renders the first one that matches the current URL. */}
         <Switch>
-          <Route path="/patient-biometrics">
-            <BiometricsDashboard />
-          </Route>
+          <Route path="/patient-history">
+            <PatientDetail />
+          </Route> 
           <Route path="/register-patient">
             <RegisterPatientPage />
           </Route>
-          <Route path="/view-patient">
-            <ViewPatient />
+          <Route path="/enroll-patient">
+            <EnrollPatientPage />
           </Route>
-          <Route path="/patient-dashboard">
-            <PatientDashboardPage />
+          <Route path="/update-patient">
+            <UpdatePatientEnrollment />
           </Route>
-          <Route path="/patient-vitals">
-            <Dashboard />
-            {/*<PatientVitalsPage />*/}
+          <Route path="/kp-prev">
+            <KpPrev />
           </Route>
-          <Route path="/add-patient-vital">
-            <Dashboard />
-            {/*<AddPatientVitalsPage />*/}
-          </Route>
+
+
           <Route path="/">
-            <Components />
-          </Route>
+            <Home />
+          </Route>       
+          
         </Switch>
       </div>
-    </Router>
+ </Router>
   );
 }
 
-function PatientDashboardPage() {
-  return <ClientDashboard />;
-}
-function RegisterPatientPage() {
-  return <RegisterPatient />;
-}
 
-/*
-function PatientVitalsPage() {
-  return <PatientVitals />
-}
-function AddPatientVitalsPage() {
-  return <AddPatientVitals />
-}
-*/
+
+

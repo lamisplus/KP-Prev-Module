@@ -6,8 +6,8 @@ menus:
     disabled: false
     name: KP_PREV
     state: KP_PREV
-    url: /across/resources/static/patient/index.html
-umdLocation: /across/resources/static/patient/index.html
+    url: /across/resources/static/kp_prev/index.html
+umdLocation: /across/resources/static/kp_prev/index.html
 webModules:
   - breadcrumb: KP_PREV
     name: Kp_PREVModule

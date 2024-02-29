@@ -529,7 +529,7 @@ li {
   padding-bottom: 112px;
   height: 100%;
   position: absolute;
-  top: 52px;
+  top: 5rem;
   padding-top: 0;
   z-index: 99;
   background-color: #fff;
@@ -1170,13 +1170,14 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
     [data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .deznav .metismenu li a {
       padding: 0.8125rem 0.9375rem; }
     [data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .deznav .metismenu li > ul {
-      position: inherit;
-      left: 7.75rem;
+      position: absolute;
+      left: 3.75rem;
       top: 2.9375rem;
-      width: 15rem;
+      width: 11.875rem;
       z-index: 1001;
       display: none;
       padding-left: 1px;
+      box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.15);
       height: auto !important; }
       [direction="rtl"][data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .deznav .metismenu li > ul {
         left: auto;
