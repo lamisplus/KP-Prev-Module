@@ -1,4 +1,4 @@
-package org.lamisplus.modules.KP_PREV.utility;
+package org.lamisplus.modules.kpprev.utility;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;

@@ -1,4 +1,4 @@
-package org.lamisplus.modules.patient.config;
+package org.lamisplus.modules.kpprev.config;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

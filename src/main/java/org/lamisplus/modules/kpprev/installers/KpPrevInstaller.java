@@ -1,4 +1,4 @@
-package org.lamisplus.modules.KP_PREV.installers;
+package org.lamisplus.modules.kpprev.installers;
 
 import com.foreach.across.core.annotations.Installer;
 import com.foreach.across.core.installers.AcrossLiquibaseInstaller;

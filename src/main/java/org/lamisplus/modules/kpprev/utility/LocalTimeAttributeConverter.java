@@ -1,4 +1,4 @@
-package org.lamisplus.modules.KP_PREV.utility;
+package org.lamisplus.modules.kpprev.utility;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

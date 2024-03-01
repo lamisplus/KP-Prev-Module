@@ -1,4 +1,4 @@
-package org.lamisplus.modules.KP_PREV.utility;
+package org.lamisplus.modules.kpprev.utility;
 
 import com.google.common.hash.Hashing;
 import okhttp3.*;

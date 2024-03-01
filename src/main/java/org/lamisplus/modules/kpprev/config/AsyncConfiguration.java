@@ -1,4 +1,4 @@
-package org.lamisplus.modules.KP_PREV.config;
+package org.lamisplus.modules.kpprev.config;
 
 import io.github.jhipster.async.ExceptionHandlingAsyncTaskExecutor;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +27,12 @@ public class AsyncConfiguration implements AsyncConfigurer, SchedulingConfigurer
     @Override
     @Bean(name = "taskExecutor")
     public Executor getAsyncExecutor() {
-        log.debug ("Creating Async Task Executor");
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor ();
-        executor.setCorePoolSize (3);
-        executor.setMaxPoolSize (3);
-        executor.setQueueCapacity (3);
-        return new ExceptionHandlingAsyncTaskExecutor (executor);
+        LOG.info ("Creating Async Task Executor {}", "Async Task Executor");
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(100);
+        executor.setQueueCapacity(100);
+        return new ExceptionHandlingAsyncTaskExecutor(executor);
     }
 
     @Override
@@ -47,8 +47,6 @@ public class AsyncConfiguration implements AsyncConfigurer, SchedulingConfigurer
 
     @Bean
     public Executor scheduledTaskExecutor() {
-        return Executors.newScheduledThreadPool (3);
+        return Executors.newScheduledThreadPool(3);
     }
-
-
 }
