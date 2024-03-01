@@ -1,34 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  
-  <parent>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
         <groupId>com.foreach.across</groupId>
         <artifactId>across-application-parent</artifactId>
         <version>5.1.0.RELEASE</version>
         <relativePath/>
     </parent>
 
-  <groupId>org.lamisplus.modules</groupId>
-  <artifactId>KP_PREV</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
 
-  <name>KP_PREV</name>
-  <url>http://maven.apache.org</url>
+    <groupId>org.lamisplus.modules</groupId>
+    <artifactId>kprev</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>kp-prev-module</name>
+    <description>kp-prev-module</description>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	<java.version>1.8</java.version>
+    <properties>
+        <java.version>1.8</java.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <org.projectlombok.version>1.18.4</org.projectlombok.version>
         <jjwt.version>0.11.2</jjwt.version>
         <build.revision>1.0.0</build.revision>
         <audit4j.version>2.5.0</audit4j.version>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
-  </properties>
-  
-  <repositories>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
         <repository>
             <id>foreach-nexus</id>
             <name>Foreach nexus</name>
@@ -36,17 +41,18 @@
         </repository>
     </repositories>
 
-  <dependencies>
+    <dependencies>
+
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
             <version>0.9.5.5</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
-            <groupId>org.audit4j</groupId>
-            <artifactId>audit4j-core</artifactId>
-            <version>2.5.0</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -116,14 +122,12 @@
             <artifactId>gson</artifactId>
             <version>2.9.0</version>
         </dependency>
-         
-		 
-		 <dependency>
+
+        <dependency>
             <groupId>org.lamisplus.modules</groupId>
             <artifactId>base-module</artifactId>
             <version>2.0.0</version>
         </dependency>
-       
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -206,6 +210,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.9.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.github.jhipster</groupId>
             <artifactId>jhipster-framework</artifactId>
             <version>3.9.1</version>
@@ -215,13 +225,9 @@
             <groupId>com.foreach.across.modules</groupId>
             <artifactId>across-hibernate-module</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.5.0</version>
-        </dependency>
     </dependencies>
-	<build>
+
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -259,62 +265,63 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <!--<plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>-->
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>1.12.1</version>
                 <executions>
-<!--                    <execution>-->
-<!--                        <id>install node and npm</id>-->
-<!--                        <goals>-->
-<!--                            <goal>install-node-and-npm</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <nodeVersion>v16.13.2</nodeVersion>-->
-<!--                            <npmVersion>8.1.2</npmVersion>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>npm install</id>-->
-<!--                        <goals>-->
-<!--                            <goal>npm</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <arguments>install</arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>npm run build</id>-->
-<!--                        <goals>-->
-<!--                            <goal>npm</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <arguments>run build</arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
+                    <!--<execution>
+                        <id>install node and npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <configuration>
+                            <nodeVersion>v16.20.0</nodeVersion>
+                            <npmVersion>8.19.4</npmVersion>
+                        </configuration>
+                    </execution>-->
+                    <!--<execution>
+                        <id>npm install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>-->
+                    <!--					<execution>-->
+                    <!--                        <id>npm run build</id>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>npm</goal>-->
+                    <!--                        </goals>-->
+                    <!--                        <configuration>-->
+                    <!--                            <arguments>run build</arguments>-->
+                    <!--                        </configuration>-->
+                    <!--                    </execution>-->
                 </executions>
             </plugin>
-                        <plugin>
-                            <artifactId>maven-antrun-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <phase>generate-resources</phase>
-                                    <configuration>
-                                        <target>
-                                            <copy todir="${project.build.directory}/classes/views/static/patient">
-                                                <fileset dir="${project.basedir}/build"/>
-                                            </copy>
-                                        </target>
-                                    </configuration>
-                                    <goals>
-                                        <goal>run</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <copy todir="${project.build.directory}/classes/views/static/report">
+                                    <fileset dir="${project.basedir}/build"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
-
-  
 </project>
