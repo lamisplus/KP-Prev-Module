@@ -1,5 +1,5 @@
 basePackage: org.lamisplus.modules.kpprev
-name: KP PREV Module
+name: KpPrevModule
 store: true
 menus:
   - icon: fa-solid fa-hospital-user
@@ -10,7 +10,7 @@ menus:
 umdLocation: /across/resources/static/kp_prev/index.html
 webModules:
   - breadcrumb: kpprev
-    name: KP PREVModule
+    name: KpPrevModule
     path: kpprev
     position: 99
 
