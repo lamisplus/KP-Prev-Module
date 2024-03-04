@@ -1,19 +1,16 @@
-basePackage: org.lamisplus.modules.hepatitis
-name: HepatitisModule
+basePackage: org.lamisplus.modules.kp_prev
+name: KP_PREVModule
 store: true
 menus:
-  - icon: fa fa-virus
+  - icon: fa-solid fa-hospital-user
     disabled: false
-    name: Hepatitis
-    state: hepatitis
-    url: /across/resources/static/hepatitis/index.html
-umdLocation: /across/resources/static/hepatitis/index.html
+    name: KP_PREV
+    state: KP_PREV
+    url: /across/resources/static/kp_prev/index.html
+umdLocation: /across/resources/static/kp_prev/index.html
 webModules:
-  - breadcrumb: HEPATITIS
-    name: HepatitisModule
-    path: hepatitis
+  - breadcrumb: KP_PREV
+    name: Kp_PREVModule
+    path: KP_PREV
     position: 99
-permissions:
-  - name: create_hepatitis
-    description: create hepatitis
-    moduleName: HepatitisModule
+

@@ -124,11 +124,16 @@
   },
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts --openssl-legacy-provider --max-old-space-size=15096 build && xcopy /s /y build src\\main\\resources\\views\\static\\hepatitis",
+    "build": "react-scripts --max-old-space-size=15096 --openssl-legacy-provider build && xcopy /s /y build src\\main\\resources\\views\\static\\kp_prev",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -140,8 +145,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "eslint-config-react": "^1.1.7"
   }
 }
