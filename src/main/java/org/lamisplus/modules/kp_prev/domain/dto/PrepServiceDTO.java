@@ -11,8 +11,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class PrepServiceDTO implements Serializable {
 	
-	private int offered_prep;
-	private int accepted_prep;
-	private int referred_for_prep;
+	private String offered_prep;
+	private String accepted_prep;
+	private String referred_for_prep;
 
 }

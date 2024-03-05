@@ -10,5 +10,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class HivEducationalServiceDTO implements Serializable {
+	
+	private String peerGroupCommunication;
+	private String interpersonalCommunication;
+	private String iecMaterial;
 
 }

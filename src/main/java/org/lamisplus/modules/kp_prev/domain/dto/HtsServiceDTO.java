@@ -12,10 +12,10 @@ import lombok.Data;
 public class HtsServiceDTO implements Serializable
 
 {
-private int offered_hts;
-private int accepted_hts;
-private int hiv_test_result;
-private int referred_for_art;
+private String offered_hts;
+private String accepted_hts;
+private String hiv_test_result;
+private String referred_for_art;
 
 
 }

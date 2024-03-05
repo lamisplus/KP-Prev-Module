@@ -11,8 +11,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class StructuralServiceDTO implements Serializable {
 	
-	private int providedEmpowerment;
-	private int legalAidServices;
+	private String providedEmpowerment;
+	private String legalAidServices;
 	
 
 }

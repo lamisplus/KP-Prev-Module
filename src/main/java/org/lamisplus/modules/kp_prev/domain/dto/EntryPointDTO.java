@@ -10,6 +10,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class EntryPointDTO implements Serializable {
-    private  int htsaccepted;
-    private  int known_postive;
+    private  String htsaccepted;
+    private  String known_postive;
 }
