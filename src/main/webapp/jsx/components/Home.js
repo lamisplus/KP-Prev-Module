@@ -1,10 +1,10 @@
-import React, {useState, Fragment } from "react";
-import { Row, Col, Card,  Tab, Tabs, } from "react-bootstrap";
-import PatientList from './Patient/PatientList'
+import React, { useState, Fragment } from "react";
+import { Row, Col, Card, Tab, Tabs } from "react-bootstrap";
+import PatientList from "./Patient/PatientList";
 //import PatientVaccinatedLIst from './Patient/PatientVaccinatedLIst'
 import KpPrevEnrolled from "./KpPrev/KpPrevEnrolled";
-import { Link } from 'react-router-dom'
-import Button from '@material-ui/core/Button';
+import { Link } from "react-router-dom";
+import Button from "@material-ui/core/Button";
 import { FaUserPlus } from "react-icons/fa";
 //import PageTitle from "./../layouts/PageTitle";
 const divStyle = {
@@ -13,17 +13,21 @@ const divStyle = {
 };
 
 const Home = () => {
-    const [key, setKey] = useState('home');
-
+  const [key, setKey] = useState("home");
 
   return (
-    <Fragment>  
-      <div className="row page-titles mx-0" style={{marginTop:"0px", marginBottom:"-10px"}}>
-			<ol className="breadcrumb">
-				<li className="breadcrumb-item active"><h4>KP-PREV</h4></li>
-			</ol>
-		  </div>
-      <Link to={"register-patient"}>
+    <Fragment>
+      <div
+        className="row page-titles mx-0"
+        style={{ marginTop: "0px", marginBottom: "-10px" }}
+      >
+        <ol className="breadcrumb">
+          <li className="breadcrumb-item active">
+            <h4>KP-PREV</h4>
+          </li>
+        </ol>
+      </div>
+      {/* <Link to={"register-patient"}>
             <Button
                 variant="contained"
                 color="primary"
@@ -33,27 +37,27 @@ const Home = () => {
             >
                 <span style={{ textTransform: "capitalize" }}>New Patient</span>
             </Button>
-        </Link>
-        <br/><br/>
-      <br/>
-      <Row>       
+        </Link> */}
+      <br />
+      <br />
+      <br />
+      <Row>
         <Col xl={12}>
-          <Card style={divStyle}>            
+          <Card style={divStyle}>
             <Card.Body>
               {/* <!-- Nav tabs --> */}
               <div className="custom-tab-1">
                 <Tabs
-                    id="controlled-tab-example"
-                    activeKey={key}
-                    onSelect={(k) => setKey(k)}
-                    className="mb-3"
+                  id="controlled-tab-example"
+                  activeKey={key}
+                  onSelect={(k) => setKey(k)}
+                  className="mb-3"
                 >
-                  
-                  <Tab eventKey="home" title="Find Patients">                   
+                  <Tab eventKey="home" title="Find Patients">
                     <PatientList />
                   </Tab>
 
-                  <Tab eventKey="kpprev" title="Kp-Prev">                   
+                  <Tab eventKey="kpprev" title="KP_PrEV Patients">
                     <KpPrevEnrolled />
                   </Tab>
                   {/* <Tab eventKey="visualization" title="Data Visualisation">                   
@@ -64,7 +68,6 @@ const Home = () => {
             </Card.Body>
           </Card>
         </Col>
-        
       </Row>
     </Fragment>
   );

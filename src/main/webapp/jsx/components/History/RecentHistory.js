@@ -1,11 +1,10 @@
-import React, { useState,useEffect,Fragment} from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import axios from "axios";
-import VaccinationHistory from './../Vaccination/VaccinationHistory'
+import VaccinationHistory from "./../Vaccination/VaccinationHistory";
+import KpPrevHistory from "./../KpPrev/KpPrevHistory";
 import { url as baseUrl, token } from "../../../api";
 
-
 const RecentHistory = (props) => {
-
   const [recentActivities, setRecentActivities] = useState([]);
   const [loadingRecent, setLoadingRecent] = useState(true);
 
@@ -54,16 +53,13 @@ const RecentHistory = (props) => {
         actionType: action,
       });
     }
-  }
+  };
 
   return (
     <Fragment>
-      
       <div className="row">
-        <VaccinationHistory patientObj={props.patientObj}/>
-     
+        <KpPrevHistory patientObj={props.patientObj} />
       </div>
-      
     </Fragment>
   );
 };
