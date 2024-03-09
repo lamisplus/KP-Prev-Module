@@ -8,6 +8,7 @@ import {
   Input,
   Button,
 } from "reactstrap";
+import { Link, useHistory, useLocation } from "react-router-dom";
 import MatButton from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
 import SaveIcon from "@material-ui/icons/Save";
@@ -119,7 +120,7 @@ function getStyles(name, selectedOptions, theme) {
 const KpPrev = (props) => {
   const theme = useTheme();
   const patientObj = props.patientObj;
-
+  const history = useHistory();
   const [errors, setErrors] = useState({});
   const [htsCodeVal, setHtsCodeVal] = useState({});
   const [prepCodeVal, setPrepCodeVal] = useState({});
@@ -499,6 +500,7 @@ const KpPrev = (props) => {
             typelegalempowerment: "",
             legalprogramreferred: "",
           });
+          history.push("/");
         })
         .catch((error) => {
           setSaving(false);

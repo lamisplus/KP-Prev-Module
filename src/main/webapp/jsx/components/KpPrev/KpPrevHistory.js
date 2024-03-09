@@ -131,7 +131,7 @@ const KpPrevHistory = (props) => {
   ///GET LIST OF Patients Vaccinations
   async function patients() {
     axios
-      .get(`${baseUrl}covid/vaccinations/patients/${patientObj.id}`, {
+      .get(`${baseUrl}kpprev/${patientObj.uuid}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -177,7 +177,7 @@ const KpPrevHistory = (props) => {
     setSaving(true);
     //props.setActiveContent({...props.activeContent, route:'mental-health-view', id:row.id})
     axios
-      .delete(`${baseUrl}covid/vaccinations/${record.id}`, {
+      .delete(`${baseUrl}kpprev/${record.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -207,99 +207,93 @@ const KpPrevHistory = (props) => {
         <CardBody>
           <MaterialTable
             icons={tableIcons}
-            title="Patient Historys "
+            title="Patient Kp-Prev History "
             columns={[
               {
                 title: "Date Of Services Provided",
                 field: "dateOfServicesProvided",
               },
               {
-                title: "Action",
-                field: "action",
+                title: "Prevention Code",
+                field: "preventioncode",
                 filtering: false,
-                render: (rowData) => (
-                  <div>
-                    <Menu.Menu position="right">
-                      <Menu.Item>
-                        <Button
-                          style={{ backgroundColor: "rgb(153,46,98)" }}
-                          primary
-                        >
-                          <Dropdown
-                            item
-                            text="Action"
-                            style={{ color: "white" }}
-                          >
-                            <Dropdown.Menu style={{ marginTop: "10px" }}>
-                              <Dropdown.Item
-                              //onClick={() => LoadViewPage(rowData, "view")}
-                              >
-                                {" "}
-                                <Icon name="eye" />
-                                View{" "}
-                              </Dropdown.Item>
-
-                              <Dropdown.Item
-                              // onClick={() => LoadViewPage(rowData, "update")}
-                              >
-                                <Icon name="edit" />
-                                Edit
-                              </Dropdown.Item>
-
-                              <Dropdown.Item
-                              //onClick={() => LoadModal(rowData, "delete")}
-                              >
-                                {" "}
-                                <Icon name="trash" /> Delete
-                              </Dropdown.Item>
-                            </Dropdown.Menu>
-                          </Dropdown>
-                        </Button>
-                      </Menu.Item>
-                    </Menu.Menu>
-                  </div>
-                ),
               },
+              { title: "HTS Services", field: "htsServices", filtering: false },
+              {
+                title: "Prep Services",
+                field: "prepServices",
+                filtering: false,
+              },
+              {
+                title: "Commodity Services",
+                field: "commodityServices",
+                filtering: false,
+              },
+              {
+                title: "HIV Educational Services",
+                field: "hivEducationalServices",
+                filtering: false,
+              },
+              {
+                title: "Biomedical Services",
+                field: "biomedicalServices",
+                filtering: false,
+              },
+              {
+                title: "Structural Services",
+                field: "structuralServices",
+                filtering: false,
+              },
+              // {
+              //   title: "Action",
+              //   field: "action",
+              //   filtering: false,
+              // },
 
-              // { title: "Dose Number", field: "doseNumber", filtering: false },
-              // { title: "Location", field: "location", filtering: false },
-              // { title: "Batch Number", field: "batchNumber", filtering: false },
-              // { title: "Adverse Effect ", field: "adverseEffect", filtering: false },
-              // { title: "Vaccination Facility", field: "vaccinationFacility", filtering: false },
-              // { title: "Actions", field: "actions", filtering: false },
+              // { title: "Actions", field: "biomedicalServices", filtering: false },
             ]}
-            //   data={ vacinationList.map((row) => ({
-
-            //         //dateOfServicesProvided: row
-            //        // vaccine: row.vaccineName,
-            //         //vaccineDate: row.vaccineDate,
-            //         //batchNumber: row.batchNumber,
-            //         //doseNumber: row.doseNumber,
-            //        // location: row.location,
-            //         //vaccinationFacility: row.vaccinationFacility,
-            //         //adverseEffect: row.adverseEffect,
-            //         actions:
-
-            //         <div>
-            //             <Menu.Menu position='right'  >
-            //             <Menu.Item >
-            //                 <Button style={{backgroundColor:'rgb(153,46,98)', color:"#fff"}} primary>
-            //                 <Dropdown item text='Action'>
-
-            //                 <Dropdown.Menu style={{ marginTop:"10px", }}>
-            //                     <Dropdown.Item onClick={()=>LoadEditModal(row)} ><IconMenu name='edit' />Edit</Dropdown.Item>
-            //                     <Dropdown.Item onClick={()=>LoadDeleteModal(row)} > <IconMenu name='trash' /> Delete</Dropdown.Item>
-            //                 </Dropdown.Menu>
-            //             </Dropdown>
-            //                 </Button>
-            //             </Menu.Item>
-            //             </Menu.Menu>
-            //         </div>
-
-            //       }))}
-            data={dummyData}
-            //columns={columns}
-
+            data={vacinationList.map((row) => ({
+              dateOfServicesProvided: row.dateServiceOffered,
+              preventioncode: row.prevCode,
+              htsServices: row.htsServices?.offered_hts !== "" ? "✅" : "❌",
+              prepServices: row.prepServices?.offered_prep !== "" ? "✅" : "❌",
+              commodityServices:
+                row.commodityServices?.condoms_dispensed !== "" ? "✅" : "❌",
+              hivEducationalServices:
+                row.hivEducationalServices?.iecMaterial !== "" ? "✅" : "❌",
+              biomedicalServices:
+                row.biomedicalServices?.sti_screening !== "" ? "✅" : "❌",
+              structuralServices:
+                row.structuralServices?.legalAidServices !== "" ? "✅" : "❌",
+              // action: (
+              //   <div>
+              //     <Menu.Menu position="right">
+              //       <Menu.Item>
+              //         <Button
+              //           style={{
+              //             backgroundColor: "rgb(153,46,98)",
+              //             color: "#fff",
+              //           }}
+              //           primary
+              //         >
+              //           <Dropdown item text="Action">
+              //             <Dropdown.Menu style={{ marginTop: "10px" }}>
+              //               <Dropdown.Item onClick={() => LoadEditModal(row)}>
+              //                 <IconMenu name="edit" />
+              //                 Edit
+              //               </Dropdown.Item>
+              //               <Dropdown.Item onClick={() => LoadDeleteModal(row)}>
+              //                 {" "}
+              //                 <IconMenu name="trash" /> Delete
+              //               </Dropdown.Item>
+              //             </Dropdown.Menu>
+              //           </Dropdown>
+              //         </Button>
+              //       </Menu.Item>
+              //     </Menu.Menu>
+              //   </div>
+              // ),
+            }))}
             options={{
               headerStyle: {
                 backgroundColor: "#014d88",

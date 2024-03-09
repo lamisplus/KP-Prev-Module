@@ -131,8 +131,8 @@ const KpPrevEnrolled = (props) => {
         columns={[
           // { title: " ID", field: "Id" },
           {
-            title: "Patient Name",
-            field: "name",
+            title: "Date Service Offered",
+            field: "dateServiceOffered",
           },
           {
             title: "Hospital Number",
@@ -144,15 +144,15 @@ const KpPrevEnrolled = (props) => {
           { title: "Age", field: "age", filtering: false },
 
           //{ title: "ART Number", field: "v_status", filtering: false },
-          { title: "Vaccination Status", field: "count", filtering: false },
-          { title: "Actions", field: "actions", filtering: false },
+          // { title: "Kp Prev Status", field: "count", filtering: false },
+          // { title: "Actions", field: "actions", filtering: false },
         ]}
         //isLoading={loading}
         data={(query) =>
           new Promise((resolve, reject) =>
             axios
               .get(
-                `${baseUrl}patient?pageSize=${query.pageSize}&pageNo=${query.page}&searchParam=${query.search}`,
+                `${baseUrl}kpprev?pageSize=${query.pageSize}&pageNo=${query.page}&searchParam=${query.search}`,
                 { headers: { Authorization: `Bearer ${token}` } }
               )
               .then((response) => response)
@@ -162,61 +162,55 @@ const KpPrevEnrolled = (props) => {
                     result.data.records &&
                     result.data.records !== null &&
                     result.data.records.map((row) => ({
-                      name: row.firstName + " " + row.lastName,
-                      hospital_number: row.participantId,
-                      gender: row.gender !== null ? row.gender.display : "",
-                      age: calculate_age(row.dateOfBirth),
+                      dateServiceOffered: row.dateServiceOffered,
+                      hospital_number: row.patientId,
+                      gender: "",
+                      age: "",
 
-                      count: (
-                        <Label color="blue" size="mini">
-                          {row.vaccinationStatus}
-                        </Label>
-                      ),
-
-                      actions: (
-                        <div>
-                          <Link
-                            to={{
-                              pathname: "/patient-history",
-                              state: { patientObj: row },
-                            }}
-                          >
-                            <ButtonGroup
-                              variant="contained"
-                              aria-label="split button"
-                              style={{
-                                backgroundColor: "rgb(153, 46, 98)",
-                                height: "30px",
-                                width: "215px",
-                              }}
-                              size="large"
-                            >
-                              <Button
-                                color="primary"
-                                size="small"
-                                aria-label="select merge strategy"
-                                aria-haspopup="menu"
-                                style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                              >
-                                <MdDashboard />
-                              </Button>
-                              <Button
-                                style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: "12px",
-                                    color: "#fff",
-                                    fontWeight: "bolder",
-                                  }}
-                                >
-                                  Patient Dashboard
-                                </span>
-                              </Button>
-                            </ButtonGroup>
-                          </Link>
-                        </div>
-                      ),
+                      // actions: (
+                      //   <div>
+                      //     <Link
+                      //       to={{
+                      //         pathname: "/patient-history",
+                      //         state: { patientObj: row },
+                      //       }}
+                      //     >
+                      //       <ButtonGroup
+                      //         variant="contained"
+                      //         aria-label="split button"
+                      //         style={{
+                      //           backgroundColor: "rgb(153, 46, 98)",
+                      //           height: "30px",
+                      //           width: "215px",
+                      //         }}
+                      //         size="large"
+                      //       >
+                      //         <Button
+                      //           color="primary"
+                      //           size="small"
+                      //           aria-label="select merge strategy"
+                      //           aria-haspopup="menu"
+                      //           style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                      //         >
+                      //           <MdDashboard />
+                      //         </Button>
+                      //         <Button
+                      //           style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                      //         >
+                      //           <span
+                      //             style={{
+                      //               fontSize: "12px",
+                      //               color: "#fff",
+                      //               fontWeight: "bolder",
+                      //             }}
+                      //           >
+                      //             Patient Dashboard
+                      //           </span>
+                      //         </Button>
+                      //       </ButtonGroup>
+                      //     </Link>
+                      //   </div>
+                      // ),
                     })),
                   page: query.page,
                   totalCount: result.data.totalRecords,
