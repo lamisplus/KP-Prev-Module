@@ -31,6 +31,9 @@ private  String prevCode;
 @Column(name = "hts_client_code")
 private String htsCode;
 
+@Column(name = "prep_code")
+private String prepCode;
+
 @Column(name = "archived")
 private Integer archived;
 

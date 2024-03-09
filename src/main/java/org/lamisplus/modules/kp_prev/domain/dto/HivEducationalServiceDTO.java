@@ -12,7 +12,7 @@ import lombok.Data;
 public class HivEducationalServiceDTO implements Serializable {
 	
 	private String peerGroupCommunication;
-	private String interpersonalCommunication;
+	private String interPersonalCommunication;
 	private String iecMaterial;
 
 }

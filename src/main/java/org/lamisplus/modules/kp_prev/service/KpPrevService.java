@@ -70,7 +70,7 @@ public class KpPrevService {
 		HtsServiceDTO hts = dto.getHtsServices();
 		PrepServiceDTO prep = dto.getPrepServices();
 		EntryPointDTO entry = dto.getEntryPoint();
-		BiomedicalServiceDTO biomed = dto.getBiomedicalServices();
+		BiomedicalServiceDTO biomed = dto.getBioMedicalServices();
 		StructuralServiceDTO structural = dto.getStructuralServices();
 		CommodityServiceDTO commodity = dto.getCommodityServices();
 		HivEducationalServiceDTO educational = dto.getHivEducationalServices();
