@@ -17,5 +17,11 @@ public class CommodityServiceDTO implements Serializable {
 	private String new_needles_dispensed;
 	private String old_needles_dispensed;
 	private String naloxane_provided;
+	private String how_many_condom_dispensed;
+	private String how_many_lubricants_dispensed;
+	private String how_many_oral_quick_dispensed;
+	private String how_many_new_needle_dispensed;
+	private String how_many_old_needle_retrived;
+	private String how_many_nalxone_provided;
 
 }

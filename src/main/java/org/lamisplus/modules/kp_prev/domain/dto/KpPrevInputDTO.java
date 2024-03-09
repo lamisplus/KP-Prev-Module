@@ -30,6 +30,7 @@ public class KpPrevInputDTO implements Serializable {
 	private String patientId;
 	private String serviceProvider;
 	private String target_group;
+	private String prepCode;
 	
     @Convert(converter = LocalDateConverter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -37,7 +38,7 @@ public class KpPrevInputDTO implements Serializable {
 	private HtsServiceDTO htsServices;
 	private PrepServiceDTO prepServices;
 	private EntryPointDTO entryPoint;
-	private BiomedicalServiceDTO biomedicalServices;
+	private BiomedicalServiceDTO bioMedicalServices;
 	private StructuralServiceDTO structuralServices;
 	private CommodityServiceDTO commodityServices;
 	private HivEducationalServiceDTO hivEducationalServices;

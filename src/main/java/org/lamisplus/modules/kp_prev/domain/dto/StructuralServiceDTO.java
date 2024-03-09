@@ -13,6 +13,9 @@ public class StructuralServiceDTO implements Serializable {
 	
 	private String providedEmpowerment;
 	private String legalAidServices;
+	private String type_empowerment_provided;
+	private String typelegalempowerment;
+	private String legalprogramreferred;
 	
 
 }
