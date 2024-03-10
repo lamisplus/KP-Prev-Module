@@ -12,28 +12,18 @@ import { Link, useHistory, useLocation } from "react-router-dom";
 import MatButton from "@material-ui/core/Button";
 import { makeStyles } from "@material-ui/core/styles";
 import SaveIcon from "@material-ui/icons/Save";
-import { FaPlus } from "react-icons/fa";
-import CancelIcon from "@material-ui/icons/Cancel";
-import { Table } from "react-bootstrap";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@material-ui/icons/Delete";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { url as baseUrl } from "../../../api";
 import { token as token } from "../../../api";
 import "react-widgets/dist/css/react-widgets.css";
-import moment from "moment";
+import * as moment from "moment";
 import { Spinner } from "reactstrap";
 import { Icon, List, Label as LabelSui } from "semantic-ui-react";
-import DualListBox from "react-dual-listbox";
+
 import "react-dual-listbox/lib/react-dual-listbox.css";
-import Select from "@mui/material/Select";
+
 import { useTheme } from "@mui/material/styles";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import { dateFormat } from "highcharts";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -124,6 +114,7 @@ const KpPrev = (props) => {
   const [errors, setErrors] = useState({});
   const [htsCodeVal, setHtsCodeVal] = useState({});
   const [prepCodeVal, setPrepCodeVal] = useState({});
+  const [kpprevFormStatus, setKpprevFormStatus] = useState(true);
   let temp = { ...errors };
   const classes = useStyles();
 
@@ -135,7 +126,7 @@ const KpPrev = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        console.log("hts", response);
+        //console.log("hts", response);
         setHtsCodeVal({
           htsCode: response.data.clientCode,
           hivStatus: response.data.hivPositive,
@@ -153,7 +144,7 @@ const KpPrev = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        console.log("prep", response.data);
+        // console.log("prep", response.data);
         setPrepCodeVal({
           prevCode: response.data.uniqueId,
           prepStatus: response.data.prepStatus,
@@ -224,6 +215,7 @@ const KpPrev = (props) => {
     tbfacilityReffered: "",
     typeofMhpss: "",
     drugRehabfacilityReffered: "",
+    refferedfacilitydrugrehab: "",
   });
   const [structuralServices, setstructuralServices] = useState({
     providedOrRefferedForEmpowerment: "",
@@ -366,6 +358,8 @@ const KpPrev = (props) => {
         type_of_mhpss: bioMedicalServices.typeofMhpss,
         drug_rehab_facility_reffered:
           bioMedicalServices.drugRehabfacilityReffered,
+        reffered_facility_drug_rehab:
+          bioMedicalServices.refferedfacilitydrugrehab,
       };
 
       const commodityServicesValue = {
@@ -417,7 +411,7 @@ const KpPrev = (props) => {
         target_group:
           htsCodeVal?.htsClientDtoList?.length > 0
             ? htsCodeVal?.htsClientDtoList[0]?.targetGroup
-            : prepCodeVal?.prepDtoList[0].targetGroup,
+            : prepCodeVal?.prepDtoList[0]?.targetGroup,
         dateServiceOffered: date.dateServiceOffered,
         htsServices: htsServicesValue,
         prepServices: prepServicesValue,
@@ -427,94 +421,100 @@ const KpPrev = (props) => {
         commodityServices: commodityServicesValue,
         hivEducationalServices: hivEducationProvided,
       };
-      console.log(data);
-      setSaving(true);
-      axios
-        .post(`${baseUrl}kpprev`, data, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          console.log(response);
-          setSaving(false);
-          toast.success("Record save successfully");
-          setDate({
-            dateServiceOffered: "",
-            service_provider: "",
+      //console.log(data);
+
+      if (data.htsCode === null && data.prepCode === null) {
+        toast.error("Client is not registered on HTS or Prep");
+        setSaving(false);
+      } else {
+        axios
+          .post(`${baseUrl}kpprev`, data, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((response) => {
+            console.log(response);
+            setSaving(false);
+            toast.success("Record save successfully");
+            setDate({
+              dateServiceOffered: "",
+              service_provider: "",
+            });
+            setHtsServices({
+              offeredHts: "",
+              acceptedHts: "",
+              hivTestResult: "",
+              referredForArt: "",
+            });
+            setPrepServices({
+              offeredPrep: "",
+              acceptedPrep: "",
+              referredForPrep: "",
+            });
+            setCommodityService({
+              condomDispensed: "",
+              lubricantsDispensed: "",
+              oralQuickDispensed: "",
+              newNeedleDispensed: "",
+              oldNeedleRetrived: "",
+              nalxoneProvided: "",
+              howmanycondomDispensed: "",
+              howmanylubricantsDispensed: "",
+              howmanyoralQuickDispensed: "",
+              howmanynewNeedleDispensed: "",
+              howmanyoldNeedleRetrived: "",
+              howmanynalxoneProvided: "",
+            });
+            setHivEducationProvided({
+              iecMaterial: "",
+              interPersonalCommunication: "",
+              peerGroupCommunication: "",
+            });
+            setbioMedicalServices({
+              stiScreening: "",
+              stiSyndromicManagement: "",
+              stiTreatment: "",
+              screenedForTb: "",
+              providedWithTpt: "",
+              screenedForViralHepatits: "",
+              viralHepatitsScreenResult: "",
+              vaccinationForViralHepatits: "",
+              offeredFamilyPlanningServices: "",
+              referredForFamilyPlanningServices: "",
+              providedWithDrugRehab: "",
+              offeredMhpss: "",
+              onMedicalAssistedTherapy: "",
+              recivedNalxoneForOverdoseTreatment: "",
+              stiScreeningResult: "",
+              stifacilityReffered: "",
+              tbfacilityReffered: "",
+              typeofMhpss: "",
+              drugRehabfacilityReffered: "",
+            });
+            setstructuralServices({
+              providedOrRefferedForEmpowerment: "",
+              legalAidServiceType: "",
+              peerGroupCommunication: "",
+              typeempowermentprovided: "",
+              typelegalempowerment: "",
+              legalprogramreferred: "",
+            });
+            history.push("/");
+          })
+          .catch((error) => {
+            setSaving(false);
+            if (error.response && error.response.data) {
+              let errorMessage =
+                error.response.data.apierror &&
+                error.response.data.apierror.message !== ""
+                  ? error.response.data.apierror.message
+                  : "Something went wrong, please try again";
+              toast.error(errorMessage);
+            } else {
+              toast.error("Something went wrong. Please try again...");
+            }
           });
-          setHtsServices({
-            offeredHts: "",
-            acceptedHts: "",
-            hivTestResult: "",
-            referredForArt: "",
-          });
-          setPrepServices({
-            offeredPrep: "",
-            acceptedPrep: "",
-            referredForPrep: "",
-          });
-          setCommodityService({
-            condomDispensed: "",
-            lubricantsDispensed: "",
-            oralQuickDispensed: "",
-            newNeedleDispensed: "",
-            oldNeedleRetrived: "",
-            nalxoneProvided: "",
-            howmanycondomDispensed: "",
-            howmanylubricantsDispensed: "",
-            howmanyoralQuickDispensed: "",
-            howmanynewNeedleDispensed: "",
-            howmanyoldNeedleRetrived: "",
-            howmanynalxoneProvided: "",
-          });
-          setHivEducationProvided({
-            iecMaterial: "",
-            interPersonalCommunication: "",
-            peerGroupCommunication: "",
-          });
-          setbioMedicalServices({
-            stiScreening: "",
-            stiSyndromicManagement: "",
-            stiTreatment: "",
-            screenedForTb: "",
-            providedWithTpt: "",
-            screenedForViralHepatits: "",
-            viralHepatitsScreenResult: "",
-            vaccinationForViralHepatits: "",
-            offeredFamilyPlanningServices: "",
-            referredForFamilyPlanningServices: "",
-            providedWithDrugRehab: "",
-            offeredMhpss: "",
-            onMedicalAssistedTherapy: "",
-            recivedNalxoneForOverdoseTreatment: "",
-            stiScreeningResult: "",
-            stifacilityReffered: "",
-            tbfacilityReffered: "",
-            typeofMhpss: "",
-            drugRehabfacilityReffered: "",
-          });
-          setstructuralServices({
-            providedOrRefferedForEmpowerment: "",
-            legalAidServiceType: "",
-            peerGroupCommunication: "",
-            typeempowermentprovided: "",
-            typelegalempowerment: "",
-            legalprogramreferred: "",
-          });
-          history.push("/");
-        })
-        .catch((error) => {
-          setSaving(false);
-          if (error.response && error.response.data) {
-            let errorMessage =
-              error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
-                ? error.response.data.apierror.message
-                : "Something went wrong, please try again";
-            toast.error(errorMessage);
-          } else {
-            toast.error("Something went wrong. Please try again...");
-          }
-        });
+      }
+      //setSaving(true);
     }
   };
 
@@ -522,159 +522,52 @@ const KpPrev = (props) => {
     <div>
       <Card className={classes.root}>
         <CardBody>
-          <form>
-            {/* <div className="card d-flex"> */}
-            <div
-              className="card-header"
-              style={{
-                backgroundColor: "#014d88",
-                color: "#fff",
-                fontWeight: "bolder",
-                borderRadius: "0.2rem",
-              }}
-            >
-              <h5 className="card-title" style={{ color: "#fff" }}>
-                KEY POPULATION PREVENTION FORM
-              </h5>
-            </div>
-
-            <div className="row d-flex">
-              <div className="form-group mb-3 col-md-4 ">
-                <br />
-                <FormGroup>
-                  <Label>Date Of Service Provisions</Label>
-                  <Input
-                    type="date"
-                    name="dateServiceOffered"
-                    value={date.dateServiceOffered}
-                    onChange={handleInputChange}
-                    id="dateServiceOffered"
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  ></Input>
-                  {errors.dateServiceOffered !== "" ? (
-                    <span className={classes.error}>
-                      {errors.dateServiceOffered}
-                    </span>
-                  ) : (
-                    ""
-                  )}
-                </FormGroup>
+          {kpprevFormStatus ? (
+            <form>
+              {/* <div className="card d-flex"> */}
+              <div
+                className="card-header"
+                style={{
+                  backgroundColor: "#014d88",
+                  color: "#fff",
+                  fontWeight: "bolder",
+                  borderRadius: "0.2rem",
+                }}
+              >
+                <h5 className="card-title" style={{ color: "#fff" }}>
+                  KEY POPULATION PREVENTION FORM
+                </h5>
               </div>
 
-              {/* HTS service */}
-              {htsCodeVal.htsClientDtoList?.length > 0 && (
-                <>
-                  <LabelSui
-                    as="a"
-                    color="teal"
-                    style={{
-                      width: "100%",
-                      height: "45px",
-                      marginBottom: "10px",
-                    }}
-                    ribbon
-                  >
-                    <h2 style={{ color: "#fff" }}>HTS Services</h2>
-                  </LabelSui>
+              <div className="row d-flex">
+                <div className="form-group mb-3 col-md-4 ">
                   <br />
-                  <br />
+                  <FormGroup>
+                    <Label>Date Of Service Provisions</Label>
+                    <Input
+                      type="date"
+                      name="dateServiceOffered"
+                      value={date.dateServiceOffered}
+                      onChange={handleInputChange}
+                      id="dateServiceOffered"
+                      max={moment(new Date()).format("YYYY-MM-DD")}
+                      style={{
+                        border: "1px solid #014D88",
+                        borderRadius: "0.25rem",
+                      }}
+                    ></Input>
+                    {errors.dateServiceOffered !== "" ? (
+                      <span className={classes.error}>
+                        {errors.dateServiceOffered}
+                      </span>
+                    ) : (
+                      ""
+                    )}
+                  </FormGroup>
+                </div>
 
-                  <div className="form-group mb-10 col-xs-6 col-md-3 ">
-                    <FormGroup>
-                      <Label>Offered HTS</Label>
-                      <Input
-                        type="select"
-                        name="offeredHts"
-                        id="offeredHts"
-                        onChange={handleInputChangeHtsService}
-                        value={htsServices.offeredHts}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-xs-6 col-md-3 ">
-                    <FormGroup>
-                      <Label>Accepted HTS</Label>
-                      <Input
-                        type="select"
-                        name="acceptedHts"
-                        id="acceptedHts"
-                        onChange={handleInputChangeHtsService}
-                        value={htsServices.acceptedHts}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  {htsServices.acceptedHts === "1" ? (
-                    <div className="form-group mb-3 col-xs-6 col-md-3 ">
-                      <FormGroup>
-                        <Label>Hiv Test Result</Label>
-                        <Input
-                          type="select"
-                          name="hivTestResult"
-                          id="hivTestResult"
-                          onChange={handleInputChangeHtsService}
-                          value={htsServices.hivTestResult}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value="">Select</option>
-                          <option value="positive">Positive</option>
-                          <option value="negative">Negative</option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                  {htsServices.hivTestResult === "positive" ? (
-                    <div className="form-group mb-3 col-xs-6 col-md-3 ">
-                      <FormGroup>
-                        <Label>Reffered for ART</Label>
-                        <Input
-                          type="select"
-                          name="referredForArt"
-                          id="referredForArt"
-                          onChange={handleInputChangeHtsService}
-                          value={htsServices.referredForArt}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value="">Select</option>
-                          <option value="1">Yes</option>
-                          <option value="0">No</option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                </>
-              )}
-
-              {prepCodeVal.prepDtoList?.length > 0 ||
-                (htsServices.hivTestResult === "negative" && (
+                {/* HTS service */}
+                {htsCodeVal.htsClientDtoList?.length > 0 && (
                   <>
                     <LabelSui
                       as="a"
@@ -686,19 +579,20 @@ const KpPrev = (props) => {
                       }}
                       ribbon
                     >
-                      <h2 style={{ color: "#fff" }}>PreP Services</h2>
+                      <h2 style={{ color: "#fff" }}>HTS Services</h2>
                     </LabelSui>
                     <br />
                     <br />
-                    <div className="form-group mb-3 col-md-4 ">
+
+                    <div className="form-group mb-10 col-xs-6 col-md-3 ">
                       <FormGroup>
-                        <Label>Offered Prep</Label>
+                        <Label>Offered HTS</Label>
                         <Input
                           type="select"
-                          name="offeredPrep"
-                          id="offeredPrep"
-                          onChange={handleInputChangePrepServices}
-                          value={prepServices.offeredPrep}
+                          name="offeredHts"
+                          id="offeredHts"
+                          onChange={handleInputChangeHtsService}
+                          value={htsServices.offeredHts}
                           style={{
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
@@ -710,15 +604,15 @@ const KpPrev = (props) => {
                         </Input>
                       </FormGroup>
                     </div>
-                    <div className="form-group mb-3 col-md-4 ">
+                    <div className="form-group mb-3 col-xs-6 col-md-3 ">
                       <FormGroup>
-                        <Label>Accepted PreP</Label>
+                        <Label>Accepted HTS</Label>
                         <Input
                           type="select"
-                          name="acceptedPrep"
-                          id="acceptedPrep"
-                          onChange={handleInputChangePrepServices}
-                          value={prepServices.acceptedPrep}
+                          name="acceptedHts"
+                          id="acceptedHts"
+                          onChange={handleInputChangeHtsService}
+                          value={htsServices.acceptedHts}
                           style={{
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
@@ -730,382 +624,160 @@ const KpPrev = (props) => {
                         </Input>
                       </FormGroup>
                     </div>
-                    <div className="form-group mb-3 col-md-4 ">
-                      <FormGroup>
-                        <Label>Reffered for Prep</Label>
-                        <Input
-                          type="select"
-                          name="referredForPrep"
-                          id="referredForPrep"
-                          onChange={handleInputChangePrepServices}
-                          value={prepServices.referredForPrep}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value="">Select</option>
-                          <option value="1">Yes</option>
-                          <option value="0">No</option>
-                        </Input>
-                      </FormGroup>
-                    </div>
+                    {htsServices.acceptedHts === "1" ? (
+                      <div className="form-group mb-3 col-xs-6 col-md-3 ">
+                        <FormGroup>
+                          <Label>Hiv Test Result</Label>
+                          <Input
+                            type="select"
+                            name="hivTestResult"
+                            id="hivTestResult"
+                            onChange={handleInputChangeHtsService}
+                            value={htsServices.hivTestResult}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value="">Select</option>
+                            <option value="positive">Positive</option>
+                            <option value="negative">Negative</option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                    {htsServices.hivTestResult === "positive" ? (
+                      <div className="form-group mb-3 col-xs-6 col-md-3 ">
+                        <FormGroup>
+                          <Label>Reffered for ART</Label>
+                          <Input
+                            type="select"
+                            name="referredForArt"
+                            id="referredForArt"
+                            onChange={handleInputChangeHtsService}
+                            value={htsServices.referredForArt}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value="">Select</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    ) : (
+                      ""
+                    )}
                   </>
-                ))}
-
-              <div className="row">
-                <LabelSui
-                  as="a"
-                  color="blue"
-                  style={{
-                    width: "100%",
-                    height: "45px",
-                    marginBottom: "10px",
-                  }}
-                  ribbon
-                >
-                  <h2 style={{ color: "#fff" }}>Commodity Service</h2>
-                </LabelSui>
-
-                <div className="form-group mb-3 col-md-3 ">
-                  <FormGroup>
-                    <Label>Condom Dispensed</Label>
-                    <Input
-                      type="select"
-                      name="condomDispensed"
-                      id="condomDispensed"
-                      onChange={handleInputChangeCommodityServices}
-                      value={commodityService.condomDispensed}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-                {commodityService.condomDispensed === "yes" && (
-                  <div className="form-group mb-3 col-md-3">
-                    <FormGroup>
-                      <Label>How Many Condom Dispensed</Label>
-                      <Input
-                        type="number"
-                        name="howmanycondomDispensed"
-                        id="howmanycondomDispensed"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.howmanycondomDispensed}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
                 )}
 
-                <div className="form-group mb-3 col-md-3 ">
-                  <FormGroup>
-                    <Label>Lubricants Dispensed</Label>
-                    <Input
-                      type="select"
-                      name="lubricantsDispensed"
-                      id="lubricantsDispensed"
-                      onChange={handleInputChangeCommodityServices}
-                      value={commodityService.lubricantsDispensed}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-                {commodityService.lubricantsDispensed === "yes" && (
-                  <div className="form-group mb-3 col-md-3 ">
-                    <FormGroup>
-                      <Label>How Many Lubricants Dispensed</Label>
-                      <Input
-                        type="number"
-                        name="howmanylubricantsDispensed"
-                        id="howmanylubricantsDispensed"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.howmanylubricantsDispensed}
+                {prepCodeVal.prepDtoList?.length > 0 ||
+                  (htsServices.hivTestResult === "negative" && (
+                    <>
+                      <LabelSui
+                        as="a"
+                        color="teal"
                         style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
+                          width: "100%",
+                          height: "45px",
+                          marginBottom: "10px",
                         }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                )}
-
-                <div className="form-group mb-3 col-md-3 ">
-                  <FormGroup>
-                    <Label>Oral Quick/ HIVST dispensed</Label>
-                    <Input
-                      type="select"
-                      name="oralQuickDispensed"
-                      id="oralQuickDispensed"
-                      onChange={handleInputChangeCommodityServices}
-                      value={commodityService.oralQuickDispensed}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-                {commodityService.oralQuickDispensed === "yes" && (
-                  <div className="form-group mb-3 col-md-3">
-                    <FormGroup>
-                      <Label>How Many Oral Quick/ HIVST dispensed</Label>
-                      <Input
-                        type="number"
-                        name="howmanyoralQuickDispensed"
-                        id="howmanyoralQuickDispensed"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.howmanyoralQuickDispensed}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                )}
-
-                <div className="form-group mb-3 col-md-3 ">
-                  <FormGroup>
-                    <Label>New Needles/Syringe Dispesend</Label>
-                    <Input
-                      type="select"
-                      name="newNeedleDispensed"
-                      id="newNeedleDispensed"
-                      onChange={handleInputChangeCommodityServices}
-                      value={commodityService.newNeedleDispensed}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-                {commodityService.newNeedleDispensed === "yes" && (
-                  <div className="form-group mb-3 col-md-3 ">
-                    <FormGroup>
-                      <Label>How Many New Needles/Syringe Dispesend</Label>
-                      <Input
-                        type="number"
-                        name="howmanynewNeedleDispensed"
-                        id="howmanynewNeedleDispensed"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.howmanynewNeedleDispensed}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                )}
-
-                <div className="form-group mb-3 col-md-3 ">
-                  <FormGroup>
-                    <Label>Old Needles/Syringe Retrived</Label>
-                    <Input
-                      type="select"
-                      name="oldNeedleRetrived"
-                      id="oldNeedleRetrived"
-                      onChange={handleInputChangeCommodityServices}
-                      value={commodityService.oldNeedleRetrived}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-                {commodityService.oldNeedleRetrived === "yes" && (
-                  <div className="form-group mb-3 col-md-3">
-                    <FormGroup>
-                      <Label>Old Needles/Syringe Retrived</Label>
-                      <Input
-                        type="number"
-                        name="howmanyoldNeedleRetrived"
-                        id="howmanyoldNeedleRetrived"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.howmanyoldNeedleRetrived}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                )}
-
-                <div className="form-group mb-3 col-md-3 ">
-                  <FormGroup>
-                    <Label>Nalxone Provided</Label>
-                    <Input
-                      type="select"
-                      name="nalxoneProvided"
-                      id="nalxoneProvided"
-                      onChange={handleInputChangeCommodityServices}
-                      value={commodityService.nalxoneProvided}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-                {commodityService.nalxoneProvided === "yes" && (
-                  <div className="form-group mb-3 col-md-3">
-                    <FormGroup>
-                      <Label>How Many Nalxone Provided</Label>
-                      <Input
-                        type="number"
-                        name="howmanynalxoneProvided"
-                        id="howmanynalxoneProvided"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.howmanynalxoneProvided}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                )}
-              </div>
-
-              <div className="row">
-                <LabelSui
-                  as="a"
-                  color="blue"
-                  style={{
-                    width: "106%",
-                    height: "45px",
-                    marginBottom: "10px",
-                  }}
-                  ribbon
-                >
-                  <h2 style={{ color: "#fff" }}>HIV Educaton Provided</h2>
-                </LabelSui>
-                <div className="form-group mb-3 col-md-4 ">
-                  <FormGroup>
-                    <Label>IEC materials/pamphlets provided </Label>
-                    <Input
-                      type="select"
-                      name="iecMaterial"
-                      id="iecMaterial"
-                      onChange={handleInputChangeHivEducationProvided}
-                      value={hivEducationProvided.iecMaterial}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-
-                <div className="form-group mb-3 col-md-4 ">
-                  <FormGroup>
-                    <Label>InterPersonal Communication</Label>
-                    <Input
-                      type="select"
-                      name="interPersonalCommunication"
-                      id="interPersonalCommunication"
-                      onChange={handleInputChangeHivEducationProvided}
-                      value={hivEducationProvided.interPersonalCommunication}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-                <div className="form-group mb-3 col-md-4 ">
-                  <FormGroup>
-                    <Label>Peer Group Communication</Label>
-                    <Input
-                      type="select"
-                      name="peerGroupCommunication"
-                      id="peerGroupCommunication"
-                      onChange={handleInputChangeHivEducationProvided}
-                      value={hivEducationProvided.peerGroupCommunication}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </Input>
-                  </FormGroup>
-                </div>
-              </div>
-            </div>
-            <br />
-            {/* <div className='card'> */}
-
-            <div className=" row d-flex">
-              <div className="row">
-                <LabelSui
-                  as="a"
-                  color="blue"
-                  style={{
-                    width: "106%",
-                    height: "45px",
-                    marginBottom: "10px",
-                  }}
-                  ribbon
-                >
-                  <h2 style={{ color: "#fff" }}>Biomedical Services</h2>
-                </LabelSui>
+                        ribbon
+                      >
+                        <h2 style={{ color: "#fff" }}>PreP Services</h2>
+                      </LabelSui>
+                      <br />
+                      <br />
+                      <div className="form-group mb-3 col-md-4 ">
+                        <FormGroup>
+                          <Label>Offered Prep</Label>
+                          <Input
+                            type="select"
+                            name="offeredPrep"
+                            id="offeredPrep"
+                            onChange={handleInputChangePrepServices}
+                            value={prepServices.offeredPrep}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value="">Select</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                      <div className="form-group mb-3 col-md-4 ">
+                        <FormGroup>
+                          <Label>Accepted PreP</Label>
+                          <Input
+                            type="select"
+                            name="acceptedPrep"
+                            id="acceptedPrep"
+                            onChange={handleInputChangePrepServices}
+                            value={prepServices.acceptedPrep}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value="">Select</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                      <div className="form-group mb-3 col-md-4 ">
+                        <FormGroup>
+                          <Label>Reffered for Prep</Label>
+                          <Input
+                            type="select"
+                            name="referredForPrep"
+                            id="referredForPrep"
+                            onChange={handleInputChangePrepServices}
+                            value={prepServices.referredForPrep}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value="">Select</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    </>
+                  ))}
 
                 <div className="row">
-                  <div className="form-group mb-3 col-md-4">
+                  <LabelSui
+                    as="a"
+                    color="blue"
+                    style={{
+                      width: "100%",
+                      height: "45px",
+                      marginBottom: "10px",
+                    }}
+                    ribbon
+                  >
+                    <h2 style={{ color: "#fff" }}>Commodity Service</h2>
+                  </LabelSui>
+
+                  <div className="form-group mb-3 col-md-3 ">
                     <FormGroup>
-                      <Label>STI Screening</Label>
+                      <Label>Condom Dispensed</Label>
                       <Input
                         type="select"
-                        name="stiScreening"
-                        id="stiScreening"
-                        value={bioMedicalServices.stiScreening}
-                        onChange={handleInputChangebioMedicalServices}
+                        name="condomDispensed"
+                        id="condomDispensed"
+                        onChange={handleInputChangeCommodityServices}
+                        value={commodityService.condomDispensed}
                         style={{
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
@@ -1117,15 +789,324 @@ const KpPrev = (props) => {
                       </Input>
                     </FormGroup>
                   </div>
-                  {bioMedicalServices.stiScreening === "yes" && (
+                  {commodityService.condomDispensed === "yes" && (
+                    <div className="form-group mb-3 col-md-3">
+                      <FormGroup>
+                        <Label>How Many Condom Dispensed</Label>
+                        <Input
+                          type="number"
+                          name="howmanycondomDispensed"
+                          id="howmanycondomDispensed"
+                          onChange={handleInputChangeCommodityServices}
+                          value={commodityService.howmanycondomDispensed}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        ></Input>
+                      </FormGroup>
+                    </div>
+                  )}
+
+                  <div className="form-group mb-3 col-md-3 ">
+                    <FormGroup>
+                      <Label>Lubricants Dispensed</Label>
+                      <Input
+                        type="select"
+                        name="lubricantsDispensed"
+                        id="lubricantsDispensed"
+                        onChange={handleInputChangeCommodityServices}
+                        value={commodityService.lubricantsDispensed}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+                  {commodityService.lubricantsDispensed === "yes" && (
+                    <div className="form-group mb-3 col-md-3 ">
+                      <FormGroup>
+                        <Label>How Many Lubricants Dispensed</Label>
+                        <Input
+                          type="number"
+                          name="howmanylubricantsDispensed"
+                          id="howmanylubricantsDispensed"
+                          onChange={handleInputChangeCommodityServices}
+                          value={commodityService.howmanylubricantsDispensed}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        ></Input>
+                      </FormGroup>
+                    </div>
+                  )}
+
+                  <div className="form-group mb-3 col-md-3 ">
+                    <FormGroup>
+                      <Label>Oral Quick/ HIVST dispensed</Label>
+                      <Input
+                        type="select"
+                        name="oralQuickDispensed"
+                        id="oralQuickDispensed"
+                        onChange={handleInputChangeCommodityServices}
+                        value={commodityService.oralQuickDispensed}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+                  {commodityService.oralQuickDispensed === "yes" && (
+                    <div className="form-group mb-3 col-md-3">
+                      <FormGroup>
+                        <Label>How Many Oral Quick/ HIVST dispensed</Label>
+                        <Input
+                          type="number"
+                          name="howmanyoralQuickDispensed"
+                          id="howmanyoralQuickDispensed"
+                          onChange={handleInputChangeCommodityServices}
+                          value={commodityService.howmanyoralQuickDispensed}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        ></Input>
+                      </FormGroup>
+                    </div>
+                  )}
+
+                  <div className="form-group mb-3 col-md-3 ">
+                    <FormGroup>
+                      <Label>New Needles/Syringe Dispesend</Label>
+                      <Input
+                        type="select"
+                        name="newNeedleDispensed"
+                        id="newNeedleDispensed"
+                        onChange={handleInputChangeCommodityServices}
+                        value={commodityService.newNeedleDispensed}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+                  {commodityService.newNeedleDispensed === "yes" && (
+                    <div className="form-group mb-3 col-md-3 ">
+                      <FormGroup>
+                        <Label>How Many New Needles/Syringe Dispesend</Label>
+                        <Input
+                          type="number"
+                          name="howmanynewNeedleDispensed"
+                          id="howmanynewNeedleDispensed"
+                          onChange={handleInputChangeCommodityServices}
+                          value={commodityService.howmanynewNeedleDispensed}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        ></Input>
+                      </FormGroup>
+                    </div>
+                  )}
+
+                  <div className="form-group mb-3 col-md-3 ">
+                    <FormGroup>
+                      <Label>Old Needles/Syringe Retrived</Label>
+                      <Input
+                        type="select"
+                        name="oldNeedleRetrived"
+                        id="oldNeedleRetrived"
+                        onChange={handleInputChangeCommodityServices}
+                        value={commodityService.oldNeedleRetrived}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+                  {commodityService.oldNeedleRetrived === "yes" && (
+                    <div className="form-group mb-3 col-md-3">
+                      <FormGroup>
+                        <Label>Old Needles/Syringe Retrived</Label>
+                        <Input
+                          type="number"
+                          name="howmanyoldNeedleRetrived"
+                          id="howmanyoldNeedleRetrived"
+                          onChange={handleInputChangeCommodityServices}
+                          value={commodityService.howmanyoldNeedleRetrived}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        ></Input>
+                      </FormGroup>
+                    </div>
+                  )}
+
+                  <div className="form-group mb-3 col-md-3 ">
+                    <FormGroup>
+                      <Label>Nalxone Provided</Label>
+                      <Input
+                        type="select"
+                        name="nalxoneProvided"
+                        id="nalxoneProvided"
+                        onChange={handleInputChangeCommodityServices}
+                        value={commodityService.nalxoneProvided}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+                  {commodityService.nalxoneProvided === "yes" && (
+                    <div className="form-group mb-3 col-md-3">
+                      <FormGroup>
+                        <Label>How Many Nalxone Provided</Label>
+                        <Input
+                          type="number"
+                          name="howmanynalxoneProvided"
+                          id="howmanynalxoneProvided"
+                          onChange={handleInputChangeCommodityServices}
+                          value={commodityService.howmanynalxoneProvided}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        ></Input>
+                      </FormGroup>
+                    </div>
+                  )}
+                </div>
+
+                <div className="row">
+                  <LabelSui
+                    as="a"
+                    color="blue"
+                    style={{
+                      width: "106%",
+                      height: "45px",
+                      marginBottom: "10px",
+                    }}
+                    ribbon
+                  >
+                    <h2 style={{ color: "#fff" }}>HIV Educaton Provided</h2>
+                  </LabelSui>
+                  <div className="form-group mb-3 col-md-4 ">
+                    <FormGroup>
+                      <Label>IEC materials/pamphlets provided </Label>
+                      <Input
+                        type="select"
+                        name="iecMaterial"
+                        id="iecMaterial"
+                        onChange={handleInputChangeHivEducationProvided}
+                        value={hivEducationProvided.iecMaterial}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+
+                  <div className="form-group mb-3 col-md-4 ">
+                    <FormGroup>
+                      <Label>InterPersonal Communication</Label>
+                      <Input
+                        type="select"
+                        name="interPersonalCommunication"
+                        id="interPersonalCommunication"
+                        onChange={handleInputChangeHivEducationProvided}
+                        value={hivEducationProvided.interPersonalCommunication}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+                  <div className="form-group mb-3 col-md-4 ">
+                    <FormGroup>
+                      <Label>Peer Group Communication</Label>
+                      <Input
+                        type="select"
+                        name="peerGroupCommunication"
+                        id="peerGroupCommunication"
+                        onChange={handleInputChangeHivEducationProvided}
+                        value={hivEducationProvided.peerGroupCommunication}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+                </div>
+              </div>
+              <br />
+              {/* <div className='card'> */}
+
+              <div className=" row d-flex">
+                <div className="row">
+                  <LabelSui
+                    as="a"
+                    color="blue"
+                    style={{
+                      width: "106%",
+                      height: "45px",
+                      marginBottom: "10px",
+                    }}
+                    ribbon
+                  >
+                    <h2 style={{ color: "#fff" }}>Biomedical Services</h2>
+                  </LabelSui>
+
+                  <div className="row">
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
-                        <Label>STI Screening Result</Label>
+                        <Label>STI Screening</Label>
                         <Input
                           type="select"
-                          name="stiScreeningResult"
-                          id="stiScreeningResult"
-                          value={bioMedicalServices.stiScreeningResult}
+                          name="stiScreening"
+                          id="stiScreening"
+                          value={bioMedicalServices.stiScreening}
                           onChange={handleInputChangebioMedicalServices}
                           style={{
                             border: "1px solid #014D88",
@@ -1133,21 +1114,102 @@ const KpPrev = (props) => {
                           }}
                         >
                           <option value="">Select</option>
-                          <option value="positive">Positive</option>
-                          <option value="negative">Negative</option>
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
                         </Input>
                       </FormGroup>
                     </div>
-                  )}
-                  {bioMedicalServices.stiScreeningResult === "positive" && (
+                    {bioMedicalServices.stiScreening === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>STI Screening Result</Label>
+                          <Input
+                            type="select"
+                            name="stiScreeningResult"
+                            id="stiScreeningResult"
+                            value={bioMedicalServices.stiScreeningResult}
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value="">Select</option>
+                            <option value="positive">Positive</option>
+                            <option value="negative">Negative</option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
+                    {bioMedicalServices.stiScreeningResult === "positive" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>STI Treatment/ Referral</Label>
+                          <Input
+                            type="select"
+                            name="stiTreatment"
+                            id="stiTreatment"
+                            value={bioMedicalServices.stiTreatment}
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="yes"> Yes </option>
+                            <option value="no"> No </option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
+
+                    {bioMedicalServices.stiTreatment === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <Label> Facility Refferred to </Label>
+                        <Input
+                          type="text"
+                          name="stifacilityReffered"
+                          id="stifacilityReffered"
+                          value={bioMedicalServices.stifacilityReffered}
+                          onChange={handleInputChangebioMedicalServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      </div>
+                    )}
+
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
-                        <Label>STI Treatment/ Referral</Label>
+                        <Label>STI Syndromic Management</Label>
                         <Input
                           type="select"
-                          name="stiTreatment"
-                          id="stiTreatment"
-                          value={bioMedicalServices.stiTreatment}
+                          name="stiSyndromicManagement"
+                          id="stiSyndromicManagement"
+                          value={bioMedicalServices.stiSyndromicManagement}
+                          onChange={handleInputChangebioMedicalServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        >
+                          <option value="">Select</option>
+                          <option value="1">Yes</option>
+                          <option value="0">No</option>
+                        </Input>
+                      </FormGroup>
+                    </div>
+
+                    <div className="form-group mb-3 col-md-4">
+                      <FormGroup>
+                        <Label>Screened for TB</Label>
+                        <Input
+                          type="select"
+                          name="screenedForTb"
+                          id="screenedForTb"
+                          value={bioMedicalServices.screenedForTb}
                           onChange={handleInputChangebioMedicalServices}
                           style={{
                             border: "1px solid #014D88",
@@ -1160,75 +1222,74 @@ const KpPrev = (props) => {
                         </Input>
                       </FormGroup>
                     </div>
-                  )}
-
-                  {bioMedicalServices.stiTreatment === "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <Label> Facility Refferred to </Label>
-                      <Input
-                        type="text"
-                        name="stifacilityReffered"
-                        id="stifacilityReffered"
-                        value={bioMedicalServices.stifacilityReffered}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>STI Syndromic Management</Label>
-                      <Input
-                        type="select"
-                        name="stiSyndromicManagement"
-                        id="stiSyndromicManagement"
-                        value={bioMedicalServices.stiSyndromicManagement}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Screened for TB</Label>
-                      <Input
-                        type="select"
-                        name="screenedForTb"
-                        id="screenedForTb"
-                        value={bioMedicalServices.screenedForTb}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value=""> Select </option>
-                        <option value="yes"> Yes </option>
-                        <option value="no"> No </option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  {bioMedicalServices.screenedForTb === "no" && (
+                    {bioMedicalServices.screenedForTb === "no" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>Provided with TPT</Label>
+                          <Input
+                            type="select"
+                            name="providedWithTpt"
+                            id="providedWithTpt"
+                            value={bioMedicalServices.providedWithTpt}
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="yes"> Yes </option>
+                            <option value="no"> No </option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
+                    {bioMedicalServices.screenedForTb === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>TB treatment/referral </Label>
+                          <Input
+                            type="select"
+                            name="tbtreatmentrefferal"
+                            id="tbtreatmentrefferal"
+                            value={bioMedicalServices.tbtreatmentrefferal}
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="yes"> Yes </option>
+                            <option value="no"> No </option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
+                    {bioMedicalServices.tbtreatmentrefferal === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <Label> Facility Refferred to </Label>
+                        <Input
+                          type="text"
+                          name="tbfacilityReffered"
+                          id="tbfacilityReffered"
+                          value={bioMedicalServices.tbfacilityReffered}
+                          onChange={handleInputChangebioMedicalServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      </div>
+                    )}
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
-                        <Label>Provided with TPT</Label>
+                        <Label>Screened For Viral Heaptits</Label>
                         <Input
                           type="select"
-                          name="providedWithTpt"
-                          id="providedWithTpt"
-                          value={bioMedicalServices.providedWithTpt}
+                          name="screenedForViralHepatits"
+                          id="screenedForViralHepatits"
+                          value={bioMedicalServices.screenedForViralHepatits}
                           onChange={handleInputChangebioMedicalServices}
                           style={{
                             border: "1px solid #014D88",
@@ -1241,148 +1302,37 @@ const KpPrev = (props) => {
                         </Input>
                       </FormGroup>
                     </div>
-                  )}
-                  {bioMedicalServices.screenedForTb === "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <FormGroup>
-                        <Label>TB treatment/referral </Label>
-                        <Input
-                          type="select"
-                          name="tbtreatmentrefferal"
-                          id="tbtreatmentrefferal"
-                          value={bioMedicalServices.tbtreatmentrefferal}
-                          onChange={handleInputChangebioMedicalServices}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value=""> Select </option>
-                          <option value="yes"> Yes </option>
-                          <option value="no"> No </option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                  )}
-                  {bioMedicalServices.tbtreatmentrefferal === "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <Label> Facility Refferred to </Label>
-                      <Input
-                        type="text"
-                        name="tbfacilityReffered"
-                        id="tbfacilityReffered"
-                        value={bioMedicalServices.tbfacilityReffered}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      />
-                    </div>
-                  )}
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Screened For Viral Heaptits</Label>
-                      <Input
-                        type="select"
-                        name="screenedForViralHepatits"
-                        id="screenedForViralHepatits"
-                        value={bioMedicalServices.screenedForViralHepatits}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value=""> Select </option>
-                        <option value="yes"> Yes </option>
-                        <option value="no"> No </option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  {bioMedicalServices.screenedForViralHepatits === "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <FormGroup>
-                        <Label>Viral Hepatits Screen Result</Label>
-                        <Input
-                          type="select"
-                          name="viralHepatitsScreenResult"
-                          id="viralHepatitsScreenResult"
-                          value={bioMedicalServices.viralHepatitsScreenResult}
-                          onChange={handleInputChangebioMedicalServices}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value=""> Select </option>
-                          <option value="positive"> Positive </option>
-                          <option value="negative"> Negative</option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                  )}
+                    {bioMedicalServices.screenedForViralHepatits === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>Viral Hepatits Screen Result</Label>
+                          <Input
+                            type="select"
+                            name="viralHepatitsScreenResult"
+                            id="viralHepatitsScreenResult"
+                            value={bioMedicalServices.viralHepatitsScreenResult}
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="positive"> Positive </option>
+                            <option value="negative"> Negative</option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
 
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Vaccination For Viral Hepatits</Label>
-                      <Input
-                        type="select"
-                        name="vaccinationForViralHepatits"
-                        id="vaccinationForViralHepatits"
-                        value={bioMedicalServices.vaccinationForViralHepatits}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value=""> Select </option>
-                        <option value="Yes"> Yes </option>
-                        <option value="No"> No </option>
-                      </Input>
-                      {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                    </FormGroup>
-                  </div>
-
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Offered Family Planning Services</Label>
-                      <Input
-                        type="select"
-                        name="offeredFamilyPlanningServices"
-                        id="offeredFamilyPlanningServices"
-                        value={bioMedicalServices.offeredFamilyPlanningServices}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value=""> Select </option>
-                        <option value="yes"> Yes </option>
-                        <option value="no"> No </option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  {bioMedicalServices.offeredFamilyPlanningServices ===
-                    "yes" && (
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
-                        <Label>Refferred For Family Planning Services</Label>
+                        <Label>Vaccination For Viral Hepatits</Label>
                         <Input
                           type="select"
-                          name="referredForFamilyPlanningServices"
-                          id="referredForFamilyPlanningServices"
-                          value={
-                            bioMedicalServices.referredForFamilyPlanningServices
-                          }
+                          name="vaccinationForViralHepatits"
+                          id="vaccinationForViralHepatits"
+                          value={bioMedicalServices.vaccinationForViralHepatits}
                           onChange={handleInputChangebioMedicalServices}
                           style={{
                             border: "1px solid #014D88",
@@ -1393,320 +1343,316 @@ const KpPrev = (props) => {
                           <option value="Yes"> Yes </option>
                           <option value="No"> No </option>
                         </Input>
-                      </FormGroup>
-                    </div>
-                  )}
-
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Provided With Drug Rehab</Label>
-                      <Input
-                        type="select"
-                        name="providedWithDrugRehab"
-                        id="providedWithDrugRehab"
-                        value={bioMedicalServices.providedWithDrugRehab}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value=""> Select </option>
-                        <option value="yes"> Yes </option>
-                        <option value="no"> No </option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  {bioMedicalServices.providedWithDrugRehab === "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <FormGroup>
-                        <Label>Offered MHPSS</Label>
-                        <Input
-                          type="select"
-                          name="offeredMhpss"
-                          id="offeredMhpss"
-                          value={bioMedicalServices.offeredMhpss}
-                          onChange={handleInputChangebioMedicalServices}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value=""> Select </option>
-                          <option value="yes"> Yes </option>
-                          <option value="no"> No </option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                  )}
-
-                  {bioMedicalServices.offeredMhpss === "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <FormGroup>
-                        <Label>Type of MHPSS Provided</Label>
-                        <Input
-                          type="select"
-                          name="typeofMhpss"
-                          id="typeofMhpss"
-                          value={bioMedicalServices.typeofMhpss}
-                          onChange={handleInputChangebioMedicalServices}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value=""> Select </option>
-                          <option value="yes"> Yes </option>
-                          <option value="no"> No </option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                  )}
-
-                  {bioMedicalServices.providedWithDrugRehab === "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <FormGroup>
-                        <Label>Referred to facility for Drug Rehab </Label>
-                        <Input
-                          type="select"
-                          name="refferedfacilitydrugrehab"
-                          id="refferedfacilitydrugrehab"
-                          value={bioMedicalServices.refferedfacilitydrugrehab}
-                          onChange={handleInputChangebioMedicalServices}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value=""> Select </option>
-                          <option value="yes"> Yes </option>
-                          <option value="no"> No </option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                  )}
-
-                  {bioMedicalServices.refferedfacilitydrugrehab === "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <Label>Drug Rehab Facility Refferred to </Label>
-                      <Input
-                        type="text"
-                        name="drugRehabfacilityReffered"
-                        id="drugRehabfacilityReffered"
-                        value={bioMedicalServices.drugRehabfacilityReffered}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>
-                        On Medical Assisted Therapy (MAT) for atleast 6 months
-                      </Label>
-                      <Input
-                        type="select"
-                        name="onMedicalAssistedTherapy"
-                        id="onMedicalAssistedTherapy"
-                        value={bioMedicalServices.onMedicalAssistedTherapy}
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value=""> Select </option>
-                        <option value="yes"> Yes </option>
-                        <option value="no"> No </option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Recived Nalxone for Overdose Treatment</Label>
-                      <Input
-                        type="select"
-                        name="recivedNalxoneForOverdoseTreatment"
-                        id="recivedNalxoneForOverdoseTreatment"
-                        value={
-                          bioMedicalServices.recivedNalxoneForOverdoseTreatment
-                        }
-                        onChange={handleInputChangebioMedicalServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value=""> Select </option>
-                        <option value="yes"> Yes </option>
-                        <option value="no"> No </option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                </div>
-              </div>
-
-              <div className="row">
-                <LabelSui
-                  as="a"
-                  color="blue"
-                  style={{
-                    width: "106%",
-                    height: "45px",
-                    marginBottom: "10px",
-                  }}
-                  ribbon
-                >
-                  <h2 style={{ color: "#fff" }}> Structural Services </h2>
-                </LabelSui>
-                <br />
-                <br />
-                <div className="form-group mb-3 col-md-6">
-                  <FormGroup>
-                    <Label>Provided or Reffered for Empowerment</Label>
-                    <Input
-                      type="select"
-                      name="providedOrRefferedForEmpowerment"
-                      id="providedOrRefferedForEmpowerment"
-                      value={
-                        structuralServices.providedOrRefferedForEmpowerment
-                      }
-                      onChange={handleInputChangestructuralServices}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value=""> Select </option>
-                      <option value="yes"> Yes </option>
-                      <option value="no"> No </option>
-                    </Input>
-                  </FormGroup>
-                  {structuralServices.recivedNalxoneForOverdoseTreatment ===
-                    "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <Label> Type of Empowerment Provided </Label>
-                      <Input
-                        type="text"
-                        name="typeempowermentprovided"
-                        id="typeempowermentprovided"
-                        value={structuralServices.typeempowermentprovided}
-                        onChange={handleInputChangestructuralServices}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="form-group mb-3 col-md-6">
-                  <FormGroup>
-                    <Label>Legal Aid Service Type</Label>
-                    <Input
-                      type="select"
-                      name="legalAidServiceType"
-                      id="legalAidServiceType"
-                      value={structuralServices.legalAidServiceType}
-                      onChange={handleInputChangestructuralServices}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value=""> Select </option>
-                      <option value="yes"> Yes </option>
-                      <option value="no"> No </option>
-                    </Input>
-                  </FormGroup>
-                </div>
-                {structuralServices.legalAidServiceType === "yes" && (
-                  <div className="form-group mb-3 col-md-6">
-                    <Label> Type of Legal Empowerment Provided </Label>
-                    <Input
-                      type="text"
-                      name="typelegalempowerment"
-                      id="typelegalempowerment"
-                      value={structuralServices.typelegalempowerment}
-                      onChange={handleInputChangestructuralServices}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    />
-                  </div>
-                )}
-                {structuralServices.legalAidServiceType === "yes" && (
-                  <div className="form-group mb-3 col-md-6">
-                    <Label> Legal Program referred </Label>
-                    <Input
-                      type="text"
-                      name="legalprogramreferred"
-                      id="legalprogramreferred"
-                      value={structuralServices.legalprogramreferred}
-                      onChange={handleInputChangestructuralServices}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="row">
-                <LabelSui
-                  as="a"
-                  color="blue"
-                  style={{
-                    width: "106%",
-                    height: "45px",
-                    marginBottom: "10px",
-                  }}
-                  ribbon
-                >
-                  <h2 style={{ color: "#fff" }}> Service Provider </h2>
-                </LabelSui>
-
-                <div className="form-group mb-3 col-md-6">
-                  <FormGroup>
-                    <Label>Name of service provider</Label>
-                    <Input
-                      type="text"
-                      name="service_provider"
-                      id="service_provider"
-                      value={date.service_provider}
-                      onChange={handleInputChange}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    />
-
-                    {/* {errors.discontinuation !== "" ? (
+                        {/* {errors.discontinuation !== "" ? (
                     <span className={classes.error}>
                       {errors.discontinuation}
                     </span>
                   ) : (
                     ""
                   )} */}
-                  </FormGroup>
-                  {structuralServices.recivedNalxoneForOverdoseTreatment ===
-                    "Yes" && (
+                      </FormGroup>
+                    </div>
+
                     <div className="form-group mb-3 col-md-4">
-                      <Label> Facility Refferred to </Label>
+                      <FormGroup>
+                        <Label>Offered Family Planning Services</Label>
+                        <Input
+                          type="select"
+                          name="offeredFamilyPlanningServices"
+                          id="offeredFamilyPlanningServices"
+                          value={
+                            bioMedicalServices.offeredFamilyPlanningServices
+                          }
+                          onChange={handleInputChangebioMedicalServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        >
+                          <option value=""> Select </option>
+                          <option value="yes"> Yes </option>
+                          <option value="no"> No </option>
+                        </Input>
+                      </FormGroup>
+                    </div>
+                    {bioMedicalServices.offeredFamilyPlanningServices ===
+                      "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>Refferred For Family Planning Services</Label>
+                          <Input
+                            type="select"
+                            name="referredForFamilyPlanningServices"
+                            id="referredForFamilyPlanningServices"
+                            value={
+                              bioMedicalServices.referredForFamilyPlanningServices
+                            }
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="Yes"> Yes </option>
+                            <option value="No"> No </option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
+
+                    <div className="form-group mb-3 col-md-4">
+                      <FormGroup>
+                        <Label>Provided With Drug Rehab</Label>
+                        <Input
+                          type="select"
+                          name="providedWithDrugRehab"
+                          id="providedWithDrugRehab"
+                          value={bioMedicalServices.providedWithDrugRehab}
+                          onChange={handleInputChangebioMedicalServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        >
+                          <option value=""> Select </option>
+                          <option value="yes"> Yes </option>
+                          <option value="no"> No </option>
+                        </Input>
+                      </FormGroup>
+                    </div>
+                    {bioMedicalServices.providedWithDrugRehab === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>Offered MHPSS</Label>
+                          <Input
+                            type="select"
+                            name="offeredMhpss"
+                            id="offeredMhpss"
+                            value={bioMedicalServices.offeredMhpss}
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="yes"> Yes </option>
+                            <option value="no"> No </option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
+
+                    {bioMedicalServices.offeredMhpss === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>Type of MHPSS Provided</Label>
+                          <Input
+                            type="select"
+                            name="typeofMhpss"
+                            id="typeofMhpss"
+                            value={bioMedicalServices.typeofMhpss}
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="yes"> Yes </option>
+                            <option value="no"> No </option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
+
+                    {bioMedicalServices.providedWithDrugRehab === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <FormGroup>
+                          <Label>Referred to facility for Drug Rehab </Label>
+                          <Input
+                            type="select"
+                            name="refferedfacilitydrugrehab"
+                            id="refferedfacilitydrugrehab"
+                            value={bioMedicalServices.refferedfacilitydrugrehab}
+                            onChange={handleInputChangebioMedicalServices}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="yes"> Yes </option>
+                            <option value="no"> No </option>
+                          </Input>
+                        </FormGroup>
+                      </div>
+                    )}
+
+                    {bioMedicalServices.refferedfacilitydrugrehab === "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <Label>Drug Rehab Facility Refferred to </Label>
+                        <Input
+                          type="text"
+                          name="drugRehabfacilityReffered"
+                          id="drugRehabfacilityReffered"
+                          value={bioMedicalServices.drugRehabfacilityReffered}
+                          onChange={handleInputChangebioMedicalServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    <div className="form-group mb-3 col-md-4">
+                      <FormGroup>
+                        <Label>
+                          On Medical Assisted Therapy (MAT) for atleast 6 months
+                        </Label>
+                        <Input
+                          type="select"
+                          name="onMedicalAssistedTherapy"
+                          id="onMedicalAssistedTherapy"
+                          value={bioMedicalServices.onMedicalAssistedTherapy}
+                          onChange={handleInputChangebioMedicalServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        >
+                          <option value=""> Select </option>
+                          <option value="yes"> Yes </option>
+                          <option value="no"> No </option>
+                        </Input>
+                      </FormGroup>
+                    </div>
+
+                    <div className="form-group mb-3 col-md-4">
+                      <FormGroup>
+                        <Label>Recived Nalxone for Overdose Treatment</Label>
+                        <Input
+                          type="select"
+                          name="recivedNalxoneForOverdoseTreatment"
+                          id="recivedNalxoneForOverdoseTreatment"
+                          value={
+                            bioMedicalServices.recivedNalxoneForOverdoseTreatment
+                          }
+                          onChange={handleInputChangebioMedicalServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        >
+                          <option value=""> Select </option>
+                          <option value="yes"> Yes </option>
+                          <option value="no"> No </option>
+                        </Input>
+                      </FormGroup>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="row">
+                  <LabelSui
+                    as="a"
+                    color="blue"
+                    style={{
+                      width: "106%",
+                      height: "45px",
+                      marginBottom: "10px",
+                    }}
+                    ribbon
+                  >
+                    <h2 style={{ color: "#fff" }}> Structural Services </h2>
+                  </LabelSui>
+                  <br />
+                  <br />
+                  <div className="form-group mb-3 col-md-6">
+                    <FormGroup>
+                      <Label>Provided or Reffered for Empowerment</Label>
+                      <Input
+                        type="select"
+                        name="providedOrRefferedForEmpowerment"
+                        id="providedOrRefferedForEmpowerment"
+                        value={
+                          structuralServices.providedOrRefferedForEmpowerment
+                        }
+                        onChange={handleInputChangestructuralServices}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value=""> Select </option>
+                        <option value="yes"> Yes </option>
+                        <option value="no"> No </option>
+                      </Input>
+                    </FormGroup>
+                    {structuralServices.recivedNalxoneForOverdoseTreatment ===
+                      "yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <Label> Type of Empowerment Provided </Label>
+                        <Input
+                          type="text"
+                          name="typeempowermentprovided"
+                          id="typeempowermentprovided"
+                          value={structuralServices.typeempowermentprovided}
+                          onChange={handleInputChangestructuralServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="form-group mb-3 col-md-6">
+                    <FormGroup>
+                      <Label>Legal Aid Service Type</Label>
+                      <Input
+                        type="select"
+                        name="legalAidServiceType"
+                        id="legalAidServiceType"
+                        value={structuralServices.legalAidServiceType}
+                        onChange={handleInputChangestructuralServices}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      >
+                        <option value=""> Select </option>
+                        <option value="yes"> Yes </option>
+                        <option value="no"> No </option>
+                      </Input>
+                    </FormGroup>
+                  </div>
+                  {structuralServices.legalAidServiceType === "yes" && (
+                    <div className="form-group mb-3 col-md-6">
+                      <Label> Type of Legal Empowerment Provided </Label>
                       <Input
                         type="text"
-                        name="facilityRefferedToRecievedNalxoneForOverdoseTreatment"
-                        id="facilityRefferedToRecievedNalxoneForOverdoseTreatment"
-                        value={
-                          facilityRefferedToo.facilityRefferedToRecievedNalxoneForOverdoseTreatment
-                        }
+                        name="typelegalempowerment"
+                        id="typelegalempowerment"
+                        value={structuralServices.typelegalempowerment}
+                        onChange={handleInputChangestructuralServices}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      />
+                    </div>
+                  )}
+                  {structuralServices.legalAidServiceType === "yes" && (
+                    <div className="form-group mb-3 col-md-6">
+                      <Label> Legal Program referred </Label>
+                      <Input
+                        type="text"
+                        name="legalprogramreferred"
+                        id="legalprogramreferred"
+                        value={structuralServices.legalprogramreferred}
                         onChange={handleInputChangestructuralServices}
                         style={{
                           border: "1px solid #014D88",
@@ -1716,40 +1662,101 @@ const KpPrev = (props) => {
                     </div>
                   )}
                 </div>
-              </div>
-              {/* </div> */}
-            </div>
-            {saving ? <Spinner /> : ""}
-            <br />
 
-            <MatButton
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.button}
-              startIcon={<SaveIcon />}
-              //hidden={props.activeContent.actionType === "view" ? true : false}
-              onClick={handleSubmit}
-              style={{ backgroundColor: "#014d88", color: "#ffffff" }}
-              //disabled={attemptList.length <= 0 && !saving ? true : false}
-            >
-              {!saving ? (
-                <span style={{ textTransform: "capitalize" }}>
-                  {" "}
-                  {props.activeContent.actionType === "update"
-                    ? "Update"
-                    : "Save"}
-                </span>
-              ) : (
-                <span style={{ textTransform: "capitalize" }}>
-                  {props.activeContent.actionType === "update"
-                    ? "Update..."
-                    : "Save..."}
-                </span>
-              )}
-            </MatButton>
-            {/* </div> */}
-          </form>
+                <div className="row">
+                  <LabelSui
+                    as="a"
+                    color="blue"
+                    style={{
+                      width: "106%",
+                      height: "45px",
+                      marginBottom: "10px",
+                    }}
+                    ribbon
+                  >
+                    <h2 style={{ color: "#fff" }}> Service Provider </h2>
+                  </LabelSui>
+
+                  <div className="form-group mb-3 col-md-6">
+                    <FormGroup>
+                      <Label>Name of service provider</Label>
+                      <Input
+                        type="text"
+                        name="service_provider"
+                        id="service_provider"
+                        value={date.service_provider}
+                        onChange={handleInputChange}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                      />
+
+                      {/* {errors.discontinuation !== "" ? (
+                    <span className={classes.error}>
+                      {errors.discontinuation}
+                    </span>
+                  ) : (
+                    ""
+                  )} */}
+                    </FormGroup>
+                    {structuralServices.recivedNalxoneForOverdoseTreatment ===
+                      "Yes" && (
+                      <div className="form-group mb-3 col-md-4">
+                        <Label> Facility Refferred to </Label>
+                        <Input
+                          type="text"
+                          name="facilityRefferedToRecievedNalxoneForOverdoseTreatment"
+                          id="facilityRefferedToRecievedNalxoneForOverdoseTreatment"
+                          value={
+                            facilityRefferedToo.facilityRefferedToRecievedNalxoneForOverdoseTreatment
+                          }
+                          onChange={handleInputChangestructuralServices}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* </div> */}
+              </div>
+              {saving ? <Spinner /> : ""}
+              <br />
+
+              <MatButton
+                type="submit"
+                variant="contained"
+                color="primary"
+                className={classes.button}
+                startIcon={<SaveIcon />}
+                //hidden={props.activeContent.actionType === "view" ? true : false}
+                onClick={handleSubmit}
+                style={{ backgroundColor: "#014d88", color: "#ffffff" }}
+                //disabled={attemptList.length <= 0 && !saving ? true : false}
+              >
+                {!saving ? (
+                  <span style={{ textTransform: "capitalize" }}>
+                    {" "}
+                    {props.activeContent.actionType === "update"
+                      ? "Update"
+                      : "Save"}
+                  </span>
+                ) : (
+                  <span style={{ textTransform: "capitalize" }}>
+                    {props.activeContent.actionType === "update"
+                      ? "Update..."
+                      : "Save..."}
+                  </span>
+                )}
+              </MatButton>
+              {/* </div> */}
+            </form>
+          ) : (
+            <div>Client not Eligible for Kp Prev</div>
+          )}
         </CardBody>
       </Card>
     </div>

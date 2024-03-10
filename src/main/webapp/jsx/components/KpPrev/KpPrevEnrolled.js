@@ -106,23 +106,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const KpPrevEnrolled = (props) => {
-  // const calculate_age = (dob) => {
-  //     const today = new Date();
-  //     const dateParts = dob.split("-");
-  //     const birthDate = new Date(dob); // create a date object directlyfrom`dob1`argument
-  //     let age_now = today.getFullYear() - birthDate.getFullYear();
-  //     const m = today.getMonth() - birthDate.getMonth();
-
-  //     if (age_now <= 0 && m < 0 && today.getDate() < birthDate.getDate()) {
-  //         age_now--;
-  //     }
-
-  //     if (age_now === 0) {
-  //         return m + " month(s)";
-  //     }
-  //     return age_now + " year(s)";
-  // };
-
   return (
     <div>
       <MaterialTable
@@ -140,12 +123,12 @@ const KpPrevEnrolled = (props) => {
             filtering: false,
           },
           // { title: "Batch number", field: "clientCode", filtering: false },
-          { title: "Sex", field: "gender", filtering: false },
-          { title: "Age", field: "age", filtering: false },
+          { title: "Prevention Code", field: "prevCode", filtering: false },
+          // { title: "Age", field: "age", filtering: false },
 
           //{ title: "ART Number", field: "v_status", filtering: false },
           // { title: "Kp Prev Status", field: "count", filtering: false },
-          // { title: "Actions", field: "actions", filtering: false },
+          { title: "Actions", field: "actions", filtering: false },
         ]}
         //isLoading={loading}
         data={(query) =>
@@ -163,54 +146,55 @@ const KpPrevEnrolled = (props) => {
                     result.data.records !== null &&
                     result.data.records.map((row) => ({
                       dateServiceOffered: row.dateServiceOffered,
-                      hospital_number: row.patientId,
-                      gender: "",
+                      hospital_number:
+                        row.htsCode !== null ? row.htsCode : row.prepCode,
+                      prevCode: row.prevCode,
                       age: "",
 
-                      // actions: (
-                      //   <div>
-                      //     <Link
-                      //       to={{
-                      //         pathname: "/patient-history",
-                      //         state: { patientObj: row },
-                      //       }}
-                      //     >
-                      //       <ButtonGroup
-                      //         variant="contained"
-                      //         aria-label="split button"
-                      //         style={{
-                      //           backgroundColor: "rgb(153, 46, 98)",
-                      //           height: "30px",
-                      //           width: "215px",
-                      //         }}
-                      //         size="large"
-                      //       >
-                      //         <Button
-                      //           color="primary"
-                      //           size="small"
-                      //           aria-label="select merge strategy"
-                      //           aria-haspopup="menu"
-                      //           style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                      //         >
-                      //           <MdDashboard />
-                      //         </Button>
-                      //         <Button
-                      //           style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                      //         >
-                      //           <span
-                      //             style={{
-                      //               fontSize: "12px",
-                      //               color: "#fff",
-                      //               fontWeight: "bolder",
-                      //             }}
-                      //           >
-                      //             Patient Dashboard
-                      //           </span>
-                      //         </Button>
-                      //       </ButtonGroup>
-                      //     </Link>
-                      //   </div>
-                      // ),
+                      actions: (
+                        <div>
+                          <Link
+                            to={{
+                              pathname: "/view-kp-prev",
+                              state: { patientObj: row },
+                            }}
+                          >
+                            <ButtonGroup
+                              variant="contained"
+                              aria-label="split button"
+                              style={{
+                                backgroundColor: "rgb(153, 46, 98)",
+                                height: "30px",
+                                width: "215px",
+                              }}
+                              size="large"
+                            >
+                              <Button
+                                color="primary"
+                                size="small"
+                                aria-label="select merge strategy"
+                                aria-haspopup="menu"
+                                style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                              >
+                                <MdDashboard />
+                              </Button>
+                              <Button
+                                style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                              >
+                                <span
+                                  style={{
+                                    fontSize: "12px",
+                                    color: "#fff",
+                                    fontWeight: "bolder",
+                                  }}
+                                >
+                                  View KP Prev
+                                </span>
+                              </Button>
+                            </ButtonGroup>
+                          </Link>
+                        </div>
+                      ),
                     })),
                   page: query.page,
                   totalCount: result.data.totalRecords,
