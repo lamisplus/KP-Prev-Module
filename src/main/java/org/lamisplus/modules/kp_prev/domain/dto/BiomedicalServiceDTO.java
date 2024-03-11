@@ -25,7 +25,7 @@ public class BiomedicalServiceDTO implements Serializable
  private String offered_mhpss;
  private String received_naloxone_for_overdose_treatment;
  private String medical_assisted_therapy_for_six_months;
- //private String sti_screen_result;
+ private String sti_screening_result;
  //private String facility_referred_sti_synd_mgt;
  private String sti_facility_referred;
  private String tb_facility_reffered;
@@ -33,7 +33,7 @@ public class BiomedicalServiceDTO implements Serializable
  //private String facility_referred_vaccineViralHepatitis;
  //private String familyPlanning_screen_result;
  //private String facility_referred_familyPlanning;
- private String drug_rehab_facility_reffered;
+ private String referred_facility_drug_rehab;
 //private String facility_referred_mhpss;
  private String type_of_mhpss;
  
