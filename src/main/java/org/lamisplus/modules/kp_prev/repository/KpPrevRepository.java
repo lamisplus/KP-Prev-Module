@@ -17,6 +17,7 @@ public interface KpPrevRepository extends JpaRepository<KpPrev, Long> {
 	
 	@Query(value = "SELECT * FROM kp_prev WHERE (prevention_code ilike ?1) AND archived=?2 AND facility_id=?3", nativeQuery = true)
     Page<KpPrev> findAllServicesBySearchParameters(String queryParam, Integer archived, Long facilityId, Pageable pageable);
-	
-	
+
+	@Query(value = "select * from kp_prev where archived = 0 and person_uuid = ?1", nativeQuery = true)
+	List<KpPrev> getAllKpPrevByPersonId(String patientID);
 }

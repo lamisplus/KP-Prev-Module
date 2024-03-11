@@ -1,5 +1,6 @@
 package org.lamisplus.modules.kp_prev.service;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -46,12 +47,10 @@ public class KpPrevService {
             log.info("currentUser: " + currentUser.get());
             User user = currentUser.get();
             Long currentOrganisationUnitId = user.getCurrentOrganisationUnitId();
-            //preventionService.setfa.setFacilityId(currentOrganisationUnitId);
+            preventionService.setFacilityId(currentOrganisationUnitId);
         }
         preventionService.setUuid(UUID.randomUUID().toString());
 		return this.getDtoFromKpPrev(kpPrevRepository.save(preventionService));
-		//return null;
-        
 	}
    
 	
@@ -165,4 +164,9 @@ public class KpPrevService {
         kpPrev.setArchived(1);
         kpPrevRepository.save(kpPrev);
     }
+
+	public List<KpPrev> getAllKpPrevById(String person_uuid) {
+		return kpPrevRepository.getAllKpPrevByPersonId(person_uuid);
+	}
+
 }

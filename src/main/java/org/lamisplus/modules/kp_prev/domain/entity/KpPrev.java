@@ -50,8 +50,8 @@ private String uuid;
 @Column(name = "visit_date")
 private LocalDate dateServiceOffered;
 
-/*@Column(name = "facility_id")
-private Long facility_id;*/
+@Column(name = "facility_id")
+private Long facilityId;
 
 @Type(type = "jsonb-node")
 @Column(columnDefinition = "jsonb", name = "entry_point", nullable = true)

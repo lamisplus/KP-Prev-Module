@@ -2,6 +2,7 @@ package org.lamisplus.modules.kp_prev.controller;
 
 import org.lamisplus.modules.kp_prev.domain.dto.*;
 
+import org.lamisplus.modules.kp_prev.domain.entity.KpPrev;
 import org.lamisplus.modules.kp_prev.service.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -28,38 +31,41 @@ public class KpPrevController {
 	
 private final KpPrevService kpPrevService;
 	
-@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-public ResponseEntity<KpPrevResponseDTO> createKpPrev(@RequestBody KpPrevInputDTO kpPrevInputDTO)
-{
-  return ResponseEntity.ok(kpPrevService.createKpPrev(kpPrevInputDTO));	
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<KpPrevResponseDTO> createKpPrev(@RequestBody KpPrevInputDTO kpPrevInputDTO)
+    {
+      return ResponseEntity.ok(kpPrevService.createKpPrev(kpPrevInputDTO));
 
-}
-@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-public ResponseEntity<KpPrevMetaDataDto> getAllPatients(
-        @RequestParam(defaultValue = "*") String searchParam,
-        @RequestParam(defaultValue = "0") Integer pageNo,
-        @RequestParam(defaultValue = "10") Integer pageSize) {
-    KpPrevMetaDataDto kpPrevMetaDataDto = kpPrevService.findKpPrevBySearchParam(searchParam, pageNo, pageSize);
-    return new ResponseEntity<>(kpPrevMetaDataDto, new HttpHeaders(), HttpStatus.OK);
-}
+    }
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<KpPrevMetaDataDto> getAllPatients(
+            @RequestParam(defaultValue = "*") String searchParam,
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        KpPrevMetaDataDto kpPrevMetaDataDto = kpPrevService.findKpPrevBySearchParam(searchParam, pageNo, pageSize);
+        return new ResponseEntity<>(kpPrevMetaDataDto, new HttpHeaders(), HttpStatus.OK);
+    }
 
-
-@GetMapping("/retrieve")
-public ResponseEntity<String> getKpPrev()
+    @GetMapping("/retrieve")
+    public ResponseEntity<String> getKpPrev()
 {
 	return ResponseEntity.ok("Call was successful!");
 }
 
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<KpPrevResponseDTO> updateKpPrev(@PathVariable("id") Long id, @RequestBody KpPrevInputDTO kpPrevInputDto) {
+        return ResponseEntity.ok(kpPrevService.updateKpPrev(id, kpPrevInputDto));
+    }
+    @DeleteMapping(value = "/{id}",
+    produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> deleteKpPrev(@PathVariable("id") Long id) {
+    kpPrevService.deleteKpPrevById(id);
+        return ResponseEntity.accepted().build();
+    }
 
-@PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-public ResponseEntity<KpPrevResponseDTO> updateKpPrev(@PathVariable("id") Long id, @RequestBody KpPrevInputDTO kpPrevInputDto) {
-    return ResponseEntity.ok(kpPrevService.updateKpPrev(id, kpPrevInputDto));
-}
-
-@DeleteMapping(value = "/{id}",
-produces = MediaType.APPLICATION_JSON_VALUE)
-public ResponseEntity<String> deleteKpPrev(@PathVariable("id") Long id) {
-kpPrevService.deleteKpPrevById(id);
-return ResponseEntity.accepted().build();
-}
+    @GetMapping("/{personID}")
+    public ResponseEntity<List<KpPrev>> getKpPrev(@PathVariable("personID") String personID)
+    {
+        return ResponseEntity.ok(kpPrevService.getAllKpPrevById(personID));
+    }
 }

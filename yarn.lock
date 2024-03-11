@@ -7734,11 +7734,6 @@ eslint-config-react-app@^6.0.0:
   dependencies:
     confusing-browser-globals "^1.0.10"
 
-eslint-config-react@^1.1.7:
-  version "1.1.7"
-  resolved "https://registry.npmjs.org/eslint-config-react/-/eslint-config-react-1.1.7.tgz"
-  integrity sha512-P4Z6u68wf0BvIvZNu+U8uQsk3DcZ1CcCI1XpUkJlG6vOa+iVcSQLgE01f2DB2kXlKRcT8/3dsH+wveLgvEgbkQ==
-
 eslint-import-resolver-node@^0.3.2, eslint-import-resolver-node@^0.3.7:
   version "0.3.7"
   resolved "https://registry.npmjs.org/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.7.tgz"
