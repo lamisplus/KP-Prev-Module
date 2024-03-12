@@ -151,6 +151,7 @@ public class KpPrevService {
         KpPrev preventionService = this.getPreventionServiceFromDto(kpPrevDto);
         preventionService.setId(existservice.getId());
         preventionService.setUuid(existservice.getUuid());
+		preventionService.setPersonId(existservice.getPersonId());
         preventionService.setCreatedBy(existservice.getCreatedBy());
         preventionService.setCreatedDate(existservice.getCreatedDate());
         preventionService.setArchived(existservice.getArchived());

@@ -328,11 +328,13 @@ const ViewUpdate = (props) => {
         viral_hepatitis_screen_result:
           bioMedicalServices.viralHepatitsScreenResult,
         sti_screening_result: bioMedicalServices.stiScreeningResult,
-        sti_facility_reffered: bioMedicalServices.stifacilityReffered,
+        sti_facility_referred: bioMedicalServices.stifacilityReffered,
         tb_facility_reffered: bioMedicalServices.tbfacilityReffered,
         type_of_mhpss: bioMedicalServices.typeofMhpss,
         drug_rehab_facility_reffered:
-          bioMedicalServices.drugRehabfacilityReffered,
+        bioMedicalServices.drugRehabfacilityReffered,
+        referred_facility_drug_rehab:
+        bioMedicalServices.refferedfacilitydrugrehab,
       };
 
       const commodityServicesValue = {
