@@ -34,7 +34,7 @@ public class BiomedicalServiceDTO implements Serializable
  //private String familyPlanning_screen_result;
  //private String facility_referred_familyPlanning;
  private String referred_facility_drug_rehab;
-//private String facility_referred_mhpss;
+ private String drug_rehab_facility_reffered;
  private String type_of_mhpss;
  
 }
