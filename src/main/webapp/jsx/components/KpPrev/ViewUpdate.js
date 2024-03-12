@@ -338,6 +338,9 @@ const ViewUpdate = (props) => {
           bioMedicalServices.drugRehabfacilityReffered,
         referred_facility_drug_rehab:
           bioMedicalServices.refferedfacilitydrugrehab,
+          tb_treatment_refferal:
+                    bioMedicalServices.tbtreatmentrefferal,
+
       };
 
       const commodityServicesValue = {
