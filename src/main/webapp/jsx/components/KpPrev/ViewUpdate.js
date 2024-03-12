@@ -197,9 +197,12 @@ const ViewUpdate = (props) => {
     stiScreeningResult: kpprevValues.biomedicalServices?.sti_screening_result,
     stifacilityReffered: kpprevValues.biomedicalServices?.sti_facility_referred,
     tbfacilityReffered: kpprevValues.biomedicalServices?.tb_facility_reffered,
+    tbtreatmentrefferal: kpprevValues.biomedicalServices?.tb_treatment_refferal,
     typeofMhpss: kpprevValues.biomedicalServices?.type_of_mhpss,
     drugRehabfacilityReffered:
       kpprevValues.biomedicalServices?.drug_rehab_facility_reffered,
+    refferedfacilitydrugrehab:
+      kpprevValues.biomedicalServices?.referred_facility_drug_rehab,
   });
   const [structuralServices, setstructuralServices] = useState({
     providedOrRefferedForEmpowerment:
@@ -332,9 +335,9 @@ const ViewUpdate = (props) => {
         tb_facility_reffered: bioMedicalServices.tbfacilityReffered,
         type_of_mhpss: bioMedicalServices.typeofMhpss,
         drug_rehab_facility_reffered:
-        bioMedicalServices.drugRehabfacilityReffered,
+          bioMedicalServices.drugRehabfacilityReffered,
         referred_facility_drug_rehab:
-        bioMedicalServices.refferedfacilitydrugrehab,
+          bioMedicalServices.refferedfacilitydrugrehab,
       };
 
       const commodityServicesValue = {
