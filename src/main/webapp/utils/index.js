@@ -1,8 +1,7 @@
 export const calculate_age = (dob) => {
-  if (dob !== null && dob != "") {
+  if (dob !== null && dob !== "") {
     //Check if the DOB is not null or empty
     const today = new Date();
-    const dateParts = dob.split("-");
     const birthDate = new Date(dob);
 
     // get the day, month and year of today

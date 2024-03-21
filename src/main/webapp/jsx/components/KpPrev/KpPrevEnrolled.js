@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from "react";
-import MaterialTable from "material-table";
-import axios from "axios";
-
-import { token as token, url as baseUrl } from "./../../../api";
+import React, { useState, useRef } from "react";
+import MaterialTable, { MTableToolbar } from "material-table";
 import { forwardRef } from "react";
 import "semantic-ui-css/semantic.min.css";
-import { Link } from "react-router-dom";
 import AddBox from "@material-ui/icons/AddBox";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import Check from "@material-ui/icons/Check";
@@ -23,18 +19,19 @@ import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
-import { makeStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import ButtonGroup from "@material-ui/core/ButtonGroup";
-import { MdDashboard } from "react-icons/md";
 import "@reach/menu-button/styles.css";
-import { Label } from "semantic-ui-react";
 import Moment from "moment";
 import momentLocalizer from "react-widgets-moment";
-import moment from "moment";
-import { calculate_age } from "../../../utils";
+import { useQuery } from "react-query";
+import { getKpPrevpatientsKey } from "../../utils/queryKeys";
+import Button from "@material-ui/core/Button";
+import { queryClient } from "../../utils/queryClient";
+import { fetchKpPrevPatients } from "../../services/fetchKpPrevPatients";
+import { MdDashboard } from "react-icons/md";
+import { ButtonGroup } from "reactstrap";
+import { Link } from "react-router-dom";
 
-//Dtate Picker package
+//Date Picker package
 Moment.locale("en");
 momentLocalizer();
 
@@ -62,146 +59,171 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
 };
 
-const useStyles = makeStyles((theme) => ({
-  card: {
-    margin: theme.spacing(20),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  cardBottom: {
-    marginBottom: 20,
-  },
-  Select: {
-    height: 45,
-    width: 350,
-  },
-  button: {
-    margin: theme.spacing(1),
-  },
+const KpPrevPatientList = (props) => {
+  const [query, setQueryParams] = useState({
+    page: 0,
+    pageSize: 10,
+    search: "",
+  });
 
-  root: {
-    "& > *": {
-      margin: theme.spacing(1),
-    },
-  },
-  input: {
-    display: "none",
-  },
-  error: {
-    color: "#f85032",
-    fontSize: "11px",
-  },
-  success: {
-    color: "#4BB543 ",
-    fontSize: "11px",
-  },
-}));
+  const innerContainerRef = useRef(null);
 
-const KpPrevEnrolled = (props) => {
+  // Function to scroll to the top of the inner container
+  const scrollToTop = () => {
+    const outerContainer = document?.getElementById?.("main-wrapper");
+
+    if (outerContainer) {
+      outerContainer.scrollTop = 0;
+    }
+  };
+
+  const prefetchNextPage = async () => {
+    const nextPage = query.page + 1;
+    // Use the same query key as in the useQuery hook
+    const queryKey = [getKpPrevpatientsKey, { ...query, page: nextPage }];
+    await queryClient.prefetchQuery(queryKey, () =>
+      fetchKpPrevPatients({ ...query, page: nextPage })
+    );
+  };
+
+  const { data, isLoading, refetch } = useQuery(
+    [getKpPrevpatientsKey, query],
+    () => fetchKpPrevPatients(query),
+    {
+      onSuccess: () => {
+        prefetchNextPage();
+      },
+    }
+  );
+
   return (
-    <div>
+    <div ref={innerContainerRef}>
       <MaterialTable
         icons={tableIcons}
-        title="Find Patient "
+        title="Find Patient"
         columns={[
-          // { title: " ID", field: "Id" },
           {
             title: "Date Service Offered",
             field: "dateServiceOffered",
+            render: (row) => row.dateServiceOffered,
           },
           {
             title: "Hospital Number",
             field: "hospital_number",
             filtering: false,
+            render: (row) =>
+              row.htsCode !== null ? row.htsCode : row.prepCode,
           },
-          // { title: "Batch number", field: "clientCode", filtering: false },
-          { title: "Prevention Code", field: "prevCode", filtering: false },
-          // { title: "Age", field: "age", filtering: false },
 
-          //{ title: "ART Number", field: "v_status", filtering: false },
-          // { title: "Kp Prev Status", field: "count", filtering: false },
-          { title: "Actions", field: "actions", filtering: false },
+          {
+            title: "Prevention Code",
+            field: "prevCode",
+            filtering: false,
+          },
+
+          {
+            title: "Actions",
+            field: "actions",
+            filtering: false,
+            render: (row) => (
+              <div>
+                <Link
+                  to={{
+                    pathname: "/patient-history",
+                    state: { patientObj: row },
+                  }}
+                >
+                  <ButtonGroup
+                    variant="contained"
+                    aria-label="split button"
+                    style={{
+                      backgroundColor: "rgb(153, 46, 98)",
+                      height: "30px",
+                      width: "215px",
+                    }}
+                    size="large"
+                  >
+                    <Button
+                      color="primary"
+                      size="small"
+                      aria-label="select merge strategy"
+                      aria-haspopup="menu"
+                      style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                    >
+                      <MdDashboard />
+                    </Button>
+                    <Button style={{ backgroundColor: "rgb(153, 46, 98)" }}>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          color: "#fff",
+                          fontWeight: "bolder",
+                        }}
+                      >
+                        Patient Dashboard
+                      </span>
+                    </Button>
+                  </ButtonGroup>
+                </Link>
+              </div>
+
+              //   <div>
+              //   <Link
+              //     to={{
+              //       pathname: "/view-kp-prev",
+              //       state: { patientObj: row },
+              //     }}
+              //   >
+              //     <ButtonGroup
+              //       variant="contained"
+              //       aria-label="split button"
+              //       style={{
+              //         backgroundColor: "rgb(153, 46, 98)",
+              //         height: "30px",
+              //         width: "215px",
+              //       }}
+              //       size="large"
+              //     >
+              //       <Button
+              //         color="primary"
+              //         size="small"
+              //         aria-label="select merge strategy"
+              //         aria-haspopup="menu"
+              //         style={{ backgroundColor: "rgb(153, 46, 98)" }}
+              //       >
+              //         <MdDashboard />
+              //       </Button>
+              //       <Button
+              //         style={{ backgroundColor: "rgb(153, 46, 98)" }}
+              //       >
+              //         <span
+              //           style={{
+              //             fontSize: "12px",
+              //             color: "#fff",
+              //             fontWeight: "bolder",
+              //           }}
+              //         >
+              //           View KP Prev
+              //         </span>
+              //       </Button>
+              //     </ButtonGroup>
+              //   </Link>
+              // </div>
+            ),
+          },
         ]}
-        //isLoading={loading}
-        data={(query) =>
-          new Promise((resolve, reject) =>
-            axios
-              .get(
-                `${baseUrl}kpprev?pageSize=${query.pageSize}&pageNo=${query.page}&searchParam=${query.search}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              )
-              .then((response) => response)
-              .then((result) => {
-                resolve({
-                  data:
-                    result.data.records &&
-                    result.data.records !== null &&
-                    result.data.records.map((row) => ({
-                      dateServiceOffered: row.dateServiceOffered,
-                      hospital_number:
-                        row.htsCode !== null ? row.htsCode : row.prepCode,
-                      prevCode: row.prevCode,
-                      age: "",
-
-                      actions: (
-                        <div>
-                          <Link
-                            to={{
-                              pathname: "/view-kp-prev",
-                              state: { patientObj: row },
-                            }}
-                          >
-                            <ButtonGroup
-                              variant="contained"
-                              aria-label="split button"
-                              style={{
-                                backgroundColor: "rgb(153, 46, 98)",
-                                height: "30px",
-                                width: "215px",
-                              }}
-                              size="large"
-                            >
-                              <Button
-                                color="primary"
-                                size="small"
-                                aria-label="select merge strategy"
-                                aria-haspopup="menu"
-                                style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                              >
-                                <MdDashboard />
-                              </Button>
-                              <Button
-                                style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: "12px",
-                                    color: "#fff",
-                                    fontWeight: "bolder",
-                                  }}
-                                >
-                                  View KP Prev
-                                </span>
-                              </Button>
-                            </ButtonGroup>
-                          </Link>
-                        </div>
-                      ),
-                    })),
-                  page: query.page,
-                  totalCount: result.data.totalRecords,
-                });
-              })
-          )
-        }
+        components={{
+          Toolbar: (props) => (
+            <div>
+              <MTableToolbar {...props} />
+            </div>
+          ),
+        }}
+        data={data?.records || []}
+        onQueryChange={scrollToTop()}
+        totalCount={data?.totalRecords}
+        isLoading={isLoading}
+        page={data?.currentPage}
         options={{
           headerStyle: {
             backgroundColor: "#014d88",
@@ -212,15 +234,20 @@ const KpPrevEnrolled = (props) => {
             margingLeft: "250px",
           },
           filtering: false,
+          paging: true,
           exportButton: false,
           searchFieldAlignment: "left",
           pageSizeOptions: [10, 20, 100],
-          pageSize: 10,
+          pageSize: query?.pageSize || 10,
           debounceInterval: 400,
+        }}
+        onChangePage={(newPage) => {
+          setQueryParams((prevFilters) => ({ ...prevFilters, page: newPage }));
+          refetch(query);
         }}
       />
     </div>
   );
 };
 
-export default KpPrevEnrolled;
+export default KpPrevPatientList;

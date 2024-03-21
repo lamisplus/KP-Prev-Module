@@ -1,29 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import classNames from "classnames";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
-import ExpansionPanelActions from "@material-ui/core/ExpansionPanelActions";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { Link } from "react-router-dom";
 import ButtonMui from "@material-ui/core/Button";
 import { TiArrowBack } from "react-icons/ti";
-//import Chip from '@material-ui/core/Chip';
 import Divider from "@material-ui/core/Divider";
-import { Button } from "semantic-ui-react";
-import { Label } from "semantic-ui-react";
 import "semantic-ui-css/semantic.min.css";
 import { Col, Row } from "reactstrap";
 import Moment from "moment";
 import momentLocalizer from "react-widgets-moment";
-import moment from "moment";
-import { calculate_age } from "../../../utils";
-import axios from "axios";
-import { url as baseUrl, token } from "./../../../api";
-import Typography from "@material-ui/core/Typography";
-import CaptureBiometric from "./CaptureBiometric";
+
+import {
+  calculateAge,
+  getPhoneNumber,
+  getAddress,
+  getLastName,
+  getHospitalNumber,
+} from "../../utils";
 
 //Dtate Picker package
 Moment.locale("en");
@@ -68,56 +63,7 @@ function PatientCard(props) {
   const { classes } = props;
   const patientObj = props.patientObj;
 
-  //console.log("in", patientObj);
-
-  useEffect(() => {}, [props.patientObj]);
-
-  const get_age = (dob) => {
-    var today = new Date();
-    var dateParts = dob.split("-");
-    var dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
-    var birthDate = new Date(dateObject); // create a date object directlyfrom`dob1`argument
-    var age_now = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age_now--;
-    }
-    if (age_now === 0) {
-      return m + " month(s)";
-    }
-    return age_now;
-  };
-  // const calculate_age = dob => {
-  //   var today = new Date();
-  //   var dateParts = dob.split("-");
-  //   var dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
-  //   var birthDate = new Date(dateObject); // create a date object directlyfrom`dob1`argument
-  //   var age_now = today.getFullYear() - birthDate.getFullYear();
-  //   var m = today.getMonth() - birthDate.getMonth();
-  //       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-  //               age_now--;
-  //           }
-  //       if (age_now === 0) {
-  //               return m + " month(s)";
-  //           }
-  //           return age_now + " year(s)";
-  // };
-  const getPhoneNumber = (identifier) => {
-    const identifiers = identifier;
-    const phoneNumber = identifiers.contactPoint.find(
-      (obj) => obj.type === "phone"
-    );
-    return phoneNumber ? phoneNumber.value : "";
-  };
-  const getAddress = (identifier) => {
-    const identifiers = identifier;
-    const address = identifiers.address.find((obj) => obj.city);
-    const houseAddress =
-      address && address.line[0] !== null ? address.line[0] : "";
-    const landMark =
-      address && address.city && address.city !== null ? address.city : "";
-    return address ? houseAddress + " " + landMark : "";
-  };
+  
 
   return (
     <div className={classes.root}>
@@ -128,7 +74,7 @@ function PatientCard(props) {
               <Row className={"mt-1"}>
                 <Col md={12} className={classes.root2}>
                   <b style={{ fontSize: "25px", color: "rgb(153, 46, 98)" }}>
-                    {patientObj.firstName + " " + patientObj.lastName}
+                    {patientObj.firstName + " " + getLastName(patientObj)}
                   </b>
                   <Link to={"/"}>
                     <ButtonMui
@@ -151,14 +97,18 @@ function PatientCard(props) {
                   <span>
                     {" "}
                     Patient ID :{" "}
-                    <b style={{ color: "#0B72AA" }}>{patientObj.id}</b>
+                    <b style={{ color: "#0B72AA" }}>
+                      {getHospitalNumber(patientObj)}
+                    </b>
                   </span>
                 </Col>
 
                 <Col md={4} className={classes.root2}>
                   <span>
                     Date Of Birth :{" "}
-                    <b style={{ color: "#0B72AA" }}>{patientObj.dateOfBirth}</b>
+                    <b style={{ color: "#0B72AA" }}>
+                      {patientObj?.dob || patientObj?.dateOfBirth}
+                    </b>
                   </span>
                 </Col>
                 <Col md={4} className={classes.root2}>
@@ -166,7 +116,7 @@ function PatientCard(props) {
                     {" "}
                     Age :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {calculate_age(patientObj.dateOfBirth)}
+                      {calculateAge(patientObj?.dob || patientObj?.dateOfBirth)}
                     </b>
                   </span>
                 </Col>

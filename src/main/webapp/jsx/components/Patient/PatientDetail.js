@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
@@ -9,11 +9,7 @@ import PatientCardDetail from "./PatientCard";
 import { useHistory } from "react-router-dom";
 import SubMenu from "./SubMenu";
 import RecentHistory from "./../History/RecentHistory";
-import PatientHistory from "./../History/PatientHistory";
-import Biometrics from "./Biometric";
-import AddmissionHome from "./../Admission/AddmissionHome";
-import PatientVaccinationHistory from "./../Vaccination/VaccinationHistory";
-import KpPrev from "../KpPrev";
+import KpPrev from "../KpPrev/KpPrevHome";
 
 const styles = (theme) => ({
   root: {
@@ -65,12 +61,6 @@ function PatientCard(props) {
     history.location && history.location.state
       ? history.location.state.patientObj
       : {};
-  const prepId =
-    history.location && history.location.state
-      ? history.location.state.prepId
-      : {};
-  //console.log(patientObj)
-  useEffect(() => {}, [patientObj]);
 
   return (
     <div className={classes.root}>
@@ -87,6 +77,7 @@ function PatientCard(props) {
           </li>
         </ol>
       </div>
+
       <Card>
         <CardContent>
           <PatientCardDetail
@@ -94,12 +85,15 @@ function PatientCard(props) {
             setArt={setArt}
             setActiveContent={setActiveContent}
           />
+          <br />
+
           <SubMenu
             patientObj={patientObj}
             art={art}
             setActiveContent={setActiveContent}
           />
           <br />
+
           {activeContent.route === "recent-history" && (
             <RecentHistory
               patientObj={patientObj}
@@ -107,48 +101,6 @@ function PatientCard(props) {
               activeContent={activeContent}
             />
           )}
-          {/* {activeContent.route === "biometrics" && (
-            <Biometrics
-              patientObj={patientObj}
-              setActiveContent={setActiveContent}
-              activeContent={activeContent}
-            />
-          )} */}
-          {/* {activeContent.route === "addmission" && (
-            <AddmissionHome
-              patientObj={patientObj}
-              setActiveContent={setActiveContent}
-              activeContent={activeContent}
-            />
-          )} */}
-          {/* {activeContent.route === "vaccination" && (
-            <PatientVaccinationHistory
-              patientObj={patientObj}
-              setActiveContent={setActiveContent}
-              activeContent={activeContent}
-            />
-          )} */}
-          {/* {activeContent.route === "discharge" && (
-            <AddmissionHome
-              patientObj={patientObj}
-              setActiveContent={setActiveContent}
-              activeContent={activeContent}
-            />
-          )} */}
-          {/* {activeContent.route === "icu" && (
-            <AddmissionHome
-              patientObj={patientObj}
-              setActiveContent={setActiveContent}
-              activeContent={activeContent}
-            />
-          )} */}
-          {/* {activeContent.route === "patient-history" && (
-            <PatientHistory
-              patientObj={patientObj}
-              setActiveContent={setActiveContent}
-              activeContent={activeContent}
-            />
-          )} */}
 
           {activeContent.route === "kp-prev" && (
             <KpPrev
@@ -157,7 +109,7 @@ function PatientCard(props) {
               activeContent={activeContent}
             />
           )}
-          {/* History Pages */}
+          
         </CardContent>
       </Card>
     </div>

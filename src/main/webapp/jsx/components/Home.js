@@ -1,12 +1,8 @@
 import React, { useState, Fragment } from "react";
 import { Row, Col, Card, Tab, Tabs } from "react-bootstrap";
 import PatientList from "./Patient/PatientList";
-//import PatientVaccinatedLIst from './Patient/PatientVaccinatedLIst'
 import KpPrevEnrolled from "./KpPrev/KpPrevEnrolled";
-import { Link } from "react-router-dom";
-import Button from "@material-ui/core/Button";
-import { FaUserPlus } from "react-icons/fa";
-//import PageTitle from "./../layouts/PageTitle";
+
 const divStyle = {
   borderRadius: "2px",
   fontSize: 14,
@@ -27,17 +23,7 @@ const Home = () => {
           </li>
         </ol>
       </div>
-      {/* <Link to={"register-patient"}>
-            <Button
-                variant="contained"
-                color="primary"
-                className=" float-end mb-10"
-                startIcon={<FaUserPlus size="10"/>}
-                style={{backgroundColor:'#014d88'}}
-            >
-                <span style={{ textTransform: "capitalize" }}>New Patient</span>
-            </Button>
-        </Link> */}
+      
       <br />
       <br />
       <br />
@@ -60,9 +46,7 @@ const Home = () => {
                   <Tab eventKey="kpprev" title="KP_PrEV Patients">
                     <KpPrevEnrolled />
                   </Tab>
-                  {/* <Tab eventKey="visualization" title="Data Visualisation">                   
-                    <VisualisationHome />
-                  </Tab>                     */}
+                  
                 </Tabs>
               </div>
             </Card.Body>
