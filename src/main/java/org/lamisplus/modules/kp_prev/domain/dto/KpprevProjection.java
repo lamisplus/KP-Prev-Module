@@ -11,6 +11,7 @@ public interface KpprevProjection {
     String htsCode();
     String prevCode();
     String patientId();
+    String patientIdentifier();
     LocalDate dateServiceOffered();
     Object htsServices();
     Object prepServices();

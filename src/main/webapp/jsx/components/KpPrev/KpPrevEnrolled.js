@@ -23,13 +23,16 @@ import "@reach/menu-button/styles.css";
 import Moment from "moment";
 import momentLocalizer from "react-widgets-moment";
 import { useQuery } from "react-query";
-import { getKpPrevpatientsKey } from "../../utils/queryKeys";
+import { getKpPrevpatientsKey, getPatientByIdKey } from "../../utils/queryKeys";
 import Button from "@material-ui/core/Button";
 import { queryClient } from "../../utils/queryClient";
 import { fetchKpPrevPatients } from "../../services/fetchKpPrevPatients";
 import { MdDashboard } from "react-icons/md";
 import { ButtonGroup } from "reactstrap";
-import { Link } from "react-router-dom";
+import {  useHistory } from "react-router-dom";
+import { fetchPatientById } from "../../services/fetchPatientById";
+import { toast } from "react-toastify";
+
 
 //Date Picker package
 Moment.locale("en");
@@ -66,6 +69,9 @@ const KpPrevPatientList = (props) => {
     search: "",
   });
 
+  const [currentRecord, setCurrentRecord] = useState(null);
+  const history = useHistory();
+
   const innerContainerRef = useRef(null);
 
   // Function to scroll to the top of the inner container
@@ -95,6 +101,23 @@ const KpPrevPatientList = (props) => {
       },
     }
   );
+
+  const {isLoading: issLoadingCurrentPatient } =
+    useQuery(
+      [getPatientByIdKey, currentRecord?.patientIdentifier],
+      () => fetchPatientById(currentRecord?.patientIdentifier),
+      {
+        onSuccess: (data) => {
+          history.push("/patient-history", { patientObj: data });
+        },
+        onError: () => {
+          toast.error("Error fetching patient detail");
+        },
+        enabled: currentRecord?.patientIdentifier ? true : false,
+        staleTime: 100,
+        cacheTime: 100,
+      }
+    );
 
   return (
     <div ref={innerContainerRef}>
@@ -127,88 +150,43 @@ const KpPrevPatientList = (props) => {
             filtering: false,
             render: (row) => (
               <div>
-                <Link
-                  to={{
-                    pathname: "/patient-history",
-                    state: { patientObj: row },
+                <ButtonGroup
+                  variant="contained"
+                  aria-label="split button"
+                  style={{
+                    backgroundColor: "rgb(153, 46, 98)",
+                    height: "30px",
+                    width: "215px",
                   }}
+                  size="large"
+                  onClick={() => setCurrentRecord(row)}
+                  disabled={issLoadingCurrentPatient}
                 >
-                  <ButtonGroup
-                    variant="contained"
-                    aria-label="split button"
-                    style={{
-                      backgroundColor: "rgb(153, 46, 98)",
-                      height: "30px",
-                      width: "215px",
-                    }}
-                    size="large"
+                  <Button
+                    color="primary"
+                    size="small"
+                    aria-label="select merge strategy"
+                    aria-haspopup="menu"
+                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                    disabled={issLoadingCurrentPatient}
                   >
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
-                      style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                    <MdDashboard />
+                  </Button>
+                  <Button style={{ backgroundColor: "rgb(153, 46, 98)" }} disabled={issLoadingCurrentPatient}>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        color: "#fff",
+                        fontWeight: "bolder",
+                      }}
                     >
-                      <MdDashboard />
-                    </Button>
-                    <Button style={{ backgroundColor: "rgb(153, 46, 98)" }}>
-                      <span
-                        style={{
-                          fontSize: "10px",
-                          color: "#fff",
-                          fontWeight: "bolder",
-                        }}
-                      >
-                        Patient Dashboard
-                      </span>
-                    </Button>
-                  </ButtonGroup>
-                </Link>
+                      {issLoadingCurrentPatient && currentRecord?.id === row?.id
+                        ? "Please Wait"
+                        : "Patient Dashboard"}
+                    </span>
+                  </Button>
+                </ButtonGroup>
               </div>
-
-              //   <div>
-              //   <Link
-              //     to={{
-              //       pathname: "/view-kp-prev",
-              //       state: { patientObj: row },
-              //     }}
-              //   >
-              //     <ButtonGroup
-              //       variant="contained"
-              //       aria-label="split button"
-              //       style={{
-              //         backgroundColor: "rgb(153, 46, 98)",
-              //         height: "30px",
-              //         width: "215px",
-              //       }}
-              //       size="large"
-              //     >
-              //       <Button
-              //         color="primary"
-              //         size="small"
-              //         aria-label="select merge strategy"
-              //         aria-haspopup="menu"
-              //         style={{ backgroundColor: "rgb(153, 46, 98)" }}
-              //       >
-              //         <MdDashboard />
-              //       </Button>
-              //       <Button
-              //         style={{ backgroundColor: "rgb(153, 46, 98)" }}
-              //       >
-              //         <span
-              //           style={{
-              //             fontSize: "12px",
-              //             color: "#fff",
-              //             fontWeight: "bolder",
-              //           }}
-              //         >
-              //           View KP Prev
-              //         </span>
-              //       </Button>
-              //     </ButtonGroup>
-              //   </Link>
-              // </div>
             ),
           },
         ]}

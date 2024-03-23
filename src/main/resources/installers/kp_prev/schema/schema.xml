@@ -40,27 +40,36 @@
 
                service_provider_name VARCHAR(255),
 
-               hts_services jsonb,
+                hts_services jsonb,
 
-               prep_services jsonb,
+                prep_services jsonb,
 
-               structural_services jsonb,
+                structural_services jsonb,
 
-               hiv_educational_services jsonb,
+                hiv_educational_services jsonb,
 
-               commodity_services jsonb,
+                commodity_services jsonb,
 
-               biomedical_services jsonb,
-	
-               entry_point jsonb,
+                biomedical_services jsonb,
 
-          CONSTRAINT pk_kp_prev PRIMARY KEY (id)
-  
-  );
-  ALTER TABLE kp_prev
+                entry_point jsonb,
+
+                CONSTRAINT pk_kp_prev PRIMARY KEY (id)
+
+            );
+            ALTER TABLE kp_prev
                 ADD CONSTRAINT uc_kp_prev_uuid UNIQUE (uuid);
-   ALTER TABLE kp_prev
+            ALTER TABLE kp_prev
                 ADD CONSTRAINT FK_KP_PREV_ON_PERSON_UUID FOREIGN KEY (person_uuid) REFERENCES patient_person (uuid);
-    </sql>
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="true" author="Emmanuel" id="report-9">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kp_prev"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE kp_prev ADD COLUMN patient_identifier character varying;
+        </sql>
     </changeSet>
 </databaseChangeLog>

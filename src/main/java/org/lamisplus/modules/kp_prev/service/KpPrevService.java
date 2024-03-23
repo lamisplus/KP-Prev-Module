@@ -44,7 +44,6 @@ public class KpPrevService {
 		KpPrev preventionService = this.getPreventionServiceFromDto(dto);
 		Optional<User> currentUser = userService.getUserWithRoles();
 		if (currentUser.isPresent()) {
-            log.info("currentUser: " + currentUser.get());
             User user = currentUser.get();
             Long currentOrganisationUnitId = user.getCurrentOrganisationUnitId();
             preventionService.setFacilityId(currentOrganisationUnitId);
@@ -56,7 +55,7 @@ public class KpPrevService {
 	
 	private KpPrev getPreventionServiceFromDto(KpPrevInputDTO dto)
 	{
-		
+		log.info("hellllllooooo...herree" + dto.getPatientIdentifier());
 		//System.out.print(dto.getPrevCode() + ";"+dto.getHtsCode()+";"+dto.getServiceProvider()+";"+dto.getTarget_group());
 		KpPrev preventionService = new KpPrev();
 		if(dto.getHtsCode() != null) preventionService.setHtsCode(dto.getHtsCode());
@@ -81,6 +80,7 @@ public class KpPrevService {
 		preventionService.setStructuralServices(mapper.valueToTree(structural));
 		preventionService.setCommodityServices(mapper.valueToTree(commodity));
 		preventionService.setHivEducationalServices(mapper.valueToTree(educational));
+		preventionService.setPatientIdentifier(dto.getPatientIdentifier());
 		return preventionService;
 	}
 	
@@ -102,6 +102,7 @@ public class KpPrevService {
 		response.setEntryPoint(kpprev.getEntryPoint());
 		response.setDateServiceOffered(kpprev.getDateServiceOffered());
 		response.setUuid(kpprev.getUuid());
+		response.setPatientIdentifier(kpprev.getPatientIdentifier());
 		
 		return response;
 		
@@ -156,6 +157,7 @@ public class KpPrevService {
         preventionService.setCreatedDate(existservice.getCreatedDate());
         preventionService.setArchived(existservice.getArchived());
         preventionService.setFacilityId(existservice.getFacilityId());
+		preventionService.setPatientIdentifier(existservice.getPatientIdentifier());
         return getDtoFromKpPrev(kpPrevRepository.save(preventionService));
     }
 	public void deleteKpPrevById(Long id) {

@@ -29,6 +29,7 @@ public class KpPrevResponseDTO {
 	private String target_group;
 	private String serviceProvider;
 	private String uuid;
+	private String patientIdentifier;
 	
     @Convert(converter = LocalDateConverter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

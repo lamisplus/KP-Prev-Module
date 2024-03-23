@@ -44,8 +44,12 @@ private String target_group;
 @Column(name = "person_uuid")
 private String personId;
 
+
 @Column(name = "uuid")
 private String uuid;
+
+@Column(name = "patient_identifier")
+private String patientIdentifier;
 
 @Column(name = "visit_date")
 private LocalDate dateServiceOffered;
@@ -53,9 +57,11 @@ private LocalDate dateServiceOffered;
 @Column(name = "facility_id")
 private Long facilityId;
 
+
 @Type(type = "jsonb-node")
 @Column(columnDefinition = "jsonb", name = "entry_point", nullable = true)
 private JsonNode entryPoint;
+
 
 @Type(type = "jsonb-node")
 @Column(columnDefinition = "jsonb", name = "hts_services", nullable = true)

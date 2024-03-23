@@ -305,6 +305,7 @@ const CreateKpPrev = (props) => {
         referred_facility_drug_rehab:
           bioMedicalServices.refferedfacilitydrugrehab,
         tb_treatment_refferal: bioMedicalServices.tbtreatmentrefferal,
+        patient_identifier: patientObj?.id.toString()
       };
 
       const commodityServicesValue = {
@@ -323,6 +324,8 @@ const CreateKpPrev = (props) => {
           commodityService.howmanynewNeedleDispensed,
         how_many_old_needle_retrived: commodityService.howmanyoldNeedleRetrived,
         how_many_nalxone_provided: commodityService.howmanynalxoneProvided,
+        patient_identifier: patientObj?.id.toString()
+
       };
 
       const htsServicesValue = {
@@ -330,12 +333,16 @@ const CreateKpPrev = (props) => {
         hiv_test_result: htsServices.hivTestResult,
         offered_hts: htsServices.offeredHts,
         referred_for_art: htsServices.referredForArt,
+        patient_identifier: patientObj?.id.toString()
+
       };
 
       const prepServicesValue = {
         accepted_prep: prepServices.acceptedPrep,
         offered_prep: prepServices.offeredPrep,
         referred_for_prep: prepServices.referredForPrep,
+        patient_identifier: patientObj?.id.toString()
+
       };
 
       const structuralServicesValue = {
@@ -345,6 +352,9 @@ const CreateKpPrev = (props) => {
         type_empowerment_provided: structuralServices.typeempowermentprovided,
         typelegalempowerment: structuralServices.typelegalempowerment,
         legalprogramreferred: structuralServices.legalprogramreferred,
+        patient_identifier: patientObj?.id.toString()
+
+
       };
 
       const randomString = generateRandomString(10);
@@ -366,7 +376,9 @@ const CreateKpPrev = (props) => {
         bioMedicalServices: biomedicalServiceValue,
         structuralServices: structuralServicesValue,
         commodityServices: commodityServicesValue,
+        patientIdentifier: patientObj?.id?.toString(),
         hivEducationalServices: hivEducationProvided,
+        
       };
 
       if (data.htsCode === null && data.prepCode === null) {
