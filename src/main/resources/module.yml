@@ -8,7 +8,7 @@ menus:
     state: KP_PREV
     url: /across/resources/static/kp_prev/index.html
 umdLocation: /across/resources/static/kp_prev/index.html
-#gitHubLink: https://api.github.com/repos/lamisplus/KP-Prev-Module/releases/latest
+gitHubLink: https://api.github.com/repos/lamisplus/KP-Prev-Module/releases/latest
 
 webModules:
   - breadcrumb: KP_PREV
