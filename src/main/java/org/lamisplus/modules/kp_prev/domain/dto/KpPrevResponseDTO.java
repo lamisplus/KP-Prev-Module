@@ -28,6 +28,7 @@ public class KpPrevResponseDTO {
 	private String patientId;
 	private String target_group;
 	private String serviceProvider;
+	private String serviceProviderSignature;
 	private String uuid;
 	private String patientIdentifier;
 	

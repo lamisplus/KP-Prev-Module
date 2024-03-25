@@ -40,6 +40,8 @@
 
                service_provider_name VARCHAR(255),
 
+                service_provider_signature VARCHAR(255),
+
                 hts_services jsonb,
 
                 prep_services jsonb,
@@ -71,5 +73,6 @@
         <sql>
             ALTER TABLE kp_prev ADD COLUMN patient_identifier character varying;
         </sql>
+
     </changeSet>
 </databaseChangeLog>

@@ -29,6 +29,7 @@ public class KpPrevInputDTO implements Serializable {
 	private String prevCode;
 	private String patientId;
 	private String serviceProvider;
+	private String serviceProviderSignature;
 	private String target_group;
 	private String prepCode;
 	private String patientIdentifier;

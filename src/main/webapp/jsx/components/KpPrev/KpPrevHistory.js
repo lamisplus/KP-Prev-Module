@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import MaterialTable from "material-table";
-import axios from "axios";
-import { url as baseUrl } from "./../../../api";
-import { token } from "./../../../api";
 import { forwardRef } from "react";
 import "semantic-ui-css/semantic.min.css";
 import AddBox from "@material-ui/icons/AddBox";
@@ -20,16 +17,18 @@ import Remove from "@material-ui/icons/Remove";
 import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
-import { Card, CardBody } from "reactstrap";
-import Button from "@material-ui/core/Button";
-import { toast } from "react-toastify";
+import { Button, Card, CardBody } from "reactstrap";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import "@reach/menu-button/styles.css";
 import { Modal } from "react-bootstrap";
-import Vaccination from "./../Vaccination/AddViccination";
+import { Dropdown, Menu, Icon as IconMenu } from "semantic-ui-react";
 import Moment from "moment";
 import momentLocalizer from "react-widgets-moment";
+import { useQuery } from "react-query";
+import { fetchKpPrevRecordByPatientId } from "../../services/fetchKpPrevRecordByPatientId";
+import { getKpPrevRecordByPatientIdKey } from "../../utils/queryKeys";
+import { useDeleteKpPrevRecord } from "../../../hooks/useDeleteKpPrevRecord";
 
 //Dtate Picker package
 Moment.locale("en");
@@ -60,57 +59,50 @@ const tableIcons = {
 };
 
 const KpPrevHistory = (props) => {
-  const [vacinationList, setVaccinationtList] = useState([]);
-  const patientObj = props && props.patientObj ? props.patientObj : [];
-  const [modal, setModal] = useState(false);
-  const toggle = () => setModal(!modal);
   const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
   const toggleDeleteModal = () => setOpenDeleteModal(!openDeleteModal);
-  const [record] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const [record, setRecord] = useState(null);
 
-  
-  
+ const  onToggleModal = (row) => {
+  toggleDeleteModal()
+  setRecord(row)
+}
 
-  async function patients() {
-    axios
-      .get(`${baseUrl}kpprev/${patientObj.uuid}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        console.log("This is response", response.data)
-        setVaccinationtList(response.data);
-      })
-      .catch((error) => {});
-  }
+  const { data } = useQuery(
+    [getKpPrevRecordByPatientIdKey, props?.patientObj?.uuid],
+    () => fetchKpPrevRecordByPatientId(props?.patientObj?.uuid),
+    {
+      onSuccess: (data) => {
+        console.log(data);
+      },
+      enabled: props?.patientObj?.uuid ? true : false,
+    }
+  );
 
-  
   const LoadDeletePage = () => {
-    setSaving(true);
-    axios
-      .delete(`${baseUrl}kpprev/${record.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        toast.success("Record Deleted Successfully");
-        patients();
-        toggleDeleteModal();
-        setSaving(false);
-      })
-      .catch((error) => {
-        setSaving(false);
-        if (error.response && error.response.data) {
-          let errorMessage =
-            error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
-              ? error.response.data.apierror.message
-              : "Something went wrong, please try again";
-          toast.error(errorMessage);
-        } else {
-          toast.error("Something went wrong. Please try again...");
-        }
-      });
+    toggleDeleteModal()
+    mutate({id: record?.id});
+    setRecord(null)
   };
+  const LoadViewPage = (row) => {
+    props.setActiveContent({
+      ...props.activeContent,
+      route: "kp-prev",
+      actionType: "view",
+      record: row,
+    });
+  };
+
+  const LoadEditPage = (row) => {
+    props.setActiveContent({
+      ...props.activeContent,
+      route: "kp-prev",
+      actionType: "update",
+      record: row,
+    });
+  };
+
+  const { mutate, isLoading } = useDeleteKpPrevRecord();
 
   return (
     <div>
@@ -122,57 +114,102 @@ const KpPrevHistory = (props) => {
             columns={[
               {
                 title: "Date Of Services Provided",
-                field: "dateOfServicesProvided",
+                field: "dateServiceOffered",
+                render: (row) => row?.dateServiceOffered || "",
               },
               {
                 title: "Prevention Code",
                 field: "preventioncode",
                 filtering: false,
+                render: (row) => row?.prevCode || "",
               },
-              { title: "HTS Services", field: "htsServices", filtering: false },
+              {
+                title: "Hospital Number",
+                field: "hospital_number",
+                filtering: false,
+                render: (row) =>
+                  row.htsCode !== null ? row.htsCode : row.prepCode,
+              },
+    
+              {
+                title: "HTS Services",
+                field: "htsServices",
+                filtering: false,
+                render: (row) =>
+                  row?.htsServices.offered_hts !== "" ? "✅" : "❌",
+              },
               {
                 title: "Prep Services",
                 field: "prepServices",
                 filtering: false,
+                render: (row) =>
+                  row?.prepServices.offered_prep !== "" ? "✅" : "❌",
               },
               {
                 title: "Commodity Services",
                 field: "commodityServices",
                 filtering: false,
+                render: (row) =>
+                  row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
               },
               {
                 title: "HIV Educational Services",
                 field: "hivEducationalServices",
                 filtering: false,
+                render: (row) =>
+                  row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
               },
               {
                 title: "Biomedical Services",
                 field: "biomedicalServices",
                 filtering: false,
+                render: (row) =>
+                  row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
               },
               {
                 title: "Structural Services",
                 field: "structuralServices",
                 filtering: false,
+                render: (row) =>
+                  row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
               },
-            
+              {
+                title: "Actions",
+                render: (row) => (
+                  <div>
+                    <Menu.Menu position="right">
+                      <Menu.Item>
+                        <Button
+                          style={{
+                            backgroundColor: "rgb(153,46,98)",
+                            color: "#fff",
+                          }}
+                          primary
+                        >
+                          <Dropdown item text="Action">
+                            <Dropdown.Menu style={{ marginTop: "10px" }}>
+                              <Dropdown.Item onClick={() => LoadViewPage(row)}>
+                                <IconMenu name="eye" />
+                                View
+                              </Dropdown.Item>
+                              <Dropdown.Item onClick={() => LoadEditPage(row)}>
+                                <IconMenu name="edit" />
+                                Edit
+                              </Dropdown.Item>
+                              <Dropdown.Item onClick={()=> onToggleModal(row)}>
+                                {" "}
+                                <IconMenu name="trash" /> Delete
+                              </Dropdown.Item>
+                            </Dropdown.Menu>
+                          </Dropdown>
+                        </Button>
+                      </Menu.Item>
+                    </Menu.Menu>
+                  </div>
+                ),
+              },
             ]}
-            // data={vacinationList.map((row) => ({
-            //   dateOfServicesProvided: row.dateServiceOffered,
-            //   preventioncode: row.prevCode,
-            //   htsServices: row.htsServices?.offered_hts !== "" ? "✅" : "❌",
-            //   prepServices: row.prepServices?.offered_prep !== "" ? "✅" : "❌",
-            //   commodityServices:
-            //     row.commodityServices?.condoms_dispensed !== "" ? "✅" : "❌",
-            //   hivEducationalServices:
-            //     row.hivEducationalServices?.iecMaterial !== "" ? "✅" : "❌",
-            //   biomedicalServices:
-            //     row.biomedicalServices?.sti_screening !== "" ? "✅" : "❌",
-            //   structuralServices:
-            //     row.structuralServices?.legalAidServices !== "" ? "✅" : "❌",
-              
-            // }))}
-            data={[]}
+            data={data || []}
             options={{
               headerStyle: {
                 backgroundColor: "#014d88",
@@ -192,13 +229,7 @@ const KpPrevHistory = (props) => {
           />
         </CardBody>
       </Card>
-      <Vaccination
-        toggle={toggle}
-        showModal={modal}
-        patientObj={props.patientObj}
-        loadPatients={patients}
-        records={record}
-      />
+
       <Modal
         show={openDeleteModal}
         toggle={toggleDeleteModal}
@@ -223,14 +254,14 @@ const KpPrevHistory = (props) => {
           <Button
             onClick={() => LoadDeletePage(record)}
             style={{ backgroundColor: "red", color: "#fff" }}
-            disabled={saving}
+            disabled={isLoading}
           >
-            {saving === false ? "Yes" : "Deleting..."}
+            {isLoading === false ? "Yes" : "Deleting..."}
           </Button>
           <Button
             onClick={toggleDeleteModal}
             style={{ backgroundColor: "#014d88", color: "#fff" }}
-            disabled={saving}
+            disabled={isLoading}
           >
             No
           </Button>

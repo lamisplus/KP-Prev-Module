@@ -90,6 +90,10 @@ private JsonNode structuralServices;
 @Column(name = "service_provider_name")
 private String serviceProviderName;
 
+
+@Column(name = "service_provider_signature")
+private String serviceProviderSignature;
+
 @Override
 public boolean isNew() {
 	// TODO Auto-generated method stub

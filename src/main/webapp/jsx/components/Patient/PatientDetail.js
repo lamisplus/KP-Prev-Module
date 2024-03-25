@@ -109,7 +109,6 @@ function PatientCard(props) {
               activeContent={activeContent}
             />
           )}
-          
         </CardContent>
       </Card>
     </div>

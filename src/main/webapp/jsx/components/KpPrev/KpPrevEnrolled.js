@@ -102,7 +102,7 @@ const KpPrevPatientList = (props) => {
     }
   );
 
-  const {isLoading: issLoadingCurrentPatient } =
+  const {isLoading: isLoadingCurrentPatient } =
     useQuery(
       [getPatientByIdKey, currentRecord?.patientIdentifier],
       () => fetchPatientById(currentRecord?.patientIdentifier),
@@ -110,8 +110,17 @@ const KpPrevPatientList = (props) => {
         onSuccess: (data) => {
           history.push("/patient-history", { patientObj: data });
         },
-        onError: () => {
-          toast.error("Error fetching patient detail");
+        onError: (error) => {
+          if (error.response && error.response.data) {
+            let errorMessage =
+              error.response.data.apierror &&
+              error.response.data.apierror.message !== ""
+                ? error.response.data.apierror.message
+                : "Something went wrong, please try again";
+            toast.error(errorMessage);
+          } else {
+            toast.error("Something went wrong. Please try again...");
+          }
         },
         enabled: currentRecord?.patientIdentifier ? true : false,
         staleTime: 100,
@@ -145,11 +154,54 @@ const KpPrevPatientList = (props) => {
           },
 
           {
+            title: "HTS Services",
+            field: "htsServices",
+            filtering: false,
+            render: (row) =>
+              row?.htsServices.offered_hts !== "" ? "✅" : "❌",
+          },
+          {
+            title: "Prep Services",
+            field: "prepServices",
+            filtering: false,
+            render: (row) =>
+              row?.prepServices.offered_prep !== "" ? "✅" : "❌",
+          },
+          {
+            title: "Commodity Services",
+            field: "commodityServices",
+            filtering: false,
+            render: (row) =>
+              row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
+          },
+          {
+            title: "HIV Educational Services",
+            field: "hivEducationalServices",
+            filtering: false,
+            render: (row) =>
+              row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
+          },
+          {
+            title: "Biomedical Services",
+            field: "biomedicalServices",
+            filtering: false,
+            render: (row) =>
+              row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
+          },
+          {
+            title: "Structural Services",
+            field: "structuralServices",
+            filtering: false,
+            render: (row) =>
+              row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
+          },
+
+          {
             title: "Actions",
             field: "actions",
             filtering: false,
             render: (row) => (
-              <div>
+              <div className="d-flex">
                 <ButtonGroup
                   variant="contained"
                   aria-label="split button"
@@ -160,7 +212,7 @@ const KpPrevPatientList = (props) => {
                   }}
                   size="large"
                   onClick={() => setCurrentRecord(row)}
-                  disabled={issLoadingCurrentPatient}
+                  disabled={isLoadingCurrentPatient}
                 >
                   <Button
                     color="primary"
@@ -168,11 +220,11 @@ const KpPrevPatientList = (props) => {
                     aria-label="select merge strategy"
                     aria-haspopup="menu"
                     style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                    disabled={issLoadingCurrentPatient}
+                    disabled={isLoadingCurrentPatient}
                   >
                     <MdDashboard />
                   </Button>
-                  <Button style={{ backgroundColor: "rgb(153, 46, 98)" }} disabled={issLoadingCurrentPatient}>
+                  <Button style={{ backgroundColor: "rgb(153, 46, 98)" }} disabled={isLoadingCurrentPatient}>
                     <span
                       style={{
                         fontSize: "10px",
@@ -180,12 +232,61 @@ const KpPrevPatientList = (props) => {
                         fontWeight: "bolder",
                       }}
                     >
-                      {issLoadingCurrentPatient && currentRecord?.id === row?.id
+                      {isLoadingCurrentPatient && currentRecord?.id === row?.id
                         ? "Please Wait"
                         : "Patient Dashboard"}
                     </span>
                   </Button>
                 </ButtonGroup>
+
+                {/* <Link
+                   to={{
+                    pathname: "/view-kp-prev",
+                    // route: "patient-vaccination-history",
+                    state: { kpRecord: row },
+                  }}
+                >
+
+                <ButtonGroup
+                  variant="contained"
+                  aria-label="split button"
+                  style={{
+                    backgroundColor: "rgb(153, 46, 98)",
+                    height: "30px",
+                    width: "215px",
+                    marginLeft: 10,
+                 
+                    
+                  }}
+                  size="small"
+                  onClick={() => setCurrentRecord(row)}
+                  disabled={isLoadingCurrentPatient}
+                >
+                   <Button
+                    color="primary"
+                    size="small"
+                    aria-label="select merge strategy"
+                    aria-haspopup="menu"
+                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                    disabled={isLoadingCurrentPatient}
+                  >
+                    <MdDashboard />
+                  </Button>
+                  <Button style={{ backgroundColor: "rgb(153, 46, 98)", }} disabled={isLoadingCurrentPatient}>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        color: "#fff",
+                        fontWeight: "bolder",
+                      }}
+                    >
+                      {isLoadingCurrentPatient && currentRecord?.id === row?.id
+                        ? "Please Wait"
+                        : "View Record"}
+                    </span>
+                  </Button>
+                </ButtonGroup>
+                </Link> */}
               </div>
             ),
           },

@@ -37,6 +37,7 @@ import { calculateAge, getHospitalNumber } from "../../utils";
 import { useHistory } from "react-router-dom";
 import Swal from "sweetalert2";
 import { fetchCombinedHtsAndPrepCode } from "../../services/fetchCombinedHtsAndPrevCode";
+import { toast } from "react-toastify";
 
 //Date Picker package
 Moment.locale("en");
@@ -99,6 +100,18 @@ const PatientList = (props) => {
       onSuccess: () => {
         prefetchNextPage();
       },
+      onError: (error) => {
+        if (error.response && error.response.data) {
+          let errorMessage =
+            error.response.data.apierror &&
+            error.response.data.apierror.message !== ""
+              ? error.response.data.apierror.message
+              : "Something went wrong, please try again";
+          toast.error(errorMessage);
+        } else {
+          toast.error("Something went wrong. Please try again...");
+        }
+      },
     }
   );
 
@@ -133,6 +146,19 @@ const PatientList = (props) => {
           });
         } else {
           history.push("/patient-history", { patientObj: currentPatient });
+        }
+      },
+
+      onError: (error) => {
+        if (error.response && error.response.data) {
+          let errorMessage =
+            error.response.data.apierror &&
+            error.response.data.apierror.message !== ""
+              ? error.response.data.apierror.message
+              : "Something went wrong, please try again";
+          toast.error(errorMessage);
+        } else {
+          toast.error("Something went wrong. Please try again...");
         }
       },
     }

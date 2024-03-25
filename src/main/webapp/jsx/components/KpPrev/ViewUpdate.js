@@ -116,7 +116,7 @@ const ViewUpdate = (props) => {
   const patientObj = props.patientObj;
   const location = useLocation();
 
-  const kpprevValues = location.state.patientObj;
+  const kpprevValues = location.state.kpRecord;
   const history = useHistory();
   const [errors, setErrors] = useState({});
   const [htsCodeVal, setHtsCodeVal] = useState({});
@@ -170,6 +170,7 @@ const ViewUpdate = (props) => {
     peerGroupCommunication:
       kpprevValues.hivEducationalServices?.peerGroupCommunication,
   });
+
   const [bioMedicalServices, setbioMedicalServices] = useState({
     stiScreening: kpprevValues.biomedicalServices?.sti_screening,
     stiSyndromicManagement:
@@ -204,6 +205,7 @@ const ViewUpdate = (props) => {
     refferedfacilitydrugrehab:
       kpprevValues.biomedicalServices?.referred_facility_drug_rehab,
   });
+
   const [structuralServices, setstructuralServices] = useState({
     providedOrRefferedForEmpowerment:
       kpprevValues.structuralServices.providedEmpowerment,
@@ -214,6 +216,7 @@ const ViewUpdate = (props) => {
     typelegalempowerment: kpprevValues.structuralServices.typelegalempowerment,
     legalprogramreferred: kpprevValues.structuralServices.legalprogramreferred,
   });
+  
   const [facilityRefferedToo, setFacilityRefferedToo] = useState({
     facilityRefferedToStiScreening: "",
     facilityRefferedToScreenedTo: "",

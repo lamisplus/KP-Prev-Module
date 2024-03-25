@@ -17,11 +17,11 @@ function SubMenu(props) {
       .catch((error) => {});
   };
 
-  const onClickHome = (row) => {
+  const onClickHome = () => {
     props.setActiveContent({ ...props.activeContent, route: "recent-history" });
   };
   
-  const loadKpPrev = (row) => {
+  const loadKpPrev = () => {
     props.setActiveContent({
       ...props.activeContent,
       route: "kp-prev",

@@ -62,6 +62,7 @@ public class KpPrevService {
 		if(dto.getPrevCode() != null) preventionService.setPrevCode(dto.getPrevCode());
 		if(dto.getPatientId() != null) preventionService.setPersonId(dto.getPatientId());
 		if(dto.getServiceProvider() != null) preventionService.setServiceProviderName(dto.getServiceProvider());
+		if(dto.getServiceProviderSignature() != null) preventionService.setServiceProviderSignature(dto.getServiceProviderSignature());
 		if(dto.getTarget_group() != null) preventionService.setTarget_group(dto.getTarget_group());
 		preventionService.setArchived(0);
 		if(dto.getDateServiceOffered() != null) preventionService.setDateServiceOffered(dto.getDateServiceOffered());
@@ -81,6 +82,7 @@ public class KpPrevService {
 		preventionService.setCommodityServices(mapper.valueToTree(commodity));
 		preventionService.setHivEducationalServices(mapper.valueToTree(educational));
 		preventionService.setPatientIdentifier(dto.getPatientIdentifier());
+
 		return preventionService;
 	}
 	
@@ -93,6 +95,7 @@ public class KpPrevService {
 		response.setPatientId(kpprev.getPersonId());
 		response.setTarget_group(kpprev.getTarget_group());
 		response.setServiceProvider(kpprev.getServiceProviderName());
+		response.setServiceProviderSignature(kpprev.getServiceProviderSignature());
 		response.setBiomedicalServices(kpprev.getBiomedicalServices());
 		response.setCommodityServices(kpprev.getCommodityServices());
 		response.setHtsServices(kpprev.getHtsServices());
@@ -103,6 +106,7 @@ public class KpPrevService {
 		response.setDateServiceOffered(kpprev.getDateServiceOffered());
 		response.setUuid(kpprev.getUuid());
 		response.setPatientIdentifier(kpprev.getPatientIdentifier());
+
 		
 		return response;
 		
