@@ -449,8 +449,7 @@ const CreateKpPrev = (props) => {
                 </>
               )}
 
-              {formik?.values?.offeredHts === "1" &&
-              formik?.values?.acceptedHts === "0" ? null : (
+
                 <>
                   {prepCodeVal?.prepDtoList?.length > 0 ||
                     (formik?.values?.hivTestResult === "negative" && (
@@ -1986,7 +1985,7 @@ const CreateKpPrev = (props) => {
                     </div>
                   </div>
                 </>
-              )}
+              
             </div>
 
             {isLoading ? <Spinner /> : ""}

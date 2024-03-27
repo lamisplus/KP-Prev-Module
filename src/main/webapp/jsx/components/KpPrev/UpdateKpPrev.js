@@ -419,7 +419,7 @@ const UpdateKpPrev = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    readonly
+                    readOnly
                   ></Input>
                 </CustomFormGroup>
               </div>
@@ -436,7 +436,7 @@ const UpdateKpPrev = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    readonly
+                    readOnly
                   ></Input>
                 </CustomFormGroup>
               </div>
@@ -585,8 +585,7 @@ const UpdateKpPrev = (props) => {
                 </>
               )}
 
-              {formik?.values?.offeredHts === "1" &&
-              formik?.values?.acceptedHts === "0" ? null : (
+              
                 <>
                   {prepCodeVal?.prepDtoList?.length > 0 ||
                     (formik?.values?.hivTestResult === "negative" && (
@@ -2169,7 +2168,7 @@ const UpdateKpPrev = (props) => {
                     </div>
                   </div>
                 </>
-              )}
+              
             </div>
 
             {isLoading ? <Spinner /> : ""}
