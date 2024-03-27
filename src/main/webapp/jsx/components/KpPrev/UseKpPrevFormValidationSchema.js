@@ -94,7 +94,7 @@ export const useKpPrevFormValidationSchema = (
     tbTreatmentRefferal: yup.string(),
     tbFacilityReffered: yup.string(),
     screenedForViralHepatits: yup.string(),
-    vaccinationForViralHepatits: yup.string(),
+    vaccinationForViralHepatits: yup.mixed(),
     viralHepatitsScreenResult: yup.string(),
     offeredFamilyPlanningServices: yup.string(),
     referredForFamilyPlanningServices: yup.string(),

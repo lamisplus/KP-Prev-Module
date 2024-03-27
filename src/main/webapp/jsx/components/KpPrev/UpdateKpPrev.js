@@ -150,6 +150,7 @@ const UpdateKpPrev = (props) => {
     });
     const errorObj = await formik.validateForm();
     const isValid = Object.keys(errorObj).length === 0;
+    console.log("hello", errorObj)
 
     if (isValid) {
       const biomedicalServiceValue = {
