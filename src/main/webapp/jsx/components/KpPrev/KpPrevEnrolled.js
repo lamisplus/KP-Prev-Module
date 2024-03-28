@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import MaterialTable, { MTableToolbar } from "material-table";
+import React, { useState } from "react";
+import MaterialTable from "material-table";
 import { forwardRef } from "react";
 import "semantic-ui-css/semantic.min.css";
 import AddBox from "@material-ui/icons/AddBox";
@@ -19,22 +19,21 @@ import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import { MdDashboard } from "react-icons/md";
 import "@reach/menu-button/styles.css";
 import Moment from "moment";
 import momentLocalizer from "react-widgets-moment";
 import { useQuery } from "react-query";
 import { getKpPrevpatientsKey, getPatientByIdKey } from "../../utils/queryKeys";
-import Button from "@material-ui/core/Button";
-import { queryClient } from "../../utils/queryClient";
-import { fetchKpPrevPatients } from "../../services/fetchKpPrevPatients";
-import { MdDashboard } from "react-icons/md";
-import { ButtonGroup } from "reactstrap";
-import {  useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { fetchPatientById } from "../../services/fetchPatientById";
 import { toast } from "react-toastify";
+import { queryClient } from "../../utils/queryClient";
+import { fetchKpPrevPatients } from "../../services/fetchKpPrevPatients";
 
-
-//Date Picker package
+//Dtate Picker package
 Moment.locale("en");
 momentLocalizer();
 
@@ -62,26 +61,14 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
 };
 
-const KpPrevPatientList = (props) => {
+const KpPrevEnrolled = (props) => {
+  const [currentRecord, setCurrentRecord] = useState(null);
   const [query, setQueryParams] = useState({
     page: 0,
     pageSize: 10,
     search: "",
   });
-
-  const [currentRecord, setCurrentRecord] = useState(null);
   const history = useHistory();
-
-  const innerContainerRef = useRef(null);
-
-  // Function to scroll to the top of the inner container
-  const scrollToTop = () => {
-    const outerContainer = document?.getElementById?.("main-wrapper");
-
-    if (outerContainer) {
-      outerContainer.scrollTop = 0;
-    }
-  };
 
   const prefetchNextPage = async () => {
     const nextPage = query.page + 1;
@@ -102,105 +89,102 @@ const KpPrevPatientList = (props) => {
     }
   );
 
-  const {isLoading: isLoadingCurrentPatient } =
-    useQuery(
-      [getPatientByIdKey, currentRecord?.patientIdentifier],
-      () => fetchPatientById(currentRecord?.patientIdentifier),
-      {
-        onSuccess: (data) => {
-          history.push("/patient-history", { patientObj: data });
-        },
-        onError: (error) => {
-          if (error.response && error.response.data) {
-            let errorMessage =
-              error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
-                ? error.response.data.apierror.message
-                : "Something went wrong, please try again";
-            toast.error(errorMessage);
-          } else {
-            toast.error("Something went wrong. Please try again...");
-          }
-        },
-        enabled: currentRecord?.patientIdentifier ? true : false,
-        staleTime: 100,
-        cacheTime: 100,
-      }
-    );
+  const { isLoading: isLoadingCurrentPatient } = useQuery(
+    [getPatientByIdKey, currentRecord?.patientIdentifier],
+    () => fetchPatientById(currentRecord?.patientIdentifier),
+    {
+      onSuccess: (data) => {
+        history.push("/patient-history", { patientObj: data });
+      },
+      onError: (error) => {
+        if (error.response && error.response.data) {
+          let errorMessage =
+            error.response.data.apierror &&
+            error.response.data.apierror.message !== ""
+              ? error.response.data.apierror.message
+              : "Something went wrong, please try again";
+          toast.error(errorMessage);
+        } else {
+          toast.error("Something went wrong. Please try again...");
+        }
+      },
+      enabled: currentRecord?.patientIdentifier ? true : false,
+      staleTime: 100,
+      cacheTime: 100,
+    }
+  );
 
   return (
-    <div ref={innerContainerRef}>
+    <div>
       <MaterialTable
         icons={tableIcons}
-        title="Find Patient"
+        title="Find Record"
         columns={[
           {
             title: "Date Service Offered",
             field: "dateServiceOffered",
-            render: (row) => row.dateServiceOffered,
           },
           {
             title: "Hospital Number",
             field: "hospital_number",
             filtering: false,
-            render: (row) =>
-              row.htsCode !== null ? row.htsCode : row.prepCode,
           },
 
-          {
-            title: "Prevention Code",
-            field: "prevCode",
-            filtering: false,
-          },
+          { title: "Prevention Code", field: "prevCode", filtering: false },
 
           {
             title: "HTS Services",
             field: "htsServices",
             filtering: false,
-            render: (row) =>
-              row?.htsServices.offered_hts !== "" ? "✅" : "❌",
           },
           {
             title: "Prep Services",
             field: "prepServices",
             filtering: false,
-            render: (row) =>
-              row?.prepServices.offered_prep !== "" ? "✅" : "❌",
           },
           {
             title: "Commodity Services",
             field: "commodityServices",
             filtering: false,
-            render: (row) =>
-              row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
           },
           {
             title: "HIV Educational Services",
             field: "hivEducationalServices",
             filtering: false,
-            render: (row) =>
-              row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
           },
           {
             title: "Biomedical Services",
             field: "biomedicalServices",
             filtering: false,
-            render: (row) =>
-              row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
           },
           {
             title: "Structural Services",
             field: "structuralServices",
             filtering: false,
-            render: (row) =>
-              row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
           },
 
-          {
-            title: "Actions",
-            field: "actions",
-            filtering: false,
-            render: (row) => (
+          { title: "Actions", field: "actions", filtering: false },
+        ]}
+        isLoading={isLoading}
+        data={
+          data &&
+          data?.records &&
+          data?.records?.map?.((row) => ({
+            dateServiceOffered: row.dateServiceOffered,
+            hospital_number:
+              row.htsCode !== null ? row?.htsCode : row?.prepCode,
+            prevCode: row?.prevCode || "",
+            htsServices: row?.htsServices.offered_hts !== "" ? "✅" : "❌",
+            prepServices: row?.prepServices.offered_prep !== "" ? "✅" : "❌",
+            commodityServices:
+              row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
+            hivEducationalServices:
+              row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
+            biomedicalServices:
+              row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
+            structuralServices:
+              row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
+            actions: (
               <div className="d-flex">
                 <ButtonGroup
                   variant="contained"
@@ -224,7 +208,10 @@ const KpPrevPatientList = (props) => {
                   >
                     <MdDashboard />
                   </Button>
-                  <Button style={{ backgroundColor: "rgb(153, 46, 98)" }} disabled={isLoadingCurrentPatient}>
+                  <Button
+                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                    disabled={isLoadingCurrentPatient}
+                  >
                     <span
                       style={{
                         fontSize: "10px",
@@ -238,71 +225,10 @@ const KpPrevPatientList = (props) => {
                     </span>
                   </Button>
                 </ButtonGroup>
-
-                {/* <Link
-                   to={{
-                    pathname: "/view-kp-prev",
-                    // route: "patient-vaccination-history",
-                    state: { kpRecord: row },
-                  }}
-                >
-
-                <ButtonGroup
-                  variant="contained"
-                  aria-label="split button"
-                  style={{
-                    backgroundColor: "rgb(153, 46, 98)",
-                    height: "30px",
-                    width: "215px",
-                    marginLeft: 10,
-                 
-                    
-                  }}
-                  size="small"
-                  onClick={() => setCurrentRecord(row)}
-                  disabled={isLoadingCurrentPatient}
-                >
-                   <Button
-                    color="primary"
-                    size="small"
-                    aria-label="select merge strategy"
-                    aria-haspopup="menu"
-                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                    disabled={isLoadingCurrentPatient}
-                  >
-                    <MdDashboard />
-                  </Button>
-                  <Button style={{ backgroundColor: "rgb(153, 46, 98)", }} disabled={isLoadingCurrentPatient}>
-                    <span
-                      style={{
-                        fontSize: "10px",
-                        color: "#fff",
-                        fontWeight: "bolder",
-                      }}
-                    >
-                      {isLoadingCurrentPatient && currentRecord?.id === row?.id
-                        ? "Please Wait"
-                        : "View Record"}
-                    </span>
-                  </Button>
-                </ButtonGroup>
-                </Link> */}
               </div>
             ),
-          },
-        ]}
-        components={{
-          Toolbar: (props) => (
-            <div>
-              <MTableToolbar {...props} />
-            </div>
-          ),
-        }}
-        data={data?.records || []}
-        onQueryChange={scrollToTop()}
-        totalCount={data?.totalRecords}
-        isLoading={isLoading}
-        page={data?.currentPage}
+          }))
+        }
         options={{
           headerStyle: {
             backgroundColor: "#014d88",
@@ -320,8 +246,17 @@ const KpPrevPatientList = (props) => {
           pageSize: query?.pageSize || 10,
           debounceInterval: 400,
         }}
+        page={data?.currentPage}
+        totalCount={data?.totalRecords}
         onChangePage={(newPage) => {
           setQueryParams((prevFilters) => ({ ...prevFilters, page: newPage }));
+          refetch(query);
+        }}
+        onChangeRowsPerPage={(newPageSize) => {
+          setQueryParams((prevFilters) => ({
+            ...prevFilters,
+            pageSize: newPageSize,
+          }));
           refetch(query);
         }}
       />
@@ -329,4 +264,4 @@ const KpPrevPatientList = (props) => {
   );
 };
 
-export default KpPrevPatientList;
+export default KpPrevEnrolled;

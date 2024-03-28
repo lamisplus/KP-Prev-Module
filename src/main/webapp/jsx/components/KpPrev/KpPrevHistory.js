@@ -17,20 +17,19 @@ import Remove from "@material-ui/icons/Remove";
 import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
-import { Button, Card, CardBody } from "reactstrap";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
-import "@reach/menu-button/styles.css";
-import { Modal } from "react-bootstrap";
+import Button from "@material-ui/core/Button";
 import { Dropdown, Menu, Icon as IconMenu } from "semantic-ui-react";
+import "@reach/menu-button/styles.css";
 import Moment from "moment";
 import momentLocalizer from "react-widgets-moment";
-import { useQuery } from "react-query";
+import { useDeleteKpPrevRecord } from "../../../hooks/useDeleteKpPrevRecord";
+import { Modal } from "react-bootstrap";
 import { fetchKpPrevRecordByPatientId } from "../../services/fetchKpPrevRecordByPatientId";
 import { getKpPrevRecordByPatientIdKey } from "../../utils/queryKeys";
-import { useDeleteKpPrevRecord } from "../../../hooks/useDeleteKpPrevRecord";
+import { useQuery } from "react-query";
 
-//Dtate Picker package
 Moment.locale("en");
 momentLocalizer();
 
@@ -58,32 +57,22 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
 };
 
-const KpPrevHistory = (props) => {
+const KpPrevEnrolled = (props) => {
   const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
   const toggleDeleteModal = () => setOpenDeleteModal(!openDeleteModal);
   const [record, setRecord] = useState(null);
 
- const  onToggleModal = (row) => {
-  toggleDeleteModal()
-  setRecord(row)
-}
-
-  const { data } = useQuery(
-    [getKpPrevRecordByPatientIdKey, props?.patientObj?.uuid],
-    () => fetchKpPrevRecordByPatientId(props?.patientObj?.uuid),
-    {
-      onSuccess: (data) => {
-        console.log(data);
-      },
-      enabled: props?.patientObj?.uuid ? true : false,
-    }
-  );
+  const onToggleModal = (row) => {
+    toggleDeleteModal();
+    setRecord(row);
+  };
 
   const LoadDeletePage = () => {
-    toggleDeleteModal()
-    mutate({id: record?.id});
-    setRecord(null)
+    toggleDeleteModal();
+    mutate({ id: record?.id });
+    setRecord(null);
   };
+
   const LoadViewPage = (row) => {
     props.setActiveContent({
       ...props.activeContent,
@@ -102,133 +91,139 @@ const KpPrevHistory = (props) => {
     });
   };
 
-  const { mutate, isLoading } = useDeleteKpPrevRecord();
+  const { data, isLoading: isLoadingQuery } = useQuery(
+    [getKpPrevRecordByPatientIdKey, props?.patientObj?.uuid],
+    () => fetchKpPrevRecordByPatientId(props?.patientObj?.uuid),
+    {
+      onSuccess: (data) => {
+        console.log(data);
+      },
+      enabled: props?.patientObj?.uuid ? true : false,
+    }
+  );
 
+  const { mutate, isLoading } = useDeleteKpPrevRecord();
   return (
     <div>
-      <Card>
-        <CardBody>
-          <MaterialTable
-            icons={tableIcons}
-            title="Patient Kp-Prev History "
-            columns={[
-              {
-                title: "Date Of Services Provided",
-                field: "dateServiceOffered",
-                render: (row) => row?.dateServiceOffered || "",
-              },
-              {
-                title: "Prevention Code",
-                field: "preventioncode",
-                filtering: false,
-                render: (row) => row?.prevCode || "",
-              },
-              {
-                title: "Hospital Number",
-                field: "hospital_number",
-                filtering: false,
-                render: (row) =>
-                  row.htsCode !== null ? row.htsCode : row.prepCode,
-              },
-    
-              {
-                title: "HTS Services",
-                field: "htsServices",
-                filtering: false,
-                render: (row) =>
-                  row?.htsServices.offered_hts !== "" ? "✅" : "❌",
-              },
-              {
-                title: "Prep Services",
-                field: "prepServices",
-                filtering: false,
-                render: (row) =>
-                  row?.prepServices.offered_prep !== "" ? "✅" : "❌",
-              },
-              {
-                title: "Commodity Services",
-                field: "commodityServices",
-                filtering: false,
-                render: (row) =>
-                  row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
-              },
-              {
-                title: "HIV Educational Services",
-                field: "hivEducationalServices",
-                filtering: false,
-                render: (row) =>
-                  row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
-              },
-              {
-                title: "Biomedical Services",
-                field: "biomedicalServices",
-                filtering: false,
-                render: (row) =>
-                  row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
-              },
-              {
-                title: "Structural Services",
-                field: "structuralServices",
-                filtering: false,
-                render: (row) =>
-                  row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
-              },
-              {
-                title: "Actions",
-                render: (row) => (
-                  <div>
-                    <Menu.Menu position="right">
-                      <Menu.Item>
-                        <Button
-                          style={{
-                            backgroundColor: "rgb(153,46,98)",
-                            color: "#fff",
-                          }}
-                          primary
-                        >
-                          <Dropdown item text="Action">
-                            <Dropdown.Menu style={{ marginTop: "10px" }}>
-                              <Dropdown.Item onClick={() => LoadViewPage(row)}>
-                                <IconMenu name="eye" />
-                                View
-                              </Dropdown.Item>
-                              <Dropdown.Item onClick={() => LoadEditPage(row)}>
-                                <IconMenu name="edit" />
-                                Edit
-                              </Dropdown.Item>
-                              <Dropdown.Item onClick={()=> onToggleModal(row)}>
-                                {" "}
-                                <IconMenu name="trash" /> Delete
-                              </Dropdown.Item>
-                            </Dropdown.Menu>
-                          </Dropdown>
-                        </Button>
-                      </Menu.Item>
-                    </Menu.Menu>
-                  </div>
-                ),
-              },
-            ]}
-            data={data || []}
-            options={{
-              headerStyle: {
-                backgroundColor: "#014d88",
-                color: "#fff",
-              },
-              searchFieldStyle: {
-                width: "200%",
-                margingLeft: "250px",
-              },
-              filtering: false,
-              exportButton: false,
-              searchFieldAlignment: "left",
-              pageSizeOptions: [10, 20, 100],
-              pageSize: 10,
-              debounceInterval: 400,
-            }}
-          />
-        </CardBody>
-      </Card>
+      <MaterialTable
+        icons={tableIcons}
+        title="Find Record"
+        columns={[
+          {
+            title: "Date Service Offered",
+            field: "dateServiceOffered",
+          },
+          {
+            title: "Hospital Number",
+            field: "hospital_number",
+            filtering: false,
+          },
+
+          { title: "Prevention Code", field: "prevCode", filtering: false },
+
+          {
+            title: "HTS Services",
+            field: "htsServices",
+            filtering: false,
+          },
+          {
+            title: "Prep Services",
+            field: "prepServices",
+            filtering: false,
+          },
+          {
+            title: "Commodity Services",
+            field: "commodityServices",
+            filtering: false,
+          },
+          {
+            title: "HIV Educational Services",
+            field: "hivEducationalServices",
+            filtering: false,
+          },
+          {
+            title: "Biomedical Services",
+            field: "biomedicalServices",
+            filtering: false,
+          },
+          {
+            title: "Structural Services",
+            field: "structuralServices",
+            filtering: false,
+          },
+
+          { title: "Actions", field: "actions", filtering: false },
+        ]}
+        isLoading={isLoadingQuery}
+        data={
+          data &&
+          data?.map((row) => ({
+            dateServiceOffered: row.dateServiceOffered,
+            hospital_number:
+              row.htsCode !== null ? row?.htsCode : row?.prepCode,
+            prevCode: row?.prevCode || "",
+            htsServices: row?.htsServices.offered_hts !== "" ? "✅" : "❌",
+            prepServices: row?.prepServices.offered_prep !== "" ? "✅" : "❌",
+            commodityServices:
+              row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
+            hivEducationalServices:
+              row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
+            biomedicalServices:
+              row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
+            structuralServices:
+              row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
+
+            actions: (
+              <div>
+                <Menu.Menu position="right">
+                  <Menu.Item>
+                    <Button
+                      style={{
+                        backgroundColor: "rgb(153,46,98)",
+                        color: "#fff",
+                      }}
+                      primary
+                    >
+                      <Dropdown item text="Action">
+                        <Dropdown.Menu style={{ marginTop: "10px" }}>
+                          <Dropdown.Item onClick={() => LoadViewPage(row)}>
+                            <IconMenu name="eye" />
+                            View
+                          </Dropdown.Item>
+                          <Dropdown.Item onClick={() => LoadEditPage(row)}>
+                            <IconMenu name="edit" />
+                            Edit
+                          </Dropdown.Item>
+                          <Dropdown.Item onClick={() => onToggleModal(row)}>
+                            {" "}
+                            <IconMenu name="trash" /> Delete
+                          </Dropdown.Item>
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </Button>
+                  </Menu.Item>
+                </Menu.Menu>
+              </div>
+            ),
+          }))
+        }
+        options={{
+          headerStyle: {
+            backgroundColor: "#014d88",
+            color: "#fff",
+          },
+          searchFieldStyle: {
+            width: "200%",
+            margingLeft: "250px",
+          },
+          filtering: false,
+          exportButton: false,
+          searchFieldAlignment: "left",
+          pageSizeOptions: [10, 20, 100],
+          pageSize: 10,
+          debounceInterval: 400,
+        }}
+      />
 
       <Modal
         show={openDeleteModal}
@@ -247,7 +242,7 @@ const KpPrevHistory = (props) => {
         <Modal.Body>
           <h4>
             Are you Sure you want to delete -{" "}
-            <b>{record && record.batchNumber}</b>
+            <b>{record && record?.prevCode}</b>
           </h4>
         </Modal.Body>
         <Modal.Footer>
@@ -271,4 +266,4 @@ const KpPrevHistory = (props) => {
   );
 };
 
-export default KpPrevHistory;
+export default KpPrevEnrolled;

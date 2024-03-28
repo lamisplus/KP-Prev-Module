@@ -25,11 +25,8 @@ import momentLocalizer from "react-widgets-moment";
 import { useQuery } from "react-query";
 import {
   getCombinedHtsPrepCodeKey,
- 
+  getPatientsKey,
 } from "../../utils/queryKeys";
-import axios from "axios";
-
-import { token, url as baseUrl } from "./../../../api";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { MdDashboard } from "react-icons/md";
@@ -38,6 +35,8 @@ import { useHistory } from "react-router-dom";
 import Swal from "sweetalert2";
 import { fetchCombinedHtsAndPrepCode } from "../../services/fetchCombinedHtsAndPrevCode";
 import { toast } from "react-toastify";
+import { fetchAllPatients } from "../../services/fetchAllPatients";
+import { queryClient } from "../../utils/queryClient";
 
 //Date Picker package
 Moment.locale("en");
@@ -69,8 +68,14 @@ const tableIcons = {
 
 const PatientList = (props) => {
   const [currentPatient, setCurrentPatient] = useState(null);
-
   const [showPPI, setShowPPI] = useState(true);
+
+  const [query, setQueryParams] = useState({
+    page: 0,
+    pageSize: 10,
+    search: "",
+  });
+
   const handleCheckBox = (e) => {
     if (e.target.checked) {
       setShowPPI(false);
@@ -79,15 +84,36 @@ const PatientList = (props) => {
     }
   };
 
-  
+  const prefetchNextPage = async () => {
+    const nextPage = query.page + 1;
+    // Use the same query key as in the useQuery hook
+    const queryKey = [getPatientsKey, { ...query, page: nextPage }];
+    await queryClient.prefetchQuery(queryKey, () =>
+      fetchAllPatients({ ...query, page: nextPage })
+    );
+  };
 
-  
-
- 
-
- 
-
-  
+  const { data, isLoading, refetch } = useQuery(
+    [getPatientsKey, query],
+    () => fetchAllPatients(query),
+    {
+      onSuccess: () => {
+        prefetchNextPage();
+      },
+      onError: (error) => {
+        if (error.response && error.response.data) {
+          let errorMessage =
+            error.response.data.apierror &&
+            error.response.data.apierror.message !== ""
+              ? error.response.data.apierror.message
+              : "Something went wrong, please try again";
+          toast.error(errorMessage);
+        } else {
+          toast.error("Something went wrong. Please try again...");
+        }
+      },
+    }
+  );
 
   const history = useHistory();
 
@@ -144,7 +170,6 @@ const PatientList = (props) => {
         icons={tableIcons}
         title="Find Patient"
         columns={[
-          // { title: " ID", field: "Id" },
           {
             title: "Patient Name",
             field: "name",
@@ -155,12 +180,10 @@ const PatientList = (props) => {
             field: "hospital_number",
             filtering: false,
           },
-          // { title: "Batch number", field: "clientCode", filtering: false },
+
           { title: "Sex", field: "gender", filtering: false },
           { title: "Age", field: "age", filtering: false },
 
-          //{ title: "ART Status", field: "v_status", filtering: false },
-          //{ title: "Vaccination Status", field: "count", filtering: false },
           { title: "Actions", field: "actions", filtering: false },
         ]}
         components={{
@@ -190,77 +213,64 @@ const PatientList = (props) => {
             </div>
           ),
         }}
-        data={(query) =>
-          new Promise((resolve, reject) =>
-            axios
-              .get(
-                `${baseUrl}patient?pageSize=${query.pageSize}&pageNo=${query.page}&searchParam=${query.search}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              )
-              .then((response) => response)
-              .then((result) => {
-                resolve({
-                  data:
-                    result.data.records &&
-                    result.data.records !== null &&
-                    result.data.records.map((row) => ({
-                      name: row?.firstName + " " + row?.surname || row?.otherName || "",
-                      hospital_number: getHospitalNumber(row),
+        data={
+          data &&
+          data?.records &&
+          data?.records?.map?.((row) => ({
+            name: row?.firstName + " " + row?.surname || row?.otherName || "",
+            hospital_number: getHospitalNumber(row),
+            gender: row?.gender !== null ? row.gender.display : "",
+            age: calculateAge(row?.dateOfBirth),
 
-                      gender: row?.gender !== null ? row.gender.display : "",
-                      age: calculateAge(row?.dateOfBirth),
-                      actions: (
-                        <div>
-                        <ButtonGroup
-                          variant="contained"
-                          aria-label="split button"
-                          style={{
-                            backgroundColor: "rgb(153, 46, 98)",
-                            height: "30px",
-                            width: "215px",
-                          }}
-                          size="large"
-                          onClick={() => {
-                            setCurrentPatient(row);
-                          }}
-                          disabled={isLoadingCombinedCode}
-                        >
-                          <Button
-                            color="primary"
-                            size="small"
-                            aria-label="select merge strategy"
-                            aria-haspopup="menu"
-                            style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                            disabled={isLoadingCombinedCode}
-                          >
-                            <MdDashboard />
-                          </Button>
-                          <Button
-                            style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                            disabled={isLoadingCombinedCode}
-                          >
-                            <span
-                              style={{
-                                fontSize: "10px",
-                                color: "#fff",
-                                fontWeight: "bolder",
-                              }}
-                            >
-                              {isLoadingCombinedCode && currentPatient?.id === row?.id
-                                ? "Please Wait"
-                                : "Patient Dashboard"}
-                            </span>
-                          </Button>
-                        </ButtonGroup>
-                      </div>
-                      ),
-                    })),
-                  page: query.page,
-                  totalCount: result.data.totalRecords,
-                });
-              })
-          )
+            actions: (
+              <div>
+                <ButtonGroup
+                  variant="contained"
+                  aria-label="split button"
+                  style={{
+                    backgroundColor: "rgb(153, 46, 98)",
+                    height: "30px",
+                    width: "215px",
+                  }}
+                  size="large"
+                  onClick={() => {
+                    setCurrentPatient(row);
+                  }}
+                  disabled={isLoadingCombinedCode}
+                >
+                  <Button
+                    color="primary"
+                    size="small"
+                    aria-label="select merge strategy"
+                    aria-haspopup="menu"
+                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                    disabled={isLoadingCombinedCode}
+                  >
+                    <MdDashboard />
+                  </Button>
+                  <Button
+                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                    disabled={isLoadingCombinedCode}
+                  >
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        color: "#fff",
+                        fontWeight: "bolder",
+                      }}
+                    >
+                      {isLoadingCombinedCode && currentPatient?.id === row?.id
+                        ? "Please Wait"
+                        : "Patient Dashboard"}
+                    </span>
+                  </Button>
+                </ButtonGroup>
+              </div>
+            ),
+          }))
         }
+       
+
         options={{
           headerStyle: {
             backgroundColor: "#014d88",
@@ -271,11 +281,26 @@ const PatientList = (props) => {
             margingLeft: "250px",
           },
           filtering: false,
+          paging: true,
           exportButton: false,
           searchFieldAlignment: "left",
           pageSizeOptions: [10, 20, 100],
-          pageSize: 10,
+          pageSize: query?.pageSize || 10,
           debounceInterval: 400,
+        }}
+        page={data?.currentPage}
+        totalCount={data?.totalRecords}
+        onChangePage={(newPage) => {
+          setQueryParams((prevFilters) => ({ ...prevFilters, page: newPage }));
+          refetch(query);
+        }}
+        isLoading={isLoading}
+        onChangeRowsPerPage={(newPageSize) => {
+          setQueryParams((prevFilters) => ({
+            ...prevFilters,
+            pageSize: newPageSize,
+          }));
+          refetch(query);
         }}
       />
     </div>
