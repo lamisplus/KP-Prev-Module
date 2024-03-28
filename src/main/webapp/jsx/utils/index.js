@@ -29,16 +29,16 @@ export const getLastName = (obj) => {
 };
 
 export const getHospitalNumber = (obj) => {
-  if (obj && obj.participantId) {
-    return obj.participantId;
+  if (obj && obj?.participantId) {
+    return obj?.participantId;
   } else {
     const identifiers =
-      obj?.identifier?.identifier?.filter(
+      obj?.identifier?.identifier?.filter?.(
         (obj) => obj?.type === "HospitalNumber"
       ) || [];
     const currentIdentifier = identifiers?.pop?.() || null;
 
-    return currentIdentifier?.value !== null ? currentIdentifier.value : "";
+    return currentIdentifier?.value !== null ? currentIdentifier?.value : "";
   }
 };
 
