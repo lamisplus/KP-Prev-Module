@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @EnableJpaRepositories(
 		transactionManagerRef = "KpPrevTransactionManager",
-		basePackages = "org.lamisplus.modules.KP_PREV.repository")
+		basePackages = "org.lamisplus.modules.kp_prev.repository")
 @EnableTransactionManagement
 public class DomainConfiguration {
 

@@ -167,67 +167,69 @@ const KpPrevEnrolled = (props) => {
         ]}
         isLoading={isLoading}
         data={
-          data &&
-          data?.records &&
-          data?.records?.map?.((row) => ({
-            dateServiceOffered: row.dateServiceOffered,
-            hospital_number:
-              row.htsCode !== null ? row?.htsCode : row?.prepCode,
-            prevCode: row?.prevCode || "",
-            htsServices: row?.htsServices.offered_hts !== "" ? "✅" : "❌",
-            prepServices: row?.prepServices.offered_prep !== "" ? "✅" : "❌",
-            commodityServices:
-              row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
-            hivEducationalServices:
-              row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
-            biomedicalServices:
-              row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
-            structuralServices:
-              row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
-            actions: (
-              <div className="d-flex">
-                <ButtonGroup
-                  variant="contained"
-                  aria-label="split button"
-                  style={{
-                    backgroundColor: "rgb(153, 46, 98)",
-                    height: "30px",
-                    width: "215px",
-                  }}
-                  size="large"
-                  onClick={() => setCurrentRecord(row)}
-                  disabled={isLoadingCurrentPatient}
-                >
-                  <Button
-                    color="primary"
-                    size="small"
-                    aria-label="select merge strategy"
-                    aria-haspopup="menu"
-                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                    disabled={isLoadingCurrentPatient}
-                  >
-                    <MdDashboard />
-                  </Button>
-                  <Button
-                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                    disabled={isLoadingCurrentPatient}
-                  >
-                    <span
+          !isLoading && data && data?.records
+            ? data?.records?.map?.((row) => ({
+                dateServiceOffered: row.dateServiceOffered,
+                hospital_number:
+                  row.htsCode !== null ? row?.htsCode : row?.prepCode,
+                prevCode: row?.prevCode || "",
+                htsServices: row?.htsServices.offered_hts !== "" ? "✅" : "❌",
+                prepServices:
+                  row?.prepServices.offered_prep !== "" ? "✅" : "❌",
+                commodityServices:
+                  row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
+                hivEducationalServices:
+                  row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
+                biomedicalServices:
+                  row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
+                structuralServices:
+                  row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
+                actions: (
+                  <div className="d-flex">
+                    <ButtonGroup
+                      variant="contained"
+                      aria-label="split button"
                       style={{
-                        fontSize: "10px",
-                        color: "#fff",
-                        fontWeight: "bolder",
+                        backgroundColor: "rgb(153, 46, 98)",
+                        height: "30px",
+                        width: "215px",
                       }}
+                      size="large"
+                      onClick={() => setCurrentRecord(row)}
+                      disabled={isLoadingCurrentPatient}
                     >
-                      {isLoadingCurrentPatient && currentRecord?.id === row?.id
-                        ? "Please Wait"
-                        : "Patient Dashboard"}
-                    </span>
-                  </Button>
-                </ButtonGroup>
-              </div>
-            ),
-          }))
+                      <Button
+                        color="primary"
+                        size="small"
+                        aria-label="select merge strategy"
+                        aria-haspopup="menu"
+                        style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                        disabled={isLoadingCurrentPatient}
+                      >
+                        <MdDashboard />
+                      </Button>
+                      <Button
+                        style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                        disabled={isLoadingCurrentPatient}
+                      >
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color: "#fff",
+                            fontWeight: "bolder",
+                          }}
+                        >
+                          {isLoadingCurrentPatient &&
+                          currentRecord?.id === row?.id
+                            ? "Please Wait"
+                            : "Patient Dashboard"}
+                        </span>
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                ),
+              }))
+            : []
         }
         options={{
           headerStyle: {

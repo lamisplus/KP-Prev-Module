@@ -214,8 +214,8 @@ const PatientList = (props) => {
           ),
         }}
         data={
-          data &&
-          data?.records &&
+          !isLoading && data &&
+          data?.records ?
           data?.records?.map?.((row) => ({
             name: row?.firstName + " " + row?.surname || row?.otherName || "",
             hospital_number: getHospitalNumber(row),
@@ -267,7 +267,7 @@ const PatientList = (props) => {
                 </ButtonGroup>
               </div>
             ),
-          }))
+          })): []
         }
        
 

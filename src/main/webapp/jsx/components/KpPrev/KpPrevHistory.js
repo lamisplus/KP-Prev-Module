@@ -156,8 +156,8 @@ const KpPrevEnrolled = (props) => {
         ]}
         isLoading={isLoadingQuery}
         data={
-          data &&
-          data?.map((row) => ({
+          !isLoading && data ?
+          data?.map?.((row) => ({
             dateServiceOffered: row.dateServiceOffered,
             hospital_number:
               row.htsCode !== null ? row?.htsCode : row?.prepCode,
@@ -205,7 +205,7 @@ const KpPrevEnrolled = (props) => {
                 </Menu.Menu>
               </div>
             ),
-          }))
+          })): []
         }
         options={{
           headerStyle: {
