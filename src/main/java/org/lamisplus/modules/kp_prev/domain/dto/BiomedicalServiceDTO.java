@@ -27,6 +27,7 @@ public class BiomedicalServiceDTO implements Serializable
  private String medical_assisted_therapy_for_six_months;
  private String sti_screening_result;
  private String sti_facility_referred;
+ private String type_of_sti_treatment;
  private String tb_facility_reffered;
  private String referred_facility_drug_rehab;
  private String drug_rehab_facility_reffered;

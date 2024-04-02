@@ -173,6 +173,7 @@ const CreateKpPrev = (props) => {
           formik?.values?.viralHepatitsScreenResult,
         sti_screening_result: formik?.values?.stiScreeningResult,
         sti_facility_referred: formik?.values?.stiFacilityReffered,
+        type_of_sti_treatment: formik?.values?.typeOfStiTreatment,
         tb_facility_reffered: formik?.values?.tbFacilityReffered,
         type_of_mhpss: formik?.values?.typeOfMhpss,
         drug_rehab_facility_reffered: formik?.values?.drugRehabFacilityReffered,
@@ -387,7 +388,7 @@ const CreateKpPrev = (props) => {
                   {formik?.values?.acceptedHts === "1" ? (
                     <div className="form-group mb-3 col-xs-6 col-md-3 ">
                       <CustomFormGroup formik={formik} name="hivTestResult">
-                        <Label>Hiv Test Result</Label>
+                        <Label>HIV Test Result</Label>
                         <Input
                           type="select"
                           name="hivTestResult"
@@ -782,7 +783,7 @@ const CreateKpPrev = (props) => {
                           formik={formik}
                           name="howManyNewNeedleDispensed"
                         >
-                          <Label>How Many New Needles/Syringe Dispesend</Label>
+                          <Label>How Many New Needles/Syringe Dispensed</Label>
                           <Input
                             type="number"
                             name="howManyNewNeedleDispensed"
@@ -1160,6 +1161,38 @@ const CreateKpPrev = (props) => {
                           </CustomFormGroup>
                         </div>
                       )}
+
+                      {formik?.values?.stiTreatment === "yes" && (
+                          <div className="form-group mb-3 col-md-4">
+                            <CustomFormGroup
+                                formik={formik}
+                                name="typeOfStiTreatment"
+                            >
+                              <Label> Type of STI treatment </Label>
+                              <Input
+                                  type="text"
+                                  name="typeOfStiTreatment"
+                                  id="typeOfStiTreatment"
+                                  value={formik?.values?.typeOfStiTreatment}
+                                  onChange={formik?.handleChange}
+                                  onBlur={formik?.handleBlur}
+                                  style={{
+                                    border: "1px solid #014D88",
+                                    borderRadius: "0.25rem",
+                                  }}
+                              />
+                              {formik?.touched.typeOfStiTreatment &&
+                                  formik?.errors.typeOfStiTreatment !== "" && (
+                                      <span className={classes.error}>
+                                  {formik?.errors.typeOfStiTreatment}
+                                </span>
+                                  )}
+                            </CustomFormGroup>
+                          </div>
+                      )}
+
+
+
 
                       <div className="form-group mb-3 col-md-4">
                         <CustomFormGroup
@@ -1646,7 +1679,7 @@ const CreateKpPrev = (props) => {
                           name="onMedicalAssistedTherapy"
                         >
                           <Label>
-                            On Medical Assisted Therapy (MAT) for atleast 6
+                            On Medical Assisted Therapy (MAT) for at least 6
                             months
                           </Label>
                           <Input
@@ -1832,7 +1865,7 @@ const CreateKpPrev = (props) => {
                         formik={formik}
                         name="legalAidServiceType"
                       >
-                        <Label>Legal Aid Service Type</Label>
+                        <Label>Legal Aid Service</Label>
                         <Input
                           type="select"
                           name="legalAidServiceType"

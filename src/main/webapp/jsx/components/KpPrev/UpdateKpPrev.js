@@ -176,6 +176,7 @@ const UpdateKpPrev = (props) => {
           formik?.values?.viralHepatitsScreenResult,
         sti_screening_result: formik?.values?.stiScreeningResult,
         sti_facility_referred: formik?.values?.stiFacilityReffered,
+        type_of_sti_treatment:  formik?.values?.typeOfStiTreatment,
         tb_facility_reffered: formik?.values?.tbFacilityReffered,
         type_of_mhpss: formik?.values?.typeOfMhpss,
         drug_rehab_facility_reffered: formik?.values?.drugRehabFacilityReffered,
@@ -331,6 +332,7 @@ const UpdateKpPrev = (props) => {
       screenedForViralHepatits:
         formInitialValue?.biomedicalServices?.screened_for_viral_hepatitis,
       stiScreening: formInitialValue?.biomedicalServices?.sti_screening,
+      typeOfStiTreatment:   formInitialValue?.biomedicalServices?.type_of_sti_treatment,
       stiSyndromicManagement:
         formInitialValue?.biomedicalServices?.sti_syndromic_management,
       stiTreatment: formInitialValue?.biomedicalServices?.sti_treatment,
@@ -521,7 +523,7 @@ const UpdateKpPrev = (props) => {
                   {formik?.values?.acceptedHts === "1" ? (
                     <div className="form-group mb-3 col-xs-6 col-md-3 ">
                       <CustomFormGroup formik={formik} name="hivTestResult">
-                        <Label>Hiv Test Result</Label>
+                        <Label>HIV Test Result</Label>
                         <Input
                           type="select"
                           disabled={disableInputs}
@@ -1319,6 +1321,36 @@ const UpdateKpPrev = (props) => {
                         </div>
                       )}
 
+                      {formik?.values?.stiTreatment === "yes" && (
+                          <div className="form-group mb-3 col-md-4">
+                            <CustomFormGroup
+                                formik={formik}
+                                name="typeOfStiTreatment"
+                            >
+                              <Label> Type of STI treatment </Label>
+                              <Input
+                                  type="text"
+                                  name="typeOfStiTreatment"
+                                  disabled={disableInputs}
+                                  id="typeOfStiTreatment"
+                                  value={formik?.values?.typeOfStiTreatment}
+                                  onChange={formik?.handleChange}
+                                  onBlur={formik?.handleBlur}
+                                  style={{
+                                    border: "1px solid #014D88",
+                                    borderRadius: "0.25rem",
+                                  }}
+                              />
+                              {formik?.touched.typeOfStiTreatment &&
+                                  formik?.errors.typeOfStiTreatment !== "" && (
+                                      <span className={classes.error}>
+                                  {formik?.errors.typeOfStiTreatment}
+                                </span>
+                                  )}
+                            </CustomFormGroup>
+                          </div>
+                      )}
+
                       <div className="form-group mb-3 col-md-4">
                         <CustomFormGroup
                           formik={formik}
@@ -1475,7 +1507,7 @@ const UpdateKpPrev = (props) => {
                           formik={formik}
                           name="screenedForViralHepatits"
                         >
-                          <Label>Screened For Viral Heaptitis</Label>
+                          <Label>Screened For Viral Hepatitis</Label>
                           <Input
                             type="select"
                             disabled={disableInputs}
@@ -1819,7 +1851,7 @@ const UpdateKpPrev = (props) => {
                           name="onMedicalAssistedTherapy"
                         >
                           <Label>
-                            On Medical Assisted Therapy (MAT) for atleast 6
+                            On Medical Assisted Therapy (MAT) for at least 6
                             months
                           </Label>
                           <Input
@@ -1854,7 +1886,7 @@ const UpdateKpPrev = (props) => {
                           formik={formik}
                           name="receivedNalxoneForOverdoseTreatment"
                         >
-                          <Label>Recived Nalxone for Overdose Treatment</Label>
+                          <Label>Received Nalxone for Overdose Treatment</Label>
                           <Input
                             type="select"
                             disabled={disableInputs}
