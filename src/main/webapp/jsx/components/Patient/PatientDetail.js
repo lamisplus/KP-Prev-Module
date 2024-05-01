@@ -62,6 +62,31 @@ function PatientCard(props) {
       ? history.location.state.patientObj
       : {};
 
+  const componentMap = {
+    "recent-history": (
+      <RecentHistory
+        patientObj={patientObj}
+        setActiveContent={setActiveContent}
+        activeContent={activeContent}
+      />
+    ),
+
+    "kp-prev": (
+      <KpPrev
+        patientObj={patientObj}
+        setActiveContent={setActiveContent}
+        activeContent={activeContent}
+      />
+    ),
+  };
+
+  const returnPatientDashboardCardContent = (route) => {
+    if (!route || route === "") {
+      return null;
+    }
+    return componentMap[route];
+  };
+
   return (
     <div className={classes.root}>
       <div
@@ -85,6 +110,7 @@ function PatientCard(props) {
             setArt={setArt}
             setActiveContent={setActiveContent}
           />
+
           <br />
 
           <SubMenu
@@ -94,21 +120,7 @@ function PatientCard(props) {
           />
           <br />
 
-          {activeContent.route === "recent-history" && (
-            <RecentHistory
-              patientObj={patientObj}
-              setActiveContent={setActiveContent}
-              activeContent={activeContent}
-            />
-          )}
-
-          {activeContent.route === "kp-prev" && (
-            <KpPrev
-              patientObj={patientObj}
-              setActiveContent={setActiveContent}
-              activeContent={activeContent}
-            />
-          )}
+          {returnPatientDashboardCardContent(activeContent?.route || "")}
         </CardContent>
       </Card>
     </div>

@@ -77,6 +77,7 @@ const PatientList = (props) => {
   });
 
   const handleCheckBox = (e) => {
+    
     if (e.target.checked) {
       setShowPPI(false);
     } else {
