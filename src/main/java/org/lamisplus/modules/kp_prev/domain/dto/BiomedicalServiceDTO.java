@@ -33,5 +33,9 @@ public class BiomedicalServiceDTO implements Serializable
  private String drug_rehab_facility_reffered;
  private String type_of_mhpss;
  private String tb_treatment_refferal;
+ private String patient_current_tb_status;
+ private String accepted_family_planning;
+ private String facility_referred_for_viral_hepatitis;
+
  
 }

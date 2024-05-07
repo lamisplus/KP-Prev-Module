@@ -31,6 +31,17 @@ public class KpPrevResponseDTO {
 	private String serviceProviderSignature;
 	private String uuid;
 	private String patientIdentifier;
+	private String kpOfferedHts;
+	private String kpAcceptedHts;
+	private String kpHtsClientCode;
+	private String kpHtsFinalResult;
+	private String kpPatientArtNumber;
+	private String kpPatientHospitalNumber;
+	private String kpKnownPositive;
+	private String kpPatientTargetGroup;
+	private String kpPatientState;
+	private String kpPatientProvince;
+
 	
     @Convert(converter = LocalDateConverter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -42,6 +53,7 @@ public class KpPrevResponseDTO {
 	private Object structuralServices;
 	private Object commodityServices;
 	private Object hivEducationalServices;
-	
+
+
 
 }

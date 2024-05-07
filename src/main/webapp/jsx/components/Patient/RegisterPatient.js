@@ -523,11 +523,8 @@ const RegisterPatient = (props) => {
   };
   /*****  Validation  Relationship Input*/
   const validateRelatives = () => {
-    console.log(relatives)
     const nigerianPhoneNumberRegex = /^(\+?234|0)([789]\d{9})$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-
     let temp = { ...errors };
     temp.firstName = relatives.firstName ? "" : "First Name is required";
     //temp.lastName = relatives.lastName ? "" : "Last Name  is required."
@@ -584,7 +581,6 @@ const RegisterPatient = (props) => {
     setAllContacts([...allContacts]);
   };
   const handleEditRelative = (relative, index) => {
-    console.log(relative);
     setRelatives(relative);
     setShowRelative(true);
     allContacts.splice(index, 1);

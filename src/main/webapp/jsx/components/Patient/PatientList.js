@@ -27,6 +27,7 @@ import {
   getCombinedHtsPrepCodeKey,
   getPatientsKey,
 } from "../../utils/queryKeys";
+import { Link } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { MdDashboard } from "react-icons/md";
@@ -77,7 +78,6 @@ const PatientList = (props) => {
   });
 
   const handleCheckBox = (e) => {
-    
     if (e.target.checked) {
       setShowPPI(false);
     } else {
@@ -165,6 +165,8 @@ const PatientList = (props) => {
     }
   );
 
+ 
+
   return (
     <div>
       <MaterialTable
@@ -215,63 +217,70 @@ const PatientList = (props) => {
           ),
         }}
         data={
-          !isLoading && data &&
-          data?.records ?
-          data?.records?.map?.((row) => ({
-            name: row?.firstName + " " + row?.surname || row?.otherName || "",
-            hospital_number: getHospitalNumber(row),
-            gender: row?.gender !== null ? row.gender.display : "",
-            age: calculateAge(row?.dateOfBirth),
+          !isLoading && data && data?.records
+            ? data?.records?.map?.((row) => ({
+                name:
+                  row?.firstName + " " + row?.surname || row?.otherName || "",
+                hospital_number: getHospitalNumber(row),
+                gender: row?.gender !== null ? row.gender.display : "",
+                age: calculateAge(row?.dateOfBirth),
 
-            actions: (
-              <div>
-                <ButtonGroup
-                  variant="contained"
-                  aria-label="split button"
-                  style={{
-                    backgroundColor: "rgb(153, 46, 98)",
-                    height: "30px",
-                    width: "215px",
-                  }}
-                  size="large"
-                  onClick={() => {
-                    setCurrentPatient(row);
-                  }}
-                  disabled={isLoadingCombinedCode}
-                >
-                  <Button
-                    color="primary"
-                    size="small"
-                    aria-label="select merge strategy"
-                    aria-haspopup="menu"
-                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                    disabled={isLoadingCombinedCode}
-                  >
-                    <MdDashboard />
-                  </Button>
-                  <Button
-                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                    disabled={isLoadingCombinedCode}
-                  >
-                    <span
-                      style={{
-                        fontSize: "10px",
-                        color: "#fff",
-                        fontWeight: "bolder",
+                actions: (
+                  <div>
+                    <Link
+                      to={{
+                        pathname: "/patient-history",
+                        state: { patientObj: row },
                       }}
                     >
-                      {isLoadingCombinedCode && currentPatient?.id === row?.id
-                        ? "Please Wait"
-                        : "Patient Dashboard"}
-                    </span>
-                  </Button>
-                </ButtonGroup>
-              </div>
-            ),
-          })): []
+                      <ButtonGroup
+                        variant="contained"
+                        aria-label="split button"
+                        style={{
+                          backgroundColor: "rgb(153, 46, 98)",
+                          height: "30px",
+                          width: "215px",
+                        }}
+                        size="large"
+                        // onClick={() => {
+                        //   setCurrentPatient(row);
+                        // }}
+                        // disabled={isLoadingCombinedCode}
+                      >
+                        <Button
+                          color="primary"
+                          size="small"
+                          aria-label="select merge strategy"
+                          aria-haspopup="menu"
+                          style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                          // disabled={isLoadingCombinedCode}
+                        >
+                          <MdDashboard />
+                        </Button>
+                        <Button
+                          style={{ backgroundColor: "rgb(153, 46, 98)" }}
+                          // disabled={isLoadingCombinedCode}
+                        >
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              color: "#fff",
+                              fontWeight: "bolder",
+                            }}
+                          >
+                            {isLoadingCombinedCode &&
+                            currentPatient?.id === row?.id
+                              ? "Please Wait"
+                              : "Patient Dashboard"}
+                          </span>
+                        </Button>
+                      </ButtonGroup>
+                    </Link>
+                  </div>
+                ),
+              }))
+            : []
         }
-       
-
         options={{
           headerStyle: {
             backgroundColor: "#014d88",

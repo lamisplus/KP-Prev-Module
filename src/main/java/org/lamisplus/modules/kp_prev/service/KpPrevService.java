@@ -47,12 +47,22 @@ public class KpPrevService {
 	
 	private KpPrev getPreventionServiceFromDto(KpPrevInputDTO dto)
 	{
-		log.info("hellllllooooo...herree" + dto.getPatientIdentifier());
-		//System.out.print(dto.getPrevCode() + ";"+dto.getHtsCode()+";"+dto.getServiceProvider()+";"+dto.getTarget_group());
+
 		KpPrev preventionService = new KpPrev();
 		if(dto.getHtsCode() != null) preventionService.setHtsCode(dto.getHtsCode());
 		if(dto.getPrevCode() != null) preventionService.setPrevCode(dto.getPrevCode());
 		if(dto.getPatientId() != null) preventionService.setPersonId(dto.getPatientId());
+
+		if(dto.getKpOfferedHts() != null) preventionService.setKpOfferedHts(dto.getKpOfferedHts());
+		if(dto.getKpAcceptedHts() != null) preventionService.setKpAcceptedHts(dto.getKpAcceptedHts());
+		if(dto.getKpHtsClientCode() != null) preventionService.setKpHtsClientCode(dto.getKpHtsClientCode());
+		if(dto.getKpHtsFinalResult() != null) preventionService.setKpHtsFinalResult(dto.getKpHtsFinalResult());
+		if (dto.getKpPatientArtNumber() != null) preventionService.setKpPatientArtNumber(dto.getKpPatientArtNumber());
+		if (dto.getKpPatientHospitalNumber() != null) preventionService.setKpPatientHospitalNumber(dto.getKpPatientHospitalNumber());
+	    if (dto.getKpKnownPositive() != null) preventionService.setKpKnownPositive(dto.getKpKnownPositive());
+		if(dto.getKpPatientTargetGroup() != null) preventionService.setKpPatientTargetGroup(dto.getKpPatientTargetGroup());
+	    if (dto.getKpPatientState() != null) preventionService.setKpPatientState(dto.getKpPatientState());
+		if (dto.getKpPatientProvince() != null) preventionService.setKpPatientProvince(dto.getKpPatientProvince());
 		if(dto.getServiceProvider() != null) preventionService.setServiceProviderName(dto.getServiceProvider());
 		if(dto.getServiceProviderSignature() != null) preventionService.setServiceProviderSignature(dto.getServiceProviderSignature());
 		if(dto.getTarget_group() != null) preventionService.setTarget_group(dto.getTarget_group());
@@ -85,6 +95,16 @@ public class KpPrevService {
 		response.setHtsCode(kpprev.getHtsCode());
 		response.setPrevCode(kpprev.getPrevCode());
 		response.setPatientId(kpprev.getPersonId());
+		response.setKpAcceptedHts(kpprev.getKpAcceptedHts());
+		response.setKpOfferedHts(kpprev.getKpOfferedHts());
+		response.setKpHtsClientCode(kpprev.getKpHtsClientCode());
+		response.setKpHtsFinalResult(kpprev.getKpHtsFinalResult());
+		response.setKpPatientArtNumber(kpprev.getKpPatientArtNumber());
+		response.setKpPatientHospitalNumber(kpprev.getKpPatientHospitalNumber());
+		response.setKpKnownPositive(kpprev.getKpKnownPositive());
+		response.setKpPatientTargetGroup(kpprev.getKpPatientTargetGroup());
+		response.setKpPatientState(kpprev.getKpPatientState());
+		response.setKpPatientProvince(kpprev.getKpPatientProvince());
 		response.setTarget_group(kpprev.getTarget_group());
 		response.setServiceProvider(kpprev.getServiceProviderName());
 		response.setServiceProviderSignature(kpprev.getServiceProviderSignature());
