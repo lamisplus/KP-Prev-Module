@@ -562,8 +562,6 @@ const UpdateKpPrev = (props) => {
     formik.setValues(initialValues);
   }, [formInitialValue]);
 
-  console.log(formik.errors);
-
   return (
     <div>
       <Card className={classes.root}>
@@ -587,7 +585,7 @@ const UpdateKpPrev = (props) => {
               <div className="form-group mb-10 col-xs-6 col-md-4 ">
                 <br />
                 <CustomFormGroup formik={formik} name="dateServiceOffered">
-                  <Label>Date Of Service Provisions</Label>
+                  <Label>Date Of Service Provision</Label>
                   <Input
                     type="date"
                     name="dateServiceOffered"

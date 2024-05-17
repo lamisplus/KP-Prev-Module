@@ -1,10 +1,13 @@
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { generateRandomString } from "../../utils";
 
 export const useKpPrevFormValidationSchema = (onSubmit, initialValues) => {
+  const randomString = generateRandomString(10);
   const kpPrevFormIntialValues = {
     htsClientCode: "",
     knownPositive: "",
+    prevCode: `kp_kprev-${randomString}`,
     kpPatientState: "",
     patientState: "",
     patientProvince: "",
@@ -68,6 +71,7 @@ export const useKpPrevFormValidationSchema = (onSubmit, initialValues) => {
   const kpPrevFormInitialSchema = yup.object({
     dateServiceOffered: yup.date().required("This field is required"),
     htsClientCode: yup.mixed(),
+    prevCode: yup.mixed(),
     knownPositive: yup.mixed(),
     patientState: yup.mixed(),
     kpPatientState: yup.mixed(),
