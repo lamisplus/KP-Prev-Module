@@ -111,7 +111,6 @@ function PatientCard(props) {
             setArt={setArt}
             setActiveContent={setActiveContent}
           />
-
           <br />
 
           <SubMenu

@@ -95,9 +95,6 @@ const KpPrevEnrolled = (props) => {
     [getKpPrevRecordByPatientIdKey, props?.patientObj?.uuid],
     () => fetchKpPrevRecordByPatientId(props?.patientObj?.uuid),
     {
-      onSuccess: (data) => {
-        console.log(data);
-      },
       enabled: props?.patientObj?.uuid ? true : false,
     }
   );
@@ -158,20 +155,20 @@ const KpPrevEnrolled = (props) => {
         data={
           !isLoading && data ?
           data?.map?.((row) => ({
-            dateServiceOffered: row.dateServiceOffered,
+            dateServiceOffered: row?.dateServiceOffered,
             hospital_number:
-              row.htsCode !== null ? row?.htsCode : row?.prepCode,
+              row?.htsCode !== null ? row?.htsCode : row?.prepCode,
             prevCode: row?.prevCode || "",
-            htsServices: row?.htsServices.offered_hts !== "" ? "✅" : "❌",
-            prepServices: row?.prepServices.offered_prep !== "" ? "✅" : "❌",
+            htsServices: row?.htsServices?.offered_hts !== "" ? "✅" : "❌",
+            prepServices: row?.prepServices?.offered_prep !== "" ? "✅" : "❌",
             commodityServices:
-              row?.commodityServices.condoms_dispensed !== "" ? "✅" : "❌",
+              row?.commodityServices?.condoms_dispensed !== "" ? "✅" : "❌",
             hivEducationalServices:
-              row?.hivEducationalServices.iecMaterial !== "" ? "✅" : "❌",
+              row?.hivEducationalServices?.iecMaterial !== "" ? "✅" : "❌",
             biomedicalServices:
-              row?.biomedicalServices.sti_screening !== "" ? "✅" : "❌",
+              row?.biomedicalServices?.sti_screening !== "" ? "✅" : "❌",
             structuralServices:
-              row?.structuralServices.legalAidServices !== "" ? "✅" : "❌",
+              row?.structuralServices?.legalAidServices !== "" ? "✅" : "❌",
 
             actions: (
               <div>

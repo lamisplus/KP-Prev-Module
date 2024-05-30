@@ -1,28 +1,28 @@
 export const getPhoneNumber = (identifier) => {
   const identifiers = identifier;
-  const phoneNumber = identifiers.contactPoint.find(
-    (obj) => obj.type === "phone"
+  const phoneNumber = identifiers?.contactPoint?.find?.(
+    (obj) => obj?.type === "phone"
   );
-  return phoneNumber ? phoneNumber.value : "";
+  return phoneNumber ? phoneNumber?.value : "";
 };
 
 export const getAddress = (identifier) => {
   const identifiers = identifier;
-  const address = identifiers.address.find((obj) => obj.city);
+  const address = identifiers?.address?.find?.((obj) => obj?.city);
   const houseAddress =
-    address && address.line[0] !== null ? address.line[0] : "";
+    address && address?.line?.[0] !== null ? address?.line?.[0] : "";
   const landMark =
-    address && address.city && address.city !== null ? address.city : "";
+    address && address?.city && address?.city !== null ? address?.city : "";
   return address ? houseAddress + " " + landMark : "";
 };
 
 export const getLastName = (obj) => {
-  if (obj && obj.lastName) {
-    return obj.lastName;
-  } else if (obj && obj.surname) {
-    return obj.surname;
-  } else if (obj && obj.otherName) {
-    return obj.otherName;
+  if (obj && obj?.lastName) {
+    return obj?.lastName;
+  } else if (obj && obj?.surname) {
+    return obj?.surname;
+  } else if (obj && obj?.otherName) {
+    return obj?.otherName;
   } else {
     return "";
   }

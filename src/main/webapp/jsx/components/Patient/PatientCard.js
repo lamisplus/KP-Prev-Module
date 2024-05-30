@@ -61,7 +61,7 @@ const styles = (theme) => ({
 
 function PatientCard(props) {
   const { classes } = props;
-  const patientObj = props.patientObj;
+  const patientObj = props?.patientObj;
 
   
 
@@ -74,7 +74,7 @@ function PatientCard(props) {
               <Row className={"mt-1"}>
                 <Col md={12} className={classes.root2}>
                   <b style={{ fontSize: "25px", color: "rgb(153, 46, 98)" }}>
-                    {patientObj.firstName + " " + getLastName(patientObj)}
+                    {(patientObj?.firstName || "") + " " + (getLastName?.(patientObj)|| "")}
                   </b>
                   <Link to={"/"}>
                     <ButtonMui
@@ -98,7 +98,7 @@ function PatientCard(props) {
                     {" "}
                     Patient ID :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {getHospitalNumber(patientObj)}
+                      {getHospitalNumber?.(patientObj)}
                     </b>
                   </span>
                 </Col>
@@ -116,7 +116,7 @@ function PatientCard(props) {
                     {" "}
                     Age :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {calculateAge(patientObj?.dob || patientObj?.dateOfBirth)}
+                      {calculateAge?.(patientObj?.dob || patientObj?.dateOfBirth)}
                     </b>
                   </span>
                 </Col>
@@ -125,8 +125,8 @@ function PatientCard(props) {
                     {" "}
                     Gender :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {patientObj.gender !== null
-                        ? patientObj.gender.display
+                      {patientObj?.gender !== null
+                        ? patientObj?.gender?.display
                         : ""}
                     </b>
                   </span>
@@ -136,7 +136,7 @@ function PatientCard(props) {
                     {" "}
                     Phone Number :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {getPhoneNumber(patientObj.contactPoint)}
+                      {getPhoneNumber(patientObj?.contactPoint)}
                     </b>
                   </span>
                 </Col>
@@ -145,7 +145,7 @@ function PatientCard(props) {
                     {" "}
                     Address :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {getAddress(patientObj.address)}{" "}
+                      {getAddress(patientObj?.address)}{" "}
                     </b>
                   </span>
                 </Col>
