@@ -36,6 +36,6 @@ public class BiomedicalServiceDTO implements Serializable
  private String patient_current_tb_status;
  private String accepted_family_planning;
  private String facility_referred_for_viral_hepatitis;
-
+ private String facility_referred_for_family_planning_services;
  
 }
