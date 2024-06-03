@@ -434,7 +434,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+            error.response.data.apierror.message !== "" 
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);

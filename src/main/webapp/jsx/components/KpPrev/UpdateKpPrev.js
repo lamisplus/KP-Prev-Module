@@ -98,7 +98,7 @@ const UpdateKpPrev = (props) => {
   const patientObj = props.patientObj;
   const [htsCodeVal, setHtsCodeVal] = useState(null);
   const [prepCodeVal, setPrepCodeVal] = useState(null);
-  const [patientHivEnrolment, setPatientHivEnrolment] = useState(null);
+  const [, setPatientHivEnrolment] = useState(null);
   const [targetGroup, setTargetGroup] = useState([]);
   const [statesData, setStateData] = useState([]);
   const [provincesData, setProvincesData] = useState([]);
@@ -228,6 +228,8 @@ const UpdateKpPrev = (props) => {
   const { formik } = useKpPrevFormValidationSchema(handleSubmit);
   const { mutate, isLoading } = useUpdateKpPrev(formik, props);
   const [formInitialValue] = useState(props?.activeContent?.record);
+
+  
 
   const { isLoading: isLoadingHtsCode } = useQuery(
     [getHtsCodeKey, patientObj?.id],
@@ -465,11 +467,10 @@ const UpdateKpPrev = (props) => {
       kpPatientTargetGroup: formInitialValue?.kpPatientTargetGroup,
       kpPatientState: formInitialValue?.kpPatientState,
       kpPatientProvince: formInitialValue?.kpPatientProvince,
-      patient_current_tb_status: formInitialValue?.patientCurrentTbStatus,
+      patientCurrentTbStatus: formInitialValue?.biomedicalServices?.patient_current_tb_status  ,
       accepted_family_planning:
         formInitialValue?.acceptedFamilyPlanningServices,
-      facilityReferredToForViralHepatitis:
-        formInitialValue?.facility_referred_for_viral_hepatitis,
+      
       legalAidServiceType:
         formInitialValue?.structuralServices?.legalAidServices,
       providedOrRefferedForEmpowerment:
@@ -489,7 +490,7 @@ const UpdateKpPrev = (props) => {
       hivTestResult: formInitialValue?.htsServices?.hiv_test_result,
       offeredHts: formInitialValue?.htsServices?.offered_hts,
       referredForArt: formInitialValue?.htsServices?.referred_for_art,
-      htsFinalResult: formInitialValue?.htsServices?.htsFinalResult,
+      htsFinalResult: formInitialValue?.htsServices?.hts_final_result,
       condomDispensed: formInitialValue?.commodityServices?.condoms_dispensed,
 
       oralQuickDispensed:
@@ -521,6 +522,8 @@ const UpdateKpPrev = (props) => {
 
       offeredFamilyPlanningServices:
         formInitialValue?.biomedicalServices?.offered_family_planning_services,
+        acceptedFamilyPlanningServices:
+        formInitialValue?.biomedicalServices?.accepted_family_planning,
       offeredMhpss: formInitialValue?.biomedicalServices?.offered_mhpss,
       providedWithinDrugRehab:
         formInitialValue?.biomedicalServices?.provided_with_drug_rehab,
@@ -531,6 +534,11 @@ const UpdateKpPrev = (props) => {
       referredForFamilyPlanningServices:
         formInitialValue?.biomedicalServices
           ?.referred_for_family_planning_services,
+
+          facilityReferredToForViralHepatitis:
+        formInitialValue?.biomedicalServices
+          ?.facility_referred_for_viral_hepatitis,
+
       screenedForTb: formInitialValue?.biomedicalServices?.screened_for_tb,
       screenedForViralHepatits:
         formInitialValue?.biomedicalServices?.screened_for_viral_hepatitis,
@@ -591,6 +599,7 @@ const UpdateKpPrev = (props) => {
                     name="dateServiceOffered"
                     value={formik?.values?.dateServiceOffered}
                     onChange={formik?.handleChange}
+                    disabled={disableInputs}
                     onBlur={formik?.handleBlur}
                     id="dateServiceOffered"
                     max={moment(new Date()).format("YYYY-MM-DD")}
@@ -678,6 +687,7 @@ const UpdateKpPrev = (props) => {
                         id="kpOfferedHts"
                         value={formik?.values?.kpOfferedHts}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -707,6 +717,7 @@ const UpdateKpPrev = (props) => {
                         id="kpAcceptedHts"
                         value={formik?.values?.kpAcceptedHts}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -735,16 +746,13 @@ const UpdateKpPrev = (props) => {
                           name="kpHtsClientCode"
                           id="kpHtsClientCode"
                           value={formik?.values?.kpHtsClientCode}
-                          onChange={formik?.handleChange}
+                          onChange={formik?.handleChange}          
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          disabled={
-                            htsCodeVal?.htsCode !== "" ||
-                            htsCodeVal?.htsCode !== null
-                          }
+                          disabled={ disableInputs}
                         />
 
                         {formik?.touched?.kpHtsClientCode &&
@@ -766,6 +774,7 @@ const UpdateKpPrev = (props) => {
                         id="kpHtsFinalResult"
                         value={formik?.values?.kpHtsFinalResult}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -798,15 +807,13 @@ const UpdateKpPrev = (props) => {
                       id="kpPatientArtNumber"
                       value={formik?.values?.kpPatientArtNumber}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      disabled={
-                        patientHivEnrolment?.enrollment?.uniqueId !== "" ||
-                        patientHivEnrolment?.enrollment?.uniqueId !== null
-                      }
+                   
                     />
 
                     {formik?.touched?.kpPatientArtNumber &&
@@ -831,13 +838,14 @@ const UpdateKpPrev = (props) => {
                       name="kpPatientHospitalNumber"
                       id="kpPatientHospitalNumber"
                       value={patientObj?.identifier?.identifier?.[0].value}
-                      // onChange={formik?.handleChange}
-                      // onBlur={formik?.handleBlur}
+                      
+                      disabled
+                      
                       style={{
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      disabled
+                  
                     />
 
                     {formik?.touched?.kpPatientHospitalNumber &&
@@ -859,6 +867,7 @@ const UpdateKpPrev = (props) => {
                     id="kpKnownPositive"
                     value={formik?.values?.kpKnownPositive}
                     onChange={formik?.handleChange}
+                    disabled={disableInputs}
                     onBlur={formik?.handleBlur}
                     style={{
                       border: "1px solid #014D88",
@@ -887,6 +896,7 @@ const UpdateKpPrev = (props) => {
                     id="kpPatientTargetGroup"
                     value={formik?.values?.kpPatientTargetGroup}
                     onChange={formik?.handleChange}
+                    disabled={disableInputs}
                     onBlur={formik?.handleBlur}
                     style={{
                       border: "1px solid #014D88",
@@ -919,6 +929,7 @@ const UpdateKpPrev = (props) => {
                     id="kpPatientState"
                     value={formik?.values?.kpPatientState}
                     onChange={formik?.handleChange}
+                    disabled={disableInputs}
                     onBlur={formik?.handleBlur}
                     style={{
                       border: "1px solid #014D88",
@@ -952,6 +963,7 @@ const UpdateKpPrev = (props) => {
                       id="kpPatientProvince"
                       value={formik?.values?.kpPatientProvince}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1005,6 +1017,7 @@ const UpdateKpPrev = (props) => {
                       id="offeredHts"
                       value={formik?.values?.offeredHts}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1034,6 +1047,7 @@ const UpdateKpPrev = (props) => {
                       id="acceptedHts"
                       value={formik?.values?.acceptedHts}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1063,15 +1077,13 @@ const UpdateKpPrev = (props) => {
                         id="htsClientCode"
                         value={formik?.values?.htsClientCode}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
-                        disabled={
-                          htsCodeVal?.htsCode !== "" ||
-                          htsCodeVal?.htsCode !== null
-                        }
+                        
                       />
 
                       {formik?.touched?.htsClientCode &&
@@ -1093,6 +1105,7 @@ const UpdateKpPrev = (props) => {
                       id="htsFinalResult"
                       value={formik?.values?.htsFinalResult}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1138,6 +1151,7 @@ const UpdateKpPrev = (props) => {
                       id="offeredPrep"
                       value={formik?.values?.offeredPrep}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1167,6 +1181,7 @@ const UpdateKpPrev = (props) => {
                         id="acceptedPrep"
                         value={formik?.values?.acceptedPrep}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1197,6 +1212,7 @@ const UpdateKpPrev = (props) => {
                         id="referredForPrep"
                         value={formik?.values?.referredForPrep}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1243,6 +1259,7 @@ const UpdateKpPrev = (props) => {
                       id="condomDispensed"
                       value={formik?.values?.condomDispensed}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1274,6 +1291,7 @@ const UpdateKpPrev = (props) => {
                         id="howManyCondomDispensed"
                         value={formik?.values?.howManyCondomDispensed}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1299,6 +1317,7 @@ const UpdateKpPrev = (props) => {
                       id="lubricantsDispensed"
                       value={formik?.values?.lubricantsDispensed}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1330,6 +1349,7 @@ const UpdateKpPrev = (props) => {
                         id="howManyLubricantsDispensed"
                         value={formik?.values?.howManyLubricantsDispensed}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1355,6 +1375,7 @@ const UpdateKpPrev = (props) => {
                       id="oralQuickDispensed"
                       value={formik?.values?.oralQuickDispensed}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1387,6 +1408,7 @@ const UpdateKpPrev = (props) => {
                         id="howManyOralQuickDispensed"
                         value={formik?.values?.howManyOralQuickDispensed}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1412,6 +1434,7 @@ const UpdateKpPrev = (props) => {
                       id="newNeedleDispensed"
                       value={formik?.values?.newNeedleDispensed}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1444,6 +1467,7 @@ const UpdateKpPrev = (props) => {
                         id="howManyNewNeedleDispensed"
                         value={formik?.values?.howManyNewNeedleDispensed}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1470,6 +1494,7 @@ const UpdateKpPrev = (props) => {
                       id="oldNeedleRetrieved"
                       value={formik?.values?.oldNeedleRetrieved}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1503,6 +1528,7 @@ const UpdateKpPrev = (props) => {
                         id="howManyOldNeedleRetrieved"
                         value={formik?.values?.howManyOldNeedleRetrieved}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1528,6 +1554,7 @@ const UpdateKpPrev = (props) => {
                       id="nalxoneProvided"
                       value={formik?.values?.nalxoneProvided}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1560,6 +1587,7 @@ const UpdateKpPrev = (props) => {
                         id="howManyNalxoneProvided"
                         value={formik?.values?.howManyNalxoneProvided}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1601,6 +1629,7 @@ const UpdateKpPrev = (props) => {
                       id="iecMaterial"
                       value={formik?.values?.iecMaterial}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1632,6 +1661,7 @@ const UpdateKpPrev = (props) => {
                       id="interPersonalCommunication"
                       value={formik?.values?.interPersonalCommunication}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1662,6 +1692,7 @@ const UpdateKpPrev = (props) => {
                       id="peerGroupCommunication"
                       value={formik?.values?.peerGroupCommunication}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -1707,6 +1738,7 @@ const UpdateKpPrev = (props) => {
                         id="stiScreening"
                         value={formik?.values?.stiScreening}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1739,6 +1771,7 @@ const UpdateKpPrev = (props) => {
                           id="stiScreeningResult"
                           value={formik?.values?.stiScreeningResult}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -1773,6 +1806,7 @@ const UpdateKpPrev = (props) => {
                           id="stiSyndromicManagement"
                           value={formik?.values?.stiSyndromicManagement}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -1804,6 +1838,7 @@ const UpdateKpPrev = (props) => {
                           id="stiTreatment"
                           value={formik?.values?.stiTreatment}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -1837,6 +1872,7 @@ const UpdateKpPrev = (props) => {
                           id="stiFacilityReffered"
                           value={formik?.values?.stiFacilityReffered}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -1866,6 +1902,7 @@ const UpdateKpPrev = (props) => {
                           id="typeOfStiTreatment"
                           value={formik?.values?.typeOfStiTreatment}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -1891,6 +1928,7 @@ const UpdateKpPrev = (props) => {
                         id="screenedForTb"
                         value={formik?.values?.screenedForTb}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -1924,6 +1962,7 @@ const UpdateKpPrev = (props) => {
                           id="patientCurrentTbStatus"
                           value={formik?.values?.patientCurrentTbStatus}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -1953,6 +1992,7 @@ const UpdateKpPrev = (props) => {
                           id="providedWithTpt"
                           value={formik?.values?.providedWithTpt}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -1987,6 +2027,7 @@ const UpdateKpPrev = (props) => {
                           id="tbTreatmentRefferal"
                           value={formik?.values?.tbTreatmentRefferal}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2014,6 +2055,7 @@ const UpdateKpPrev = (props) => {
                           id="tbFacilityReffered"
                           value={formik?.values?.tbFacilityReffered}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2042,6 +2084,7 @@ const UpdateKpPrev = (props) => {
                         id="screenedForViralHepatits"
                         value={formik?.values?.screenedForViralHepatits}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -2075,6 +2118,7 @@ const UpdateKpPrev = (props) => {
                           id="viralHepatitsScreenResult"
                           value={formik?.values?.viralHepatitsScreenResult}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2108,6 +2152,7 @@ const UpdateKpPrev = (props) => {
                           id="vaccinationForViralHepatits"
                           value={formik?.values?.vaccinationForViralHepatits}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2143,6 +2188,7 @@ const UpdateKpPrev = (props) => {
                             formik?.values?.facilityReferredToForViralHepatitis
                           }
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2176,6 +2222,7 @@ const UpdateKpPrev = (props) => {
                         id="offeredFamilyPlanningServices"
                         value={formik?.values?.offeredFamilyPlanningServices}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -2209,6 +2256,7 @@ const UpdateKpPrev = (props) => {
                           id="acceptedFamilyPlanningServices"
                           value={formik?.values?.acceptedFamilyPlanningServices}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2216,8 +2264,8 @@ const UpdateKpPrev = (props) => {
                           }}
                         >
                           <option value=""> Select </option>
-                          <option value="Yes"> Yes </option>
-                          <option value="No"> No </option>
+                          <option value="yes"> Yes </option>
+                          <option value="no"> No </option>
                         </Input>
                         {formik?.touched.acceptedFamilyPlanningServices &&
                           formik?.errors.acceptedFamilyPlanningServices !==
@@ -2245,6 +2293,7 @@ const UpdateKpPrev = (props) => {
                             formik?.values?.referredForFamilyPlanningServices
                           }
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2252,8 +2301,8 @@ const UpdateKpPrev = (props) => {
                           }}
                         >
                           <option value=""> Select </option>
-                          <option value="Yes"> Yes </option>
-                          <option value="No"> No </option>
+                          <option value="yes"> Yes </option>
+                          <option value="no"> No </option>
                         </Input>
                         {formik?.touched.referredForFamilyPlanningServices &&
                           formik?.errors.referredForFamilyPlanningServices !==
@@ -2278,6 +2327,7 @@ const UpdateKpPrev = (props) => {
                         id="providedWithinDrugRehab"
                         value={formik?.values?.providedWithinDrugRehab}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -2311,6 +2361,7 @@ const UpdateKpPrev = (props) => {
                           id="refferedFacilityDrugRehab"
                           value={formik?.values?.refferedFacilityDrugRehab}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2337,6 +2388,7 @@ const UpdateKpPrev = (props) => {
                         id="offeredMhpss"
                         value={formik?.values?.offeredMhpss}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -2367,6 +2419,7 @@ const UpdateKpPrev = (props) => {
                           id="typeOfMhpss"
                           value={formik?.values?.typeOfMhpss}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2402,6 +2455,7 @@ const UpdateKpPrev = (props) => {
                         id="onMedicalAssistedTherapy"
                         value={formik?.values?.onMedicalAssistedTherapy}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -2436,6 +2490,7 @@ const UpdateKpPrev = (props) => {
                           formik?.values?.receivedNalxoneForOverdoseTreatment
                         }
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -2487,6 +2542,7 @@ const UpdateKpPrev = (props) => {
                       id="providedOrRefferedForEmpowerment"
                       value={formik?.values?.providedOrRefferedForEmpowerment}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -2522,6 +2578,7 @@ const UpdateKpPrev = (props) => {
                           id="typeEmpowermentprovided"
                           value={formik?.values?.typeEmpowermentprovided}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2549,6 +2606,7 @@ const UpdateKpPrev = (props) => {
                           id="empowermentProgramReferred"
                           value={formik?.values?.empowermentProgramReferred}
                           onChange={formik?.handleChange}
+                          disabled={disableInputs}
                           onBlur={formik?.handleBlur}
                           style={{
                             border: "1px solid #014D88",
@@ -2575,6 +2633,7 @@ const UpdateKpPrev = (props) => {
                       id="legalAidServiceType"
                       value={formik?.values?.legalAidServiceType}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -2608,6 +2667,7 @@ const UpdateKpPrev = (props) => {
                         id="typeLegalEmpowerment"
                         value={formik?.values?.typeLegalEmpowerment}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -2637,6 +2697,7 @@ const UpdateKpPrev = (props) => {
                         id="legalProgramReferred"
                         value={formik?.values?.legalProgramReferred}
                         onChange={formik?.handleChange}
+                        disabled={disableInputs}
                         onBlur={formik?.handleBlur}
                         style={{
                           border: "1px solid #014D88",
@@ -2678,6 +2739,7 @@ const UpdateKpPrev = (props) => {
                       id="serviceProvider"
                       value={formik?.values?.serviceProvider}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
@@ -2706,6 +2768,7 @@ const UpdateKpPrev = (props) => {
                       id="serviceProviderSignature"
                       value={formik?.values?.serviceProviderSignature}
                       onChange={formik?.handleChange}
+                      disabled={disableInputs}
                       onBlur={formik?.handleBlur}
                       style={{
                         border: "1px solid #014D88",
