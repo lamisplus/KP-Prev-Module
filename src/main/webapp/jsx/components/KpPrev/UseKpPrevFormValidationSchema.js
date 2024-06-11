@@ -88,17 +88,41 @@ export const useKpPrevFormValidationSchema = (onSubmit, initialValues) => {
     acceptedPrep: yup.mixed(),
     referredForPrep: yup.mixed(),
     condomDispensed: yup.mixed(),
-    howManyCondomDispensed: yup.mixed(),
+    howManyCondomDispensed: yup.mixed().test(
+      'is-positive',
+      'The number must be positive',
+      value => value === undefined || value === null || (typeof Number(value) === 'number' && Number(value) > 0)
+    ),
     lubricantsDispensed: yup.mixed(),
-    howManyLubricantsDispensed: yup.mixed(),
+    howManyLubricantsDispensed: yup.mixed().test(
+      'is-positive',
+      'The number must be positive',
+      value => value === undefined || value === null || (typeof Number(value) === 'number' && Number(value) > 0)
+    ),
     oralQuickDispensed: yup.mixed(),
-    howManyOralQuickDispensed: yup.mixed(),
+    howManyOralQuickDispensed: yup.mixed().test(
+      'is-positive',
+      'The number must be positive',
+      value => value === undefined || value === null || (typeof Number(value) === 'number' && Number(value) > 0)
+    ),
     newNeedleDispensed: yup.mixed(),
-    howManyNewNeedleDispensed: yup.mixed(),
+    howManyNewNeedleDispensed: yup.mixed().test(
+      'is-positive',
+      'The number must be positive',
+      value => value === undefined || value === null || (typeof Number(value) === 'number' && Number(value) > 0)
+    ),
     oldNeedleRetrieved: yup.mixed(),
-    howManyOldNeedleRetrieved: yup.mixed(),
+    howManyOldNeedleRetrieved: yup.mixed().test(
+      'is-positive',
+      'The number must be positive',
+      value => value === undefined || value === null || (typeof Number(value) === 'number' && Number(value) > 0)
+    ),
     nalxoneProvided: yup.mixed(),
-    howManyNalxoneProvided: yup.mixed(),
+    howManyNalxoneProvided: yup.mixed().test(
+      'is-positive',
+      'The number must be positive',
+      value => value === undefined || value === null || (typeof Number(value) === 'number' && Number(value) > 0)
+    ),
     iecMaterial: yup.mixed(),
     interPersonalCommunication: yup.mixed(),
     peerGroupCommunication: yup.mixed(),

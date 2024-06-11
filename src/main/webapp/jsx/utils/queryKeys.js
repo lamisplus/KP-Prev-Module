@@ -12,4 +12,6 @@ export const getProvincesKey = "GET_PROVINCES"
 export const getCodesetsKey = "GET_CODESETS"
 export const getTargetGroupKey = "TARGET_GROUP"
 export const getTbStatusKey = "TB_STATUS"
+export const getStiTreatmentKey = "STI_TREATMENT"
+export const getMhpssKey = "MHPSS_PROVIDED"
 

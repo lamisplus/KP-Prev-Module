@@ -21,6 +21,8 @@ import {
   getStatesKey,
   getTargetGroupKey,
   getTbStatusKey,
+  getMhpssKey,
+  getStiTreatmentKey,
 } from "../../utils/queryKeys";
 import { fetchHtsCode } from "../../services/fetchHtsCode";
 import { fetchPrepCode } from "../../services/fetchPrepCode";
@@ -103,6 +105,8 @@ const UpdateKpPrev = (props) => {
   const [statesData, setStateData] = useState([]);
   const [provincesData, setProvincesData] = useState([]);
   const [tbStatusData, setTbStatusData] = useState([]);
+  const [stiTreatment, setStiTreatment] = useState([]);
+  const [mhpssProvided, setMhpssProvided] = useState([]);
   const classes = useStyles();
   const disableInputs = props?.disableInputs;
 
@@ -359,20 +363,13 @@ const UpdateKpPrev = (props) => {
   );
 
   useQuery(
-    [getPatientHivEnrolmentKey, patientObj?.id],
-    () => fetchHivEnrolment(patientObj?.id),
+    [getCodesetsKey, getStiTreatmentKey],
+    () => fetchCodesets(getStiTreatmentKey),
     {
       onSuccess: (data) => {
-        setPatientHivEnrolment(data);
-        if (
-          data?.enrollment?.uniqueId !== "" ||
-          data?.enrollment?.uniqueId !== null
-        ) {
-          formik?.setFieldValue("patientArtNumber", data?.enrollment?.uniqueId);
-        }
+        setStiTreatment(data);
       },
       refetchOnMount: "always",
-
       onError: (error) => {
         if (error.response && error.response.data) {
           let errorMessage =
@@ -387,6 +384,26 @@ const UpdateKpPrev = (props) => {
       },
     }
   );
+  
+  useQuery([getCodesetsKey, getMhpssKey], () => fetchCodesets(getMhpssKey), {
+    onSuccess: (data) => {
+      setMhpssProvided(data);
+    },
+    refetchOnMount: "always",
+    onError: (error) => {
+      if (error.response && error.response.data) {
+        let errorMessage =
+          error.response.data.apierror &&
+          error.response.data.apierror.message !== ""
+            ? error.response.data.apierror.message
+            : "Something went wrong, please try again";
+        toast.error(errorMessage);
+      } else {
+        toast.error("Something went wrong. Please try again...");
+      }
+    },
+  });
+
 
   useQuery(
     [getPatientHivEnrolmentKey, patientObj?.id],
@@ -419,10 +436,41 @@ const UpdateKpPrev = (props) => {
   );
 
   useQuery(
-    [getProvincesKey, formInitialValue?.kpPatientState],
-    () => fetchProvinces(formInitialValue?.kpPatientState),
+    [getPatientHivEnrolmentKey, patientObj?.id],
+    () => fetchHivEnrolment(patientObj?.id),
     {
       onSuccess: (data) => {
+        setPatientHivEnrolment(data);
+        if (
+          data?.enrollment?.uniqueId !== "" ||
+          data?.enrollment?.uniqueId !== null
+        ) {
+          formik?.setFieldValue("patientArtNumber", data?.enrollment?.uniqueId);
+        }
+      },
+      refetchOnMount: "always",
+
+      onError: (error) => {
+        if (error.response && error.response.data) {
+          let errorMessage =
+            error.response.data.apierror &&
+            error.response.data.apierror.message !== ""
+              ? error.response.data.apierror.message
+              : "Something went wrong, please try again";
+          toast.error(errorMessage);
+        } else {
+          toast.error("Something went wrong. Please try again...");
+        }
+      },
+    }
+  );
+
+  useQuery(
+    [getProvincesKey, formik?.values?.kpPatientState, formInitialValue?.kpPatientState],
+    () => fetchProvinces(formik?.values?.kpPatientState),
+    {
+      onSuccess: (data) => {
+        console.log("provinces data", data);
         setProvincesData(data);
       },
       refetchOnMount: "always",
@@ -1127,6 +1175,9 @@ const UpdateKpPrev = (props) => {
               </div>
 
               {/* PreP Services */}
+              {
+              formik?.values?.htsFinalResult === "negative" && (
+                
               <div className="row">
                 <LabelSui
                   as="a"
@@ -1234,6 +1285,9 @@ const UpdateKpPrev = (props) => {
                   </div>
                 )}
               </div>
+
+              )
+              }
 
               {/* Commodity services */}
               <div className="row">
@@ -1897,7 +1951,7 @@ const UpdateKpPrev = (props) => {
                       >
                         <Label> Type of STI treatment </Label>
                         <Input
-                          type="text"
+                          type="select"
                           name="typeOfStiTreatment"
                           id="typeOfStiTreatment"
                           value={formik?.values?.typeOfStiTreatment}
@@ -1908,7 +1962,15 @@ const UpdateKpPrev = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                        />
+                        >
+                          <option value=""> Select </option>
+                          {stiTreatment?.map?.((el) => (
+                            <option value={el?.code} key={el?.id}>
+                              {" "}
+                              {el?.display}{" "}
+                            </option>
+                          ))}
+                        </Input>
                         {formik?.touched.typeOfStiTreatment &&
                           formik?.errors.typeOfStiTreatment !== "" && (
                             <span className={classes.error}>
@@ -2427,8 +2489,11 @@ const UpdateKpPrev = (props) => {
                           }}
                         >
                           <option value=""> Select </option>
-                          <option value="yes"> Yes </option>
-                          <option value="no"> No </option>
+                          {mhpssProvided?.map((el) => (
+                            <option value={el?.code} key={el?.id}>
+                              {el?.display}
+                            </option>
+                          ))}
                         </Input>
 
                         {formik?.touched.typeOfMhpss &&

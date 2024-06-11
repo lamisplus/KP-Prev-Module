@@ -17,6 +17,8 @@ import {
   getPrepCodeKey,
   getProvincesKey,
   getStatesKey,
+  getMhpssKey,
+  getStiTreatmentKey,
   getTargetGroupKey,
   getTbStatusKey,
 } from "../../utils/queryKeys";
@@ -101,6 +103,8 @@ const CreateKpPrev = (props) => {
   const [statesData, setStateData] = useState([]);
   const [provincesData, setProvincesData] = useState([]);
   const [tbStatusData, setTbStatusData] = useState([]);
+  const [stiTreatment, setStiTreatment] = useState([]);
+  const [mhpssProvided, setMhpssProvided] = useState([]);
   const classes = useStyles();
 
   const handleSubmit = async () => {
@@ -362,6 +366,48 @@ const CreateKpPrev = (props) => {
   );
 
   useQuery(
+    [getCodesetsKey, getStiTreatmentKey],
+    () => fetchCodesets(getStiTreatmentKey),
+    {
+      onSuccess: (data) => {
+        setStiTreatment(data);
+      },
+      refetchOnMount: "always",
+      onError: (error) => {
+        if (error.response && error.response.data) {
+          let errorMessage =
+            error.response.data.apierror &&
+            error.response.data.apierror.message !== ""
+              ? error.response.data.apierror.message
+              : "Something went wrong, please try again";
+          toast.error(errorMessage);
+        } else {
+          toast.error("Something went wrong. Please try again...");
+        }
+      },
+    }
+  );
+  
+  useQuery([getCodesetsKey, getMhpssKey], () => fetchCodesets(getMhpssKey), {
+    onSuccess: (data) => {
+      setMhpssProvided(data);
+    },
+    refetchOnMount: "always",
+    onError: (error) => {
+      if (error.response && error.response.data) {
+        let errorMessage =
+          error.response.data.apierror &&
+          error.response.data.apierror.message !== ""
+            ? error.response.data.apierror.message
+            : "Something went wrong, please try again";
+        toast.error(errorMessage);
+      } else {
+        toast.error("Something went wrong. Please try again...");
+      }
+    },
+  });
+
+  useQuery(
     [getPatientHivEnrolmentKey, patientObj?.id],
     () => fetchHivEnrolment(patientObj?.id),
     {
@@ -434,7 +480,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== "" 
+            error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -1792,7 +1838,7 @@ const CreateKpPrev = (props) => {
                       >
                         <Label> Type of STI treatment </Label>
                         <Input
-                          type="text"
+                          type="select"
                           name="typeOfStiTreatment"
                           id="typeOfStiTreatment"
                           value={formik?.values?.typeOfStiTreatment}
@@ -1802,7 +1848,15 @@ const CreateKpPrev = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                        />
+                        >
+                          <option value=""> Select </option>
+                          {stiTreatment?.map?.((el) => (
+                            <option value={el?.code} key={el?.id}>
+                              {" "}
+                              {el?.display}{" "}
+                            </option>
+                          ))}
+                        </Input>
                         {formik?.touched.typeOfStiTreatment &&
                           formik?.errors.typeOfStiTreatment !== "" && (
                             <span className={classes.error}>
@@ -2197,40 +2251,44 @@ const CreateKpPrev = (props) => {
                     </div>
                   )}
 
-                {
-                formik?.values?.referredForFamilyPlanningServices === "yes" && (
-                  <div className="form-group mb-3 col-md-4">
-                  <CustomFormGroup
-                    formik={formik}
-                    name="facilityReferredForFamilyPlanningServices"
-                  >
-                    <Label>Facility referred to</Label>
-                    <Input
-                      type="text"
-                      name="facilityReferredForFamilyPlanningServices"
-                      id="facilityReferredForFamilyPlanningServices"
-                      value={
-                        formik?.values?.facilityReferredForFamilyPlanningServices
-                      }
-                      onChange={formik?.handleChange}
-                      onBlur={formik?.handleBlur}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    
-                    />
-                    {formik?.touched.facilityReferredForFamilyPlanningServices &&
-                      formik?.errors.facilityReferredForFamilyPlanningServices !==
-                        "" && (
-                        <span className={classes.error}>
-                          {formik?.errors.facilityReferredForFamilyPlanningServices}
-                        </span>
-                      )}
-                  </CustomFormGroup>
-                </div>
-                )
-                }
+                  {formik?.values?.referredForFamilyPlanningServices ===
+                    "yes" && (
+                    <div className="form-group mb-3 col-md-4">
+                      <CustomFormGroup
+                        formik={formik}
+                        name="facilityReferredForFamilyPlanningServices"
+                      >
+                        <Label>Facility referred to</Label>
+                        <Input
+                          type="text"
+                          name="facilityReferredForFamilyPlanningServices"
+                          id="facilityReferredForFamilyPlanningServices"
+                          value={
+                            formik?.values
+                              ?.facilityReferredForFamilyPlanningServices
+                          }
+                          onChange={formik?.handleChange}
+                          onBlur={formik?.handleBlur}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                        {formik?.touched
+                          .facilityReferredForFamilyPlanningServices &&
+                          formik?.errors
+                            .facilityReferredForFamilyPlanningServices !==
+                            "" && (
+                            <span className={classes.error}>
+                              {
+                                formik?.errors
+                                  .facilityReferredForFamilyPlanningServices
+                              }
+                            </span>
+                          )}
+                      </CustomFormGroup>
+                    </div>
+                  )}
 
                   <div className="form-group mb-3 col-md-4">
                     <CustomFormGroup
@@ -2340,8 +2398,11 @@ const CreateKpPrev = (props) => {
                           }}
                         >
                           <option value=""> Select </option>
-                          <option value="yes"> Yes </option>
-                          <option value="no"> No </option>
+                          {mhpssProvided?.map((el) => (
+                            <option value={el?.code} key={el?.id}>
+                              {el?.display}
+                            </option>
+                          ))}
                         </Input>
 
                         {formik?.touched.typeOfMhpss &&
