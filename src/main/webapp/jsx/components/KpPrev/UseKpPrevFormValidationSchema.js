@@ -67,6 +67,7 @@ export const useKpPrevFormValidationSchema = (onSubmit, initialValues) => {
     facilityRefferedToRecievedNalxoneForOverdoseTreatment: "",
     empowermentProgramReferred: "",
     serviceProviderSignature: "",
+    kpPatientTargetGroup: "",
   };
 
   const kpPrevFormInitialSchema = yup.object({
@@ -79,6 +80,7 @@ export const useKpPrevFormValidationSchema = (onSubmit, initialValues) => {
     kpPatientState: yup.mixed(),
     patientProvince: yup.mixed(),
     patientTargetGroup: yup.mixed(),
+    kpPatientTargetGroup: yup.mixed().required("This field is required"),
     patientArtNumber: yup.mixed(),
     offeredHts: yup.mixed(),
     acceptedHts: yup.mixed(),

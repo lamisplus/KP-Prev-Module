@@ -98,16 +98,17 @@ const CreateKpPrev = (props) => {
   const patientObj = props.patientObj;
   const [htsCodeVal, setHtsCodeVal] = useState(null);
   const [prepCodeVal, setPrepCodeVal] = useState(null);
-  const [patientHivEnrolment, setPatientHivEnrolment] = useState(null);
+  const [, setPatientHivEnrolment] = useState(null);
   const [targetGroup, setTargetGroup] = useState([]);
-  const [statesData, setStateData] = useState([]);
-  const [provincesData, setProvincesData] = useState([]);
+  const [, setStateData] = useState([]);
+  const [, setProvincesData] = useState([]);
   const [tbStatusData, setTbStatusData] = useState([]);
   const [stiTreatment, setStiTreatment] = useState([]);
   const [mhpssProvided, setMhpssProvided] = useState([]);
   const classes = useStyles();
 
   const handleSubmit = async () => {
+    console.log(formik.errors);
     const biomedicalServiceValue = {
       medical_assisted_therapy_for_six_months:
         formik?.values?.onMedicalAssistedTherapy,
@@ -218,8 +219,8 @@ const CreateKpPrev = (props) => {
       target_group:
         formik?.values?.kpPatientTargetGroup ||
         htsCodeVal?.htsClientDtoList?.length > 0
-          ? htsCodeVal?.htsClientDtoList[0]?.targetGroup
-          : prepCodeVal?.prepDtoList[0]?.targetGroup,
+          ? htsCodeVal?.htsClientDtoList?.[0]?.targetGroup
+          : prepCodeVal?.prepDtoList?.[0]?.targetGroup,
       dateServiceOffered: formik?.values?.dateServiceOffered,
       htsServices: htsServicesValue,
       prepServices: prepServicesValue,
@@ -387,7 +388,7 @@ const CreateKpPrev = (props) => {
       },
     }
   );
-  
+
   useQuery([getCodesetsKey, getMhpssKey], () => fetchCodesets(getMhpssKey), {
     onSuccess: (data) => {
       setMhpssProvided(data);
@@ -564,6 +565,39 @@ const CreateKpPrev = (props) => {
                   ></Input>
                 </CustomFormGroup>
               </div>
+
+              <div className="form-group mb-3 col-md-4">
+                <br />
+                <CustomFormGroup formik={formik} name="kpPatientTargetGroup">
+                  <Label>Target Group</Label>
+                  <Input
+                    type="select"
+                    name="kpPatientTargetGroup"
+                    id="kpPatientTargetGroup"
+                    value={formik?.values?.kpPatientTargetGroup}
+                    onChange={formik?.handleChange}
+                    onBlur={formik?.handleBlur}
+                    style={{
+                      border: "1px solid #014D88",
+                      borderRadius: "0.25rem",
+                    }}
+                  >
+                    <option value="">Select</option>
+
+                    {targetGroup?.filter?.((el) => el?.code !== "TARGET_GROUP_GEN_POP")?.map?.((el) => (
+                      <option value={el?.code} key={el?.id}>
+                        {el?.display}
+                      </option>
+                    ))}
+                  </Input>
+                  {formik?.touched.kpPatientTargetGroup &&
+                    formik?.errors.kpPatientTargetGroup !== "" && (
+                      <span className={classes.error}>
+                        {formik?.errors.kpPatientTargetGroup}
+                      </span>
+                    )}
+                </CustomFormGroup>
+              </div>
             </div>
 
             <div className="row d-flex " style={{ marginTop: "50px" }}>
@@ -619,6 +653,37 @@ const CreateKpPrev = (props) => {
                     </CustomFormGroup>
                   </div>
 
+                  {formik?.values?.kpOfferedHts === "0" && (
+                    <div className="form-group mb-10 col-xs-6 col-md-4 ">
+                      <CustomFormGroup formik={formik} name="kpKnownPositive">
+                        <Label>Known Positive</Label>
+                        <Input
+                          type="select"
+                          name="kpKnownPositive"
+                          id="kpKnownPositive"
+                          value={formik?.values?.kpKnownPositive}
+                          onChange={formik?.handleChange}
+                          onBlur={formik?.handleBlur}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                          // readOnly
+                        >
+                          <option value="">Select</option>
+                          <option value="1">Yes</option>
+                          <option value="0">No</option>
+                        </Input>
+                        {formik?.touched.kpKnownPositive &&
+                          formik?.errors.kpKnownPositive !== "" && (
+                            <span className={classes.error}>
+                              {formik?.errors.kpKnownPositive}
+                            </span>
+                          )}
+                      </CustomFormGroup>
+                    </div>
+                  )}
+
                   {formik?.values?.kpOfferedHts === "1" && (
                     <div className="form-group mb-10 col-xs-6 col-md-4 ">
                       <CustomFormGroup formik={formik} name="kpAcceptedHts">
@@ -648,6 +713,44 @@ const CreateKpPrev = (props) => {
                       </CustomFormGroup>
                     </div>
                   )}
+
+                  {
+                  formik.values?.kpOfferedHts === "1" && formik?.values?.kpAcceptedHts === "0" && (
+                    <div className="form-group mb-10 col-xs-6 col-md-4 ">
+                    <CustomFormGroup formik={formik} name="kpKnownPositive">
+                      <Label>Known Positive</Label>
+                      <Input
+                        type="select"
+                        name="kpKnownPositive"
+                        id="kpKnownPositive"
+                        value={formik?.values?.kpKnownPositive}
+                        onChange={formik?.handleChange}
+                        onBlur={formik?.handleBlur}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                        disabled={
+                          formik?.values?.kpHtsFinalResult === "positive"
+                            ? true
+                            : false
+                        }
+                      >
+                        <option value="">Select</option>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                      </Input>
+                      {formik?.touched.kpKnownPositive &&
+                        formik?.errors.kpKnownPositive !== "" && (
+                          <span className={classes.error}>
+                            {formik?.errors.kpKnownPositive}
+                          </span>
+                        )}
+                    </CustomFormGroup>
+                  </div>
+
+                  )
+                  }
 
                   {formik?.values?.kpAcceptedHts === "1" && (
                     <>
@@ -682,6 +785,7 @@ const CreateKpPrev = (props) => {
                             )}
                         </CustomFormGroup>
                       </div>
+
                       <div className="form-group mb-10 col-xs-6 col-md-4">
                         <CustomFormGroup
                           formik={formik}
@@ -694,12 +798,10 @@ const CreateKpPrev = (props) => {
                             id="kpHtsFinalResult"
                             value={formik?.values?.kpHtsFinalResult}
                             onChange={(e) => {
+                              if (e.target.value === "positive") {
+                                formik?.setFieldValue("kpKnownPositive", "1");
+                              }
                               formik?.handleChange(e);
-                              // e.target.value === "positive"
-                              //   ? formik.setFieldValue("kpKnownPositive", "1")
-                              //   : e.target.value === "negative"
-                              //   ? formik.setFieldValue("kpKnownPositive", "0")
-                              //   : formik.setFieldValue("kpKnownPositive", "");
                             }}
                             onBlur={formik?.handleBlur}
                             style={{
@@ -721,14 +823,50 @@ const CreateKpPrev = (props) => {
                       </div>
                     </>
                   )}
+
+                  {formik?.values?.kpOfferedHts &&
+                    formik?.values?.kpAcceptedHts &&
+                    formik?.values?.kpHtsFinalResult === "positive" && (
+                      <div className="form-group mb-10 col-xs-6 col-md-4 ">
+                        <CustomFormGroup formik={formik} name="kpKnownPositive">
+                          <Label>Known Positive</Label>
+                          <Input
+                            type="select"
+                            name="kpKnownPositive"
+                            id="kpKnownPositive"
+                            value={formik?.values?.kpKnownPositive}
+                            onChange={formik?.handleChange}
+                            onBlur={formik?.handleBlur}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                            disabled={
+                              formik?.values?.kpHtsFinalResult === "positive"
+                                ? true
+                                : false
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </Input>
+                          {formik?.touched.kpKnownPositive &&
+                            formik?.errors.kpKnownPositive !== "" && (
+                              <span className={classes.error}>
+                                {formik?.errors.kpKnownPositive}
+                              </span>
+                            )}
+                        </CustomFormGroup>
+                      </div>
+                    )}
                 </>
               )}
 
-              {/* Show Patient ART if there are no HTS data */}
-              {htsCodeVal?.htsClientDtoList?.length === 0 && (
+              {formik?.values?.kpKnownPositive === "1" && (
                 <div className="form-group mb-10 col-xs-6 col-md-4">
                   <CustomFormGroup formik={formik} name="kpPatientArtNumber">
-                    <Label>Patient ART Number</Label>
+                    <Label>Patient ART Unique ID</Label>
                     <Input
                       type="text"
                       name="kpPatientArtNumber"
@@ -740,10 +878,6 @@ const CreateKpPrev = (props) => {
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      disabled={
-                        patientHivEnrolment?.enrollment?.uniqueId !== "" ||
-                        patientHivEnrolment?.enrollment?.uniqueId !== null
-                      }
                     />
 
                     {formik?.touched?.kpPatientArtNumber &&
@@ -756,337 +890,9 @@ const CreateKpPrev = (props) => {
                 </div>
               )}
 
-              {(htsCodeVal?.htsClientDtoList?.length === 0 ||
-                formik?.values?.kpAcceptedHts === "0") && (
-                <div className="form-group mb-10 col-xs-6 col-md-4 ">
-                  <CustomFormGroup
-                    formik={formik}
-                    name="kpPatientHospitalNumber"
-                  >
-                    <Label>Patient Hospital Number</Label>
-                    <Input
-                      type="text"
-                      name="kpPatientHospitalNumber"
-                      id="kpPatientHospitalNumber"
-                      value={
-                        patientObj?.identifier?.identifier?.[0]?.value || ""
-                      }
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                      disabled
-                    />
+              {/* end of entry point */}
 
-                    {formik?.touched?.kpPatientHospitalNumber &&
-                      formik?.errors?.kpPatientHospitalNumber !== "" && (
-                        <span className={classes.error}>
-                          {formik?.errors?.kpPatientHospitalNumber}
-                        </span>
-                      )}
-                  </CustomFormGroup>
-                </div>
-              )}
-
-              <div className="form-group mb-10 col-xs-6 col-md-4 ">
-                <CustomFormGroup formik={formik} name="kpKnownPositive">
-                  <Label>Known Positive</Label>
-                  <Input
-                    type="select"
-                    name="kpKnownPositive"
-                    id="kpKnownPositive"
-                    value={formik?.values?.kpKnownPositive}
-                    onChange={formik?.handleChange}
-                    onBlur={formik?.handleBlur}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                    // readOnly
-                  >
-                    <option value="">Select</option>
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
-                  </Input>
-                  {formik?.touched.kpKnownPositive &&
-                    formik?.errors.kpKnownPositive !== "" && (
-                      <span className={classes.error}>
-                        {formik?.errors.kpKnownPositive}
-                      </span>
-                    )}
-                </CustomFormGroup>
-              </div>
-
-              <div className="form-group mb-10 col-xs-6 col-md-4 ">
-                <CustomFormGroup formik={formik} name="kpPatientTargetGroup">
-                  <Label>Target Group</Label>
-                  <Input
-                    type="select"
-                    name="kpPatientTargetGroup"
-                    id="kpPatientTargetGroup"
-                    value={formik?.values?.kpPatientTargetGroup}
-                    onChange={formik?.handleChange}
-                    onBlur={formik?.handleBlur}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  >
-                    <option value="">Select</option>
-
-                    {targetGroup?.map((el) => (
-                      <option value={el?.code} key={el?.id}>
-                        {el?.display}
-                      </option>
-                    ))}
-                  </Input>
-                  {formik?.touched.kpPatientTargetGroup &&
-                    formik?.errors.kpPatientTargetGroup !== "" && (
-                      <span className={classes.error}>
-                        {formik?.errors.kpPatientTargetGroup}
-                      </span>
-                    )}
-                </CustomFormGroup>
-              </div>
-
-              <div className="form-group mb-10 col-xs-6 col-md-4 ">
-                <CustomFormGroup formik={formik} name="kpPatientState">
-                  <Label>State</Label>
-                  <Input
-                    type="select"
-                    name="kpPatientState"
-                    id="kpPatientState"
-                    value={formik?.values?.kpPatientState}
-                    onChange={formik?.handleChange}
-                    onBlur={formik?.handleBlur}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  >
-                    <option value="">Select</option>
-
-                    {statesData?.map((el) => (
-                      <option value={el?.id} key={el?.id}>
-                        {el?.name}
-                      </option>
-                    ))}
-                  </Input>
-                  {formik?.touched.kpPatientState &&
-                    formik?.errors.kpPatientState !== "" && (
-                      <span className={classes.error}>
-                        {formik?.errors.kpPatientState}
-                      </span>
-                    )}
-                </CustomFormGroup>
-              </div>
-
-              {formik?.values?.kpPatientState !== "" && (
-                <div className="form-group mb-10 col-xs-6 col-md-4 ">
-                  <CustomFormGroup formik={formik} name="kpPatientProvince">
-                    <Label>LGA</Label>
-                    <Input
-                      type="select"
-                      name="kpPatientProvince"
-                      id="kpPatientProvince"
-                      value={formik?.values?.kpPatientProvince}
-                      onChange={formik?.handleChange}
-                      onBlur={formik?.handleBlur}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-
-                      {provincesData?.map((el) => (
-                        <option value={el?.id} key={el?.id}>
-                          {el?.name}
-                        </option>
-                      ))}
-                    </Input>
-                    {formik?.touched.kpPatientProvince &&
-                      formik?.errors.kpPatientProvince !== "" && (
-                        <span className={classes.error}>
-                          {formik?.errors.kpPatientProvince}
-                        </span>
-                      )}
-                  </CustomFormGroup>
-                </div>
-              )}
-
-              {/* Services section starts here */}
-
-              {/* HTS service */}
-              <div className="row">
-                <LabelSui
-                  as="a"
-                  color="teal"
-                  style={{
-                    width: "100%",
-                    height: "45px",
-                    marginBottom: "10px",
-                  }}
-                  ribbon
-                >
-                  <h2 style={{ color: "#fff" }}>HTS Services</h2>
-                </LabelSui>
-
-                <br />
-                <br />
-
-                <div className="form-group mb-10 col-xs-6 col-md-3 ">
-                  <CustomFormGroup formik={formik} name="offeredHts">
-                    <Label>HTS Offered</Label>
-                    <Input
-                      type="select"
-                      name="offeredHts"
-                      id="offeredHts"
-                      value={formik?.values?.offeredHts}
-                      onChange={formik?.handleChange}
-                      onBlur={formik?.handleBlur}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.25rem",
-                      }}
-                    >
-                      <option value="">Select</option>
-                      <option value="1">Yes</option>
-                      <option value="0">No</option>
-                    </Input>
-
-                    {formik?.touched.offeredHts &&
-                      formik?.errors.offeredHts !== "" && (
-                        <span className={classes.error}>
-                          {formik?.errors.offeredHts}
-                        </span>
-                      )}
-                  </CustomFormGroup>
-                </div>
-
-                {formik?.values?.offeredHts === "1" && (
-                  <div className="form-group mb-3 col-xs-6 col-md-3 ">
-                    <CustomFormGroup formik={formik} name="acceptedHts">
-                      <Label>HTS Accepted</Label>
-                      <Input
-                        type="select"
-                        name="acceptedHts"
-                        id="acceptedHts"
-                        value={formik?.values?.acceptedHts}
-                        onChange={formik?.handleChange}
-                        onBlur={formik?.handleBlur}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                      {formik?.touched.acceptedHts &&
-                        formik?.errors.acceptedHts !== "" && (
-                          <span className={classes.error}>
-                            {formik?.errors.acceptedHts}
-                          </span>
-                        )}
-                    </CustomFormGroup>
-                  </div>
-                )}
-
-                {formik?.values?.acceptedHts === "1" && (
-                  <>
-                    <div className="form-group mb-3 col-xs-6 col-md-3 ">
-                      <CustomFormGroup formik={formik} name="htsClientCode">
-                        <Label>HTS Client Code</Label>
-                        <Input
-                          type="text"
-                          name="htsClientCode"
-                          id="htsClientCode"
-                          value={formik?.values?.htsClientCode}
-                          onChange={formik?.handleChange}
-                          onBlur={formik?.handleBlur}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                          disabled={
-                            htsCodeVal?.htsCode !== "" ||
-                            htsCodeVal?.htsCode !== null
-                          }
-                        />
-
-                        {formik?.touched?.htsClientCode &&
-                          formik?.errors?.htsClientCode !== "" && (
-                            <span className={classes.error}>
-                              {formik?.errors?.htsClientCode}
-                            </span>
-                          )}
-                      </CustomFormGroup>
-                    </div>
-
-                    <div className="form-group mb-3 col-xs-6 col-md-3 ">
-                      <CustomFormGroup formik={formik} name="htsFinalResult">
-                        <Label>HIV Test Result</Label>
-                        <Input
-                          type="select"
-                          name="htsFinalResult"
-                          id="htsFinalResult"
-                          value={formik?.values?.htsFinalResult}
-                          onChange={formik?.handleChange}
-                          onBlur={formik?.handleBlur}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value="">Select</option>
-                          <option value="positive">Positive</option>
-                          <option value="negative">Negative</option>
-                        </Input>
-                        {formik?.touched.htsFinalResult &&
-                          formik?.errors.htsFinalResult !== "" && (
-                            <span className={classes.error}>
-                              {formik?.errors.htsFinalResult}
-                            </span>
-                          )}
-                      </CustomFormGroup>
-                    </div>
-                  </>
-                )}
-
-                {formik?.values?.htsFinalResult === "negative" && (
-                  <div className="form-group mb-10 col-xs-6 col-md-4">
-                    <CustomFormGroup formik={formik} name="referredForArt">
-                      <Label>Referred for ART</Label>
-                      <Input
-                        type="select"
-                        name="referredForArt"
-                        id="referredForArt"
-                        value={formik?.values?.referredForArt}
-                        onChange={formik?.handleChange}
-                        onBlur={formik?.handleBlur}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                      {formik?.touched.referredForArt &&
-                        formik?.errors.referredForArt !== "" && (
-                          <span className={classes.error}>
-                            {formik?.errors.referredForArt}
-                          </span>
-                        )}
-                    </CustomFormGroup>
-                  </div>
-                )}
-              </div>
-
-              {formik?.values?.htsFinalResult === "negative" && (
+              {formik?.values?.kpHtsFinalResult === "negative" && (
                 <>
                   {/* PreP Services */}
                   <div className="row">
@@ -1100,13 +906,13 @@ const CreateKpPrev = (props) => {
                       }}
                       ribbon
                     >
-                      <h2 style={{ color: "#fff" }}>PreP Services</h2>
+                      <h2 style={{ color: "#fff" }}>PrEP Services</h2>
                     </LabelSui>
                     <br />
                     <br />
                     <div className="form-group mb-3 col-md-4 ">
                       <CustomFormGroup formik={formik} name="offeredPrep">
-                        <Label>Prep Offered</Label>
+                        <Label>PrEP Offered</Label>
                         <Input
                           type="select"
                           name="offeredPrep"
@@ -1135,7 +941,7 @@ const CreateKpPrev = (props) => {
                     {formik?.values?.offeredPrep === "1" && (
                       <div className="form-group mb-3 col-md-4 ">
                         <CustomFormGroup formik={formik} name="acceptedPrep">
-                          <Label>PreP Accepted</Label>
+                          <Label>PrEP Accepted</Label>
                           <Input
                             type="select"
                             name="acceptedPrep"
@@ -1165,7 +971,7 @@ const CreateKpPrev = (props) => {
                     {formik?.values?.acceptedPrep === "1" && (
                       <div className="form-group mb-3 col-md-4 ">
                         <CustomFormGroup formik={formik} name="referredForPrep">
-                          <Label>Referred for Prep</Label>
+                          <Label>Referred for PrEP</Label>
                           <Input
                             type="select"
                             name="referredForPrep"
@@ -1256,6 +1062,7 @@ const CreateKpPrev = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
+                        min="0"
                       ></Input>
                       {formik?.touched.howManyCondomDispensed &&
                         formik?.errors.howManyCondomDispensed !== "" && (
@@ -1312,6 +1119,7 @@ const CreateKpPrev = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
+                        min="0"
                       ></Input>
                       {formik?.touched.howManyLubricantsDispensed &&
                         formik?.errors.howManyLubricantsDispensed !== "" && (
@@ -1369,6 +1177,7 @@ const CreateKpPrev = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
+                        min="0"
                       ></Input>
                       {formik?.touched.howManyOralQuickDispensed &&
                         formik?.errors.howManyOralQuickDispensed !== "" && (
@@ -1426,6 +1235,7 @@ const CreateKpPrev = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
+                        min="0"
                       ></Input>
 
                       {formik?.touched.howManyNewNeedleDispensed &&
@@ -1485,6 +1295,7 @@ const CreateKpPrev = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
+                        min="0"
                       ></Input>
                       {formik?.touched.howManyOldNeedleRetrieved &&
                         formik?.errors.howManyOldNeedleRetrieved !== "" && (
@@ -1542,6 +1353,7 @@ const CreateKpPrev = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
+                        min="0"
                       ></Input>
 
                       {formik?.touched.howManyNalxoneProvided &&
