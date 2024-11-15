@@ -4,7 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.audit4j.core.util.Log;
 import org.lamisplus.modules.kp_prev.domain.dto.*;
+
 import org.lamisplus.modules.kp_prev.domain.entity.*;
 import org.lamisplus.modules.kp_prev.repository.*;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
@@ -26,7 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class KpPrevService {
-	
+
+	private final CurrentUserOrganizationService currentUserOrganizationService;
+	private static final Integer UN_ARCHIVED = 0;
 	private final KpPrevRepository kpPrevRepository;
 	private final UserService userService;
 	static final String SERVICE_NOT_FOUND_MESSAGE = "No such service instance with id";
@@ -124,7 +130,6 @@ public class KpPrevService {
 		
 	}
 
-
 	public  KpPrevMetaDataDto findKpPrevBySearchParam(String searchParam, Integer pageNo, Integer pageSize) {
 		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by("id").descending());
         Optional<User> currentUser = this.userService.getUserWithRoles();
@@ -132,7 +137,7 @@ public class KpPrevService {
         if (currentUser.isPresent()) {
             User user = (User) currentUser.get();
             currentOrganisationUnitId = user.getCurrentOrganisationUnitId();
-            System.out.println("facility id is:" + currentOrganisationUnitId);
+			Log.info("facility id is:" + currentOrganisationUnitId);
 
         }
         String queryParam = "";
@@ -142,24 +147,72 @@ public class KpPrevService {
             searchParam = searchParam.replaceAll(",", "");
 
             queryParam = "%" + searchParam + "%";
-            services = kpPrevRepository.findAllServicesBySearchParameters(queryParam, 0, currentOrganisationUnitId, paging);
+            services = kpPrevRepository.findAllServicesBySearchParameters(queryParam, UN_ARCHIVED, currentOrganisationUnitId, paging);
         } else {
-            services = kpPrevRepository.getAllByArchivedAndFacilityIdOrderByIdDesc(0, currentOrganisationUnitId, paging);
+            services = kpPrevRepository.getAllByArchivedAndFacilityIdOrderByIdDesc(UN_ARCHIVED, currentOrganisationUnitId, paging);
         }
 
         if (services.hasContent()) {
 
-        	System.out.println("There are a total of :"+services.getSize());
-        	KpPrevMetaDataDto kpPrevMetaDataDto = new KpPrevMetaDataDto();
-            kpPrevMetaDataDto.setTotalRecords(services.getTotalElements());
-            kpPrevMetaDataDto.setPageSize(services.getSize());
-            kpPrevMetaDataDto.setTotalPages(services.getTotalPages());
-            kpPrevMetaDataDto.setCurrentPage(services.getNumber());
-            kpPrevMetaDataDto.setRecords(services.getContent().stream().map(this::getDtoFromKpPrev).collect(Collectors.toList()));
-            return kpPrevMetaDataDto;
+			return KpPrevMetaDataDto.builder()
+					.totalRecords(services.getTotalElements())
+					.pageSize(services.getSize())
+					.totalPages(services.getTotalPages())
+					.currentPage(services.getNumber())
+					.records(services.getContent().stream().map(this::getDtoFromKpPrev).collect(Collectors.toList()))
+					.build();
         }
         
 		return null;
+	}
+
+	public KpPrevMetaDataDto getAllPatients(String searchValue, Pageable pageable) {
+		Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
+		Page<PersonDtos> persons = null;
+
+		if (searchValue != null && !StringUtils.isBlank(searchValue) && !searchValue.equalsIgnoreCase("null")) {
+			searchValue = searchValue.replaceAll("\\s", "").replaceAll(",", "");
+			String queryParam = "%" + searchValue + "%";
+			persons = kpPrevRepository.findAllPatientBySearchParameters(queryParam, UN_ARCHIVED, facilityId, pageable);
+		} else {
+			persons = kpPrevRepository.findAllPatient(UN_ARCHIVED, facilityId, pageable);
+		}
+		return getPageDTORecords(persons);
+	}
+
+	private  KpPrevMetaDataDto getPageDto(Page<?> persons, List<?> content) {
+		return KpPrevMetaDataDto.builder()
+				.currentPage(persons.getNumber())
+				.pageSize(persons.getSize())
+				.totalPages(persons.getTotalPages())
+				.totalRecords(persons.getTotalElements())
+				.records(content)
+				.build();
+	}
+
+	private KpPrevMetaDataDto getPageDTORecords(Page<PersonDtos> persons) {
+		List<PatientDto> patientDTOList = persons.getContent()
+				.stream()
+				.map(this::getPatientDtoBuild)
+				.collect(Collectors.toList());
+		return getPageDto(persons, patientDTOList);
+	}
+
+	private PatientDto getPatientDtoBuild (PersonDtos p) {
+		return PatientDto.builder()
+				.age(p.getAge())
+				.dateOfBirth(p.getDateOfBirth())
+				.sex(p.getSex())
+				.hospitalNumber(p.getHospitalNumber())
+				.firstName(p.getFirstName())
+				.facilityId(p.getFacilityId())
+				.personUuid(p.getUuid())
+				.otherName(p.getOtherName())
+				.surname(p.getSurname())
+				.id(p.getId())
+				.isDobEstimated(p.getIsDobEstimated())
+				.uniqueId(p.getUniqueId())
+				.build();
 	}
 	
 	public KpPrevResponseDTO updateKpPrev(Long id, KpPrevInputDTO kpPrevDto) {
