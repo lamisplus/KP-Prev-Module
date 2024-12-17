@@ -8,10 +8,10 @@ const RecentHistory = (props) => {
 
   console.log(props)
   useQuery(
-    [getKpPrevRecordByPatientIdKey, props?.patientObj?.uuid],
-    () => fetchKpPrevRecordByPatientId(props?.patientObj?.uuid),
+    [getKpPrevRecordByPatientIdKey, props?.patientObj?.uuid || props?.patientObj?.personUuid],
+    () => fetchKpPrevRecordByPatientId(props?.patientObj?.uuid || props?.patientObj?.personUuid),
     {
-      enabled: props?.patientObj?.uuid ? true : false,
+      enabled: props?.patientObj?.uuid || props?.patientObj?.personUuid ? true : false,
     }
   );
   

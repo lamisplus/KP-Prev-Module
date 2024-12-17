@@ -92,10 +92,10 @@ const KpPrevEnrolled = (props) => {
   };
 
   const { data, isLoading: isLoadingQuery } = useQuery(
-    [getKpPrevRecordByPatientIdKey, props?.patientObj?.uuid],
-    () => fetchKpPrevRecordByPatientId(props?.patientObj?.uuid),
+    [getKpPrevRecordByPatientIdKey, props?.patientObj?.uuid || props?.patientObj?.personUuid],
+    () => fetchKpPrevRecordByPatientId(props?.patientObj?.uuid || props?.patientObj?.personUuid),
     {
-      enabled: props?.patientObj?.uuid ? true : false,
+      enabled: (props?.patientObj?.uuid || props?.patientObj?.personUuid) ? true : false,
     }
   );
 
@@ -154,55 +154,55 @@ const KpPrevEnrolled = (props) => {
         isLoading={isLoadingQuery}
         data={
           !isLoading && data ?
-          data?.map?.((row) => ({
-            dateServiceOffered: row?.dateServiceOffered,
-            hospital_number:
-              row?.htsCode !== null ? row?.htsCode : row?.prepCode,
-            prevCode: row?.prevCode || "",
-            htsServices: row?.htsServices?.offered_hts !== "" ? "✅" : "❌",
-            prepServices: row?.prepServices?.offered_prep !== "" ? "✅" : "❌",
-            commodityServices:
-              row?.commodityServices?.condoms_dispensed !== "" ? "✅" : "❌",
-            hivEducationalServices:
-              row?.hivEducationalServices?.iecMaterial !== "" ? "✅" : "❌",
-            biomedicalServices:
-              row?.biomedicalServices?.sti_screening !== "" ? "✅" : "❌",
-            structuralServices:
-              row?.structuralServices?.legalAidServices !== "" ? "✅" : "❌",
+            data?.map?.((row) => ({
+              dateServiceOffered: row?.dateServiceOffered,
+              hospital_number:
+                row?.kpPatientHospitalNumber || row?.htsCode || row?.prepCode || row?.prevCode,
+              prevCode: row?.prevCode || "",
+              htsServices: row?.htsServices?.offered_hts !== "" ? "✅" : "❌",
+              prepServices: row?.prepServices?.offered_prep !== "" ? "✅" : "❌",
+              commodityServices:
+                row?.commodityServices?.condoms_dispensed !== "" ? "✅" : "❌",
+              hivEducationalServices:
+                row?.hivEducationalServices?.iecMaterial !== "" ? "✅" : "❌",
+              biomedicalServices:
+                row?.biomedicalServices?.sti_screening !== "" ? "✅" : "❌",
+              structuralServices:
+                row?.structuralServices?.legalAidServices !== "" ? "✅" : "❌",
 
-            actions: (
-              <div>
-                <Menu.Menu position="right">
-                  <Menu.Item>
-                    <Button
-                      style={{
-                        backgroundColor: "rgb(153,46,98)",
-                        color: "#fff",
-                      }}
-                      primary
-                    >
-                      <Dropdown item text="Action">
-                        <Dropdown.Menu style={{ marginTop: "10px" }}>
-                          <Dropdown.Item onClick={() => LoadViewPage(row)}>
-                            <IconMenu name="eye" />
-                            View
-                          </Dropdown.Item>
-                          <Dropdown.Item onClick={() => LoadEditPage(row)}>
-                            <IconMenu name="edit" />
-                            Edit
-                          </Dropdown.Item>
-                          <Dropdown.Item onClick={() => onToggleModal(row)}>
-                            {" "}
-                            <IconMenu name="trash" /> Delete
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    </Button>
-                  </Menu.Item>
-                </Menu.Menu>
-              </div>
-            ),
-          })): []
+              actions: (
+                <div>
+                  <Menu.Menu position="right">
+                    <Menu.Item>
+                      <Button
+                        style={{
+                          backgroundColor: "rgb(153,46,98)",
+                          color: "#fff",
+                        }}
+                        primary
+                      >
+                        <Dropdown item text="Action">
+                          <Dropdown.Menu style={{ marginTop: "10px" }}>
+                            <Dropdown.Item onClick={() => LoadViewPage(row)}>
+                              <IconMenu name="eye" />
+                              View
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={() => LoadEditPage(row)}>
+                              <IconMenu name="edit" />
+                              Edit
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={() => onToggleModal(row)}>
+                              {" "}
+                              <IconMenu name="trash" /> Delete
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </Button>
+                    </Menu.Item>
+                  </Menu.Menu>
+                </div>
+              ),
+            })) : []
         }
         options={{
           headerStyle: {

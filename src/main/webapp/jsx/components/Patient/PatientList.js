@@ -105,7 +105,7 @@ const PatientList = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -154,7 +154,7 @@ const PatientList = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -165,7 +165,7 @@ const PatientList = (props) => {
     }
   );
 
- 
+
 
   return (
     <div>
@@ -219,66 +219,63 @@ const PatientList = (props) => {
         data={
           !isLoading && data && data?.records
             ? data?.records?.map?.((row) => ({
-                name:
-                  row?.firstName + " " + row?.surname || row?.otherName || "",
-                hospital_number: getHospitalNumber(row),
-                gender: row?.gender !== null ? row.gender.display : "",
-                age: calculateAge(row?.dateOfBirth),
+              name:
+                row?.firstName + " " + row?.surname || row?.otherName || "",
+              hospital_number: getHospitalNumber(row) || row?.hospitalNumber,
+              gender: row?.sex || row?.gender?.display,
+              age: calculateAge(row?.dateOfBirth),
 
-                actions: (
-                  <div>
-                    <Link
-                      to={{
-                        pathname: "/patient-history",
-                        state: { patientObj: row },
+              actions: (
+                <div>
+                  <Link
+                    to={{
+                      pathname: "/patient-history",
+                      state: { patientObj: row },
+                    }}
+                  >
+                    <ButtonGroup
+                      variant="contained"
+                      aria-label="split button"
+                      style={{
+                        backgroundColor: "rgb(153, 46, 98)",
+                        height: "30px",
+                        width: "215px",
                       }}
+                      size="large"
+
                     >
-                      <ButtonGroup
-                        variant="contained"
-                        aria-label="split button"
-                        style={{
-                          backgroundColor: "rgb(153, 46, 98)",
-                          height: "30px",
-                          width: "215px",
-                        }}
-                        size="large"
-                        // onClick={() => {
-                        //   setCurrentPatient(row);
-                        // }}
-                        // disabled={isLoadingCombinedCode}
+                      <Button
+                        color="primary"
+                        size="small"
+                        aria-label="select merge strategy"
+                        aria-haspopup="menu"
+                        style={{ backgroundColor: "rgb(153, 46, 98)" }}
+
                       >
-                        <Button
-                          color="primary"
-                          size="small"
-                          aria-label="select merge strategy"
-                          aria-haspopup="menu"
-                          style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                          // disabled={isLoadingCombinedCode}
+                        <MdDashboard />
+                      </Button>
+                      <Button
+                        style={{ backgroundColor: "rgb(153, 46, 98)" }}
+
+                      >
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color: "#fff",
+                            fontWeight: "bolder",
+                          }}
                         >
-                          <MdDashboard />
-                        </Button>
-                        <Button
-                          style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                          // disabled={isLoadingCombinedCode}
-                        >
-                          <span
-                            style={{
-                              fontSize: "10px",
-                              color: "#fff",
-                              fontWeight: "bolder",
-                            }}
-                          >
-                            {isLoadingCombinedCode &&
+                          {isLoadingCombinedCode &&
                             currentPatient?.id === row?.id
-                              ? "Please Wait"
-                              : "Patient Dashboard"}
-                          </span>
-                        </Button>
-                      </ButtonGroup>
-                    </Link>
-                  </div>
-                ),
-              }))
+                            ? "Please Wait"
+                            : "Patient Dashboard"}
+                        </span>
+                      </Button>
+                    </ButtonGroup>
+                  </Link>
+                </div>
+              ),
+            }))
             : []
         }
         options={{
@@ -305,6 +302,10 @@ const PatientList = (props) => {
           refetch(query);
         }}
         isLoading={isLoading}
+        onSearchChange={(searchTerm) => {
+          setQueryParams((prevFilters) => ({ ...prevFilters, page:0, pageSize: 10, search: searchTerm }));
+          refetch(query);
+        }}
         onChangeRowsPerPage={(newPageSize) => {
           setQueryParams((prevFilters) => ({
             ...prevFilters,
@@ -312,6 +313,8 @@ const PatientList = (props) => {
           }));
           refetch(query);
         }}
+
+        key={JSON.stringify(query)}
       />
     </div>
   );

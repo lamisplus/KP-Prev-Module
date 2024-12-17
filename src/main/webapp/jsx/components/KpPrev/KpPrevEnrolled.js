@@ -114,6 +114,9 @@ const KpPrevEnrolled = (props) => {
     }
   );
 
+
+
+
   return (
     <div>
       <MaterialTable
@@ -170,8 +173,7 @@ const KpPrevEnrolled = (props) => {
           !isLoading && data && data?.records
             ? data?.records?.map?.((row) => ({
                 dateServiceOffered: row.dateServiceOffered,
-                hospital_number:
-                  row.htsCode !== null ? row?.htsCode : row?.prepCode,
+                hospital_number:  row?.kpPatientHospitalNumber  || row?.htsCode || row?.prepCode || row?.prevCode,
                 prevCode: row?.prevCode || "",
                 htsServices: row?.htsServices.offered_hts !== "" ? "✅" : "❌",
                 prepServices:

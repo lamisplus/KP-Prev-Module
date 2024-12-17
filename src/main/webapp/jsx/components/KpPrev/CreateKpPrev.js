@@ -31,6 +31,7 @@ import { fetchHivEnrolment } from "../../services/fetchHivEnrolment";
 import { fetchCodesets } from "../../services/fetchCodesets";
 import { fetchStates } from "../../services/fetchStates";
 import { fetchProvinces } from "../../services/fetchProvinces";
+import { getHospitalNumber } from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -96,6 +97,7 @@ const useStyles = makeStyles((theme) => ({
 
 const CreateKpPrev = (props) => {
   const patientObj = props.patientObj;
+
   const [htsCodeVal, setHtsCodeVal] = useState(null);
   const [prepCodeVal, setPrepCodeVal] = useState(null);
   const [, setPatientHivEnrolment] = useState(null);
@@ -199,13 +201,13 @@ const CreateKpPrev = (props) => {
       hivTestResult: formik?.values?.hivTestResult,
       prepCode: prepCodeVal?.prevCode,
       prevCode: formik?.values?.prevCode,
-      patientId: patientObj.uuid,
+      patientId: patientObj?.uuid || patientObj?.personUuid,
       kpOfferedHts: formik?.values?.kpOfferedHts,
       kpAcceptedHts: formik?.values?.kpAcceptedHts,
       kpHtsClientCode: htsCodeVal?.htsCode || formik?.values?.kpHtsClientCode,
       kpHtsFinalResult: formik?.values?.kpHtsFinalResult,
       kpPatientArtNumber: formik?.values?.kpPatientArtNumber,
-      kpPatientHospitalNumber: formik?.values?.kpPatientHospitalNumber,
+      kpPatientHospitalNumber: getHospitalNumber?.(patientObj) || patientObj?.hospitalNumber,
       kpKnownPositive: formik?.values?.kpKnownPositive,
       kpPatientTargetGroup: formik?.values?.kpPatientTargetGroup,
       kpPatientState: formik?.values?.kpPatientState,
@@ -218,7 +220,7 @@ const CreateKpPrev = (props) => {
       serviceProviderSignature: formik?.values?.serviceProviderSignature,
       target_group:
         formik?.values?.kpPatientTargetGroup ||
-        htsCodeVal?.htsClientDtoList?.length > 0
+          htsCodeVal?.htsClientDtoList?.length > 0
           ? htsCodeVal?.htsClientDtoList?.[0]?.targetGroup
           : prepCodeVal?.prepDtoList?.[0]?.targetGroup,
       dateServiceOffered: formik?.values?.dateServiceOffered,
@@ -228,7 +230,7 @@ const CreateKpPrev = (props) => {
       bioMedicalServices: biomedicalServiceValue,
       structuralServices: structuralServicesValue,
       commodityServices: commodityServicesValue,
-      patientIdentifier: patientObj?.id?.toString(),
+      patientIdentifier: patientObj?.id?.toString() || patientObj?.personId.toString(),
       hivEducationalServices: hivEducationProvided,
     };
 
@@ -240,8 +242,8 @@ const CreateKpPrev = (props) => {
   const { mutate, isLoading } = useSaveKpPrev(formik, props);
 
   const { isLoading: isLoadingHtsCode } = useQuery(
-    [getHtsCodeKey, patientObj?.id],
-    () => fetchHtsCode(patientObj?.id),
+    [getHtsCodeKey, patientObj?.id || patientObj?.personId],
+    () => fetchHtsCode(patientObj?.id || patientObj?.personId),
     {
       onSuccess: (data) => {
         setHtsCodeVal({
@@ -262,7 +264,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -274,8 +276,8 @@ const CreateKpPrev = (props) => {
   );
 
   const { isLoading: isLoadingPrepCode } = useQuery(
-    [getPrepCodeKey, patientObj?.id],
-    () => fetchPrepCode(patientObj?.id),
+    [getPrepCodeKey, patientObj?.id || patientObj?.personId],
+    () => fetchPrepCode(patientObj?.id || patientObj?.personId),
     {
       onSuccess: (data) => {
         setPrepCodeVal({
@@ -290,7 +292,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -310,7 +312,7 @@ const CreateKpPrev = (props) => {
       if (error.response && error.response.data) {
         let errorMessage =
           error.response.data.apierror &&
-          error.response.data.apierror.message !== ""
+            error.response.data.apierror.message !== ""
             ? error.response.data.apierror.message
             : "Something went wrong, please try again";
         toast.error(errorMessage);
@@ -332,7 +334,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -355,7 +357,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -378,7 +380,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -398,7 +400,7 @@ const CreateKpPrev = (props) => {
       if (error.response && error.response.data) {
         let errorMessage =
           error.response.data.apierror &&
-          error.response.data.apierror.message !== ""
+            error.response.data.apierror.message !== ""
             ? error.response.data.apierror.message
             : "Something went wrong, please try again";
         toast.error(errorMessage);
@@ -409,8 +411,8 @@ const CreateKpPrev = (props) => {
   });
 
   useQuery(
-    [getPatientHivEnrolmentKey, patientObj?.id],
-    () => fetchHivEnrolment(patientObj?.id),
+    [getPatientHivEnrolmentKey, patientObj?.id || patientObj?.personId],
+    () => fetchHivEnrolment(patientObj?.id || patientObj?.personId),
     {
       onSuccess: (data) => {
         setPatientHivEnrolment(data);
@@ -427,7 +429,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -439,8 +441,8 @@ const CreateKpPrev = (props) => {
   );
 
   useQuery(
-    [getPatientHivEnrolmentKey, patientObj?.id],
-    () => fetchHivEnrolment(patientObj?.id),
+    [getPatientHivEnrolmentKey, patientObj?.id || patientObj?.personId],
+    () => fetchHivEnrolment(patientObj?.id || patientObj?.personId),
     {
       onSuccess: (data) => {
         setPatientHivEnrolment(data);
@@ -457,7 +459,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -481,7 +483,7 @@ const CreateKpPrev = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -495,7 +497,7 @@ const CreateKpPrev = (props) => {
 
   const newClient =
     htsCodeVal?.htsClientDtoList?.length === 0 ||
-    prepCodeVal?.prepDtoList?.length === 0
+      prepCodeVal?.prepDtoList?.length === 0
       ? true
       : false;
 
@@ -522,7 +524,10 @@ const CreateKpPrev = (props) => {
               <div className="form-group mb-10 col-xs-6 col-md-4 ">
                 <br />
                 <CustomFormGroup formik={formik} name="dateServiceOffered">
-                  <Label>Date Of Service Provision</Label>
+                  <Label>Date Of Service Provision
+                    <span style={{ color: "red" }}> *</span>
+                  </Label>
+
                   <Input
                     type="date"
                     name="dateServiceOffered"
@@ -569,7 +574,9 @@ const CreateKpPrev = (props) => {
               <div className="form-group mb-3 col-md-4">
                 <br />
                 <CustomFormGroup formik={formik} name="kpPatientTargetGroup">
-                  <Label>Target Group</Label>
+                  <Label>Target Group
+                    <span style={{ color: "red" }}> *</span>
+                  </Label>
                   <Input
                     type="select"
                     name="kpPatientTargetGroup"
@@ -668,7 +675,7 @@ const CreateKpPrev = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          // readOnly
+                        // readOnly
                         >
                           <option value="">Select</option>
                           <option value="1">Yes</option>
@@ -715,41 +722,41 @@ const CreateKpPrev = (props) => {
                   )}
 
                   {
-                  formik.values?.kpOfferedHts === "1" && formik?.values?.kpAcceptedHts === "0" && (
-                    <div className="form-group mb-10 col-xs-6 col-md-4 ">
-                    <CustomFormGroup formik={formik} name="kpKnownPositive">
-                      <Label>Known Positive</Label>
-                      <Input
-                        type="select"
-                        name="kpKnownPositive"
-                        id="kpKnownPositive"
-                        value={formik?.values?.kpKnownPositive}
-                        onChange={formik?.handleChange}
-                        onBlur={formik?.handleBlur}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                        disabled={
-                          formik?.values?.kpHtsFinalResult === "positive"
-                            ? true
-                            : false
-                        }
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                      {formik?.touched.kpKnownPositive &&
-                        formik?.errors.kpKnownPositive !== "" && (
-                          <span className={classes.error}>
-                            {formik?.errors.kpKnownPositive}
-                          </span>
-                        )}
-                    </CustomFormGroup>
-                  </div>
+                    formik.values?.kpOfferedHts === "1" && formik?.values?.kpAcceptedHts === "0" && (
+                      <div className="form-group mb-10 col-xs-6 col-md-4 ">
+                        <CustomFormGroup formik={formik} name="kpKnownPositive">
+                          <Label>Known Positive</Label>
+                          <Input
+                            type="select"
+                            name="kpKnownPositive"
+                            id="kpKnownPositive"
+                            value={formik?.values?.kpKnownPositive}
+                            onChange={formik?.handleChange}
+                            onBlur={formik?.handleBlur}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                            disabled={
+                              formik?.values?.kpHtsFinalResult === "positive"
+                                ? true
+                                : false
+                            }
+                          >
+                            <option value="">Select</option>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </Input>
+                          {formik?.touched.kpKnownPositive &&
+                            formik?.errors.kpKnownPositive !== "" && (
+                              <span className={classes.error}>
+                                {formik?.errors.kpKnownPositive}
+                              </span>
+                            )}
+                        </CustomFormGroup>
+                      </div>
 
-                  )
+                    )
                   }
 
                   {formik?.values?.kpAcceptedHts === "1" && (
@@ -1741,62 +1748,62 @@ const CreateKpPrev = (props) => {
 
                   {formik?.values?.patientCurrentTbStatus ===
                     "TB_STATUS_NO_SIGN_OR_SYMPTOMS_OF_TB" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <CustomFormGroup formik={formik} name="providedWithTpt">
-                        <Label>Provided with TPT</Label>
-                        <Input
-                          type="select"
-                          name="providedWithTpt"
-                          id="providedWithTpt"
-                          value={formik?.values?.providedWithTpt}
-                          onChange={formik?.handleChange}
-                          onBlur={formik?.handleBlur}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value=""> Select </option>
-                          <option value="yes"> Yes </option>
-                          <option value="no"> No </option>
-                        </Input>
-                        {formik?.touched.providedWithTpt &&
-                          formik?.errors.providedWithTpt !== "" && (
-                            <span className={classes.error}>
-                              {formik?.errors.providedWithTpt}
-                            </span>
-                          )}
-                      </CustomFormGroup>
-                    </div>
-                  )}
+                      <div className="form-group mb-3 col-md-4">
+                        <CustomFormGroup formik={formik} name="providedWithTpt">
+                          <Label>Provided with TPT</Label>
+                          <Input
+                            type="select"
+                            name="providedWithTpt"
+                            id="providedWithTpt"
+                            value={formik?.values?.providedWithTpt}
+                            onChange={formik?.handleChange}
+                            onBlur={formik?.handleBlur}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="yes"> Yes </option>
+                            <option value="no"> No </option>
+                          </Input>
+                          {formik?.touched.providedWithTpt &&
+                            formik?.errors.providedWithTpt !== "" && (
+                              <span className={classes.error}>
+                                {formik?.errors.providedWithTpt}
+                              </span>
+                            )}
+                        </CustomFormGroup>
+                      </div>
+                    )}
 
                   {formik?.values?.patientCurrentTbStatus ===
                     "TB_STATUS_TB_POSITIVE_NOT_ON_TB_DRUGS" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <CustomFormGroup
-                        formik={formik}
-                        name="tbTreatmentRefferal"
-                      >
-                        <Label>TB treatment/referral </Label>
-                        <Input
-                          type="select"
+                      <div className="form-group mb-3 col-md-4">
+                        <CustomFormGroup
+                          formik={formik}
                           name="tbTreatmentRefferal"
-                          id="tbTreatmentRefferal"
-                          value={formik?.values?.tbTreatmentRefferal}
-                          onChange={formik?.handleChange}
-                          onBlur={formik?.handleBlur}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
                         >
-                          <option value=""> Select </option>
-                          <option value="yes"> Yes </option>
-                          <option value="no"> No </option>
-                        </Input>
-                      </CustomFormGroup>
-                    </div>
-                  )}
+                          <Label>TB treatment/referral </Label>
+                          <Input
+                            type="select"
+                            name="tbTreatmentRefferal"
+                            id="tbTreatmentRefferal"
+                            value={formik?.values?.tbTreatmentRefferal}
+                            onChange={formik?.handleChange}
+                            onBlur={formik?.handleBlur}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          >
+                            <option value=""> Select </option>
+                            <option value="yes"> Yes </option>
+                            <option value="no"> No </option>
+                          </Input>
+                        </CustomFormGroup>
+                      </div>
+                    )}
 
                   {formik?.values?.tbTreatmentRefferal === "yes" && (
                     <div className="form-group mb-3 col-md-4">
@@ -1949,7 +1956,7 @@ const CreateKpPrev = (props) => {
 
                         {formik?.touched.facilityReferredToForViralHepatitis &&
                           formik?.errors.facilityReferredToForViralHepatitis !==
-                            "" && (
+                          "" && (
                             <span className={classes.error}>
                               {
                                 formik?.errors
@@ -2018,7 +2025,7 @@ const CreateKpPrev = (props) => {
                         </Input>
                         {formik?.touched.acceptedFamilyPlanningServices &&
                           formik?.errors.acceptedFamilyPlanningServices !==
-                            "" && (
+                          "" && (
                             <span className={classes.error}>
                               {formik?.errors.acceptedFamilyPlanningServices}
                             </span>
@@ -2054,7 +2061,7 @@ const CreateKpPrev = (props) => {
                         </Input>
                         {formik?.touched.referredForFamilyPlanningServices &&
                           formik?.errors.referredForFamilyPlanningServices !==
-                            "" && (
+                          "" && (
                             <span className={classes.error}>
                               {formik?.errors.referredForFamilyPlanningServices}
                             </span>
@@ -2065,42 +2072,42 @@ const CreateKpPrev = (props) => {
 
                   {formik?.values?.referredForFamilyPlanningServices ===
                     "yes" && (
-                    <div className="form-group mb-3 col-md-4">
-                      <CustomFormGroup
-                        formik={formik}
-                        name="facilityReferredForFamilyPlanningServices"
-                      >
-                        <Label>Facility referred to</Label>
-                        <Input
-                          type="text"
+                      <div className="form-group mb-3 col-md-4">
+                        <CustomFormGroup
+                          formik={formik}
                           name="facilityReferredForFamilyPlanningServices"
-                          id="facilityReferredForFamilyPlanningServices"
-                          value={
-                            formik?.values
-                              ?.facilityReferredForFamilyPlanningServices
-                          }
-                          onChange={formik?.handleChange}
-                          onBlur={formik?.handleBlur}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        />
-                        {formik?.touched
-                          .facilityReferredForFamilyPlanningServices &&
-                          formik?.errors
-                            .facilityReferredForFamilyPlanningServices !==
+                        >
+                          <Label>Facility referred to</Label>
+                          <Input
+                            type="text"
+                            name="facilityReferredForFamilyPlanningServices"
+                            id="facilityReferredForFamilyPlanningServices"
+                            value={
+                              formik?.values
+                                ?.facilityReferredForFamilyPlanningServices
+                            }
+                            onChange={formik?.handleChange}
+                            onBlur={formik?.handleBlur}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          />
+                          {formik?.touched
+                            .facilityReferredForFamilyPlanningServices &&
+                            formik?.errors
+                              .facilityReferredForFamilyPlanningServices !==
                             "" && (
-                            <span className={classes.error}>
-                              {
-                                formik?.errors
-                                  .facilityReferredForFamilyPlanningServices
-                              }
-                            </span>
-                          )}
-                      </CustomFormGroup>
-                    </div>
-                  )}
+                              <span className={classes.error}>
+                                {
+                                  formik?.errors
+                                    .facilityReferredForFamilyPlanningServices
+                                }
+                              </span>
+                            )}
+                        </CustomFormGroup>
+                      </div>
+                    )}
 
                   <div className="form-group mb-3 col-md-4">
                     <CustomFormGroup
@@ -2288,7 +2295,7 @@ const CreateKpPrev = (props) => {
 
                       {formik?.touched.receivedNalxoneForOverdoseTreatment &&
                         formik?.errors.receivedNalxoneForOverdoseTreatment !==
-                          "" && (
+                        "" && (
                           <span className={classes.error}>
                             {formik?.errors.receivedNalxoneForOverdoseTreatment}
                           </span>
@@ -2339,7 +2346,7 @@ const CreateKpPrev = (props) => {
 
                     {formik?.touched.providedOrRefferedForEmpowerment &&
                       formik?.errors.providedOrRefferedForEmpowerment !==
-                        "" && (
+                      "" && (
                         <span className={classes.error}>
                           {formik?.errors.providedOrRefferedForEmpowerment}
                         </span>

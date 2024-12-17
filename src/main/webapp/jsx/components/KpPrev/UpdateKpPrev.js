@@ -33,6 +33,7 @@ import { fetchHivEnrolment } from "../../services/fetchHivEnrolment";
 import { fetchCodesets } from "../../services/fetchCodesets";
 import { fetchStates } from "../../services/fetchStates";
 import { fetchProvinces } from "../../services/fetchProvinces";
+import { getHospitalNumber } from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -224,7 +225,7 @@ const UpdateKpPrev = (props) => {
       bioMedicalServices: biomedicalServiceValue,
       structuralServices: structuralServicesValue,
       commodityServices: commodityServicesValue,
-      patientIdentifier: patientObj?.id?.toString(),
+      patientIdentifier: patientObj?.id?.toString() || patientObj?.personId?.toString(),
       hivEducationalServices: hivEducationProvided,
     };
 
@@ -236,8 +237,8 @@ const UpdateKpPrev = (props) => {
   const [formInitialValue] = useState(props?.activeContent?.record);
 
   const { isLoading: isLoadingHtsCode } = useQuery(
-    [getHtsCodeKey, patientObj?.id],
-    () => fetchHtsCode(patientObj?.id),
+    [getHtsCodeKey, patientObj?.id || patientObj?.personId],
+    () => fetchHtsCode(patientObj?.id || patientObj?.personId),
     {
       onSuccess: (data) => {
         setHtsCodeVal({
@@ -270,8 +271,8 @@ const UpdateKpPrev = (props) => {
   );
 
   const { isLoading: isLoadingPrepCode } = useQuery(
-    [getPrepCodeKey, patientObj?.id],
-    () => fetchPrepCode(patientObj?.id),
+    [getPrepCodeKey, patientObj?.id || patientObj?.personId],
+    () => fetchPrepCode(patientObj?.id || patientObj?.personId),
     {
       onSuccess: (data) => {
         setPrepCodeVal({
@@ -405,8 +406,8 @@ const UpdateKpPrev = (props) => {
   });
 
   useQuery(
-    [getPatientHivEnrolmentKey, patientObj?.id],
-    () => fetchHivEnrolment(patientObj?.id),
+    [getPatientHivEnrolmentKey, patientObj?.id || patientObj?.personId],
+    () => fetchHivEnrolment(patientObj?.id || patientObj?.personId),
     {
       onSuccess: (data) => {
         setPatientHivEnrolment(data);
@@ -435,8 +436,8 @@ const UpdateKpPrev = (props) => {
   );
 
   useQuery(
-    [getPatientHivEnrolmentKey, patientObj?.id],
-    () => fetchHivEnrolment(patientObj?.id),
+    [getPatientHivEnrolmentKey, patientObj?.id || patientObj?.personId],
+    () => fetchHivEnrolment(patientObj?.id || patientObj?.personId),
     {
       onSuccess: (data) => {
         setPatientHivEnrolment(data);
@@ -513,7 +514,7 @@ const UpdateKpPrev = (props) => {
       kpHtsClientCode: formInitialValue?.kpHtsClientCode,
       kpHtsFinalResult: formInitialValue?.kpHtsFinalResult,
       kpPatientArtNumber: formInitialValue?.kpPatientArtNumber,
-      kpPatientHospitalNumber: formInitialValue?.kpPatientHospitalNumber,
+      kpPatientHospitalNumber: formInitialValue?.kpPatientHospitalNumber || patientObj?.hospitalNumber ||  getHospitalNumber(patientObj),
       kpKnownPositive: formInitialValue?.kpKnownPositive,
       kpPatientTargetGroup: formInitialValue?.kpPatientTargetGroup,
       kpPatientState: formInitialValue?.kpPatientState,

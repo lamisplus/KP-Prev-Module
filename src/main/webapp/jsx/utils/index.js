@@ -29,7 +29,12 @@ export const getLastName = (obj) => {
 };
 
 export const getHospitalNumber = (obj) => {
-  if (obj && obj?.participantId) {
+
+  if (obj && obj?.hospitalNumber) {
+    return obj?.hospitalNumber
+  }
+
+  else if (obj && obj?.participantId) {
     return obj?.participantId;
   } else {
     const identifiers =
