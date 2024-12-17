@@ -651,7 +651,9 @@ const UpdateKpPrev = (props) => {
               <div className="form-group mb-10 col-xs-6 col-md-4 ">
                 <br />
                 <CustomFormGroup formik={formik} name="dateServiceOffered">
-                  <Label>Date Of Service Provision</Label>
+                  <Label>Date Of Service Provision
+                  <span style={{ color: "red" }}> *</span>
+                  </Label>
                   <Input
                     type="date"
                     name="dateServiceOffered"
@@ -705,7 +707,7 @@ const UpdateKpPrev = (props) => {
                     type="text"
                     disabled={disableInputs}
                     name="hospitalNumber"
-                    value={formInitialValue?.htsCode}
+                    value={formInitialValue?.kpPatientHospitalNumber || formInitialValue?.htsCode}
                     id="hospitalNumber"
                     style={{
                       border: "1px solid #014D88",
@@ -719,7 +721,9 @@ const UpdateKpPrev = (props) => {
               <div className="form-group mb-3 col-md-4">
                 <br />
                 <CustomFormGroup formik={formik} name="kpPatientTargetGroup">
-                  <Label>Target Group</Label>
+                  <Label>Target Group
+                  <span style={{ color: "red" }}> *</span>
+                  </Label>
                   <Input
                     type="select"
                     disabled={disableInputs}

@@ -20,7 +20,7 @@ public interface KpPrevRepository extends JpaRepository<KpPrev, Long> {
 			"pp.id, pp.uuid, sex, first_name AS firstName, surname, other_name AS otherName, full_name AS fullName, pp.hospital_number AS hospitalNumber \n" +
 			"FROM patient_person pp WHERE uuid NOT IN (SELECT person_uuid FROM kp_prev kp where kp.archived = 0) \n" +
 			"AND (pp.first_name ilike ?1 OR pp.surname ilike ?1 OR pp.other_name ilike ?1 OR pp.full_name ilike ?1 \n" +
-			"OR pp.hospital_number ilike ?1)  and pp.archived=?2 AND pp.facility_id=?3", nativeQuery = true)
+			"OR pp.hospital_number ilike ?1)  and pp.archived=?2 AND pp.facility_id=?3 ORDER BY pp.id desc", nativeQuery = true)
 	Page<PersonDtos> findAllPatientBySearchParameters(String queryParam, Integer archived, Long facilityId, Pageable pageable);
 
 
@@ -30,7 +30,7 @@ public interface KpPrevRepository extends JpaRepository<KpPrev, Long> {
 			"CAST(contact_point AS TEXT) AS contactPoint, CAST(address AS TEXT) AS address,CAST(contact AS TEXT) AS contact, \n" +
 			"is_date_of_birth_estimated AS isDateOfBirthEstimated, facility_id AS facilityId, emr_id AS emrId, nin_number AS niNumber, date_of_birth AS dateOfBirth, \n" +
 			"pp.id, pp.uuid, sex, first_name AS firstName, surname, other_name AS otherName, full_name AS fullName, pp.hospital_number AS hospitalNumber \n" +
-			"FROM patient_person pp WHERE uuid NOT IN (SELECT person_uuid FROM kp_prev kp where kp.archived = 0) and pp.archived=?1 AND pp.facility_id=?2", nativeQuery = true)
+			"FROM patient_person pp WHERE uuid NOT IN (SELECT person_uuid FROM kp_prev kp where kp.archived = 0) and pp.archived=?1 AND pp.facility_id=?2 ORDER BY pp.id desc", nativeQuery = true)
 	Page<PersonDtos> findAllPatient (Integer archived,Long facilityId,Pageable pageable);
 	
 	@Query(value = "select * from kp_prev where archived = ?1 and facility_id = ?2 ",nativeQuery = true)
