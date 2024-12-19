@@ -173,7 +173,7 @@ const KpPrevEnrolled = (props) => {
           !isLoading && data && data?.records
             ? data?.records?.map?.((row) => ({
                 dateServiceOffered: row.dateServiceOffered,
-                hospital_number:  row?.kpPatientHospitalNumber  || row?.htsCode || row?.prepCode || row?.prevCode,
+                hospital_number:  row?.kpPatientHospitalNumber  || "",
                 prevCode: row?.prevCode || "",
                 htsServices: row?.htsServices.offered_hts !== "" ? "✅" : "❌",
                 prepServices:
