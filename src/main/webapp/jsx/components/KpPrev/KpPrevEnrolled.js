@@ -114,9 +114,6 @@ const KpPrevEnrolled = (props) => {
     }
   );
 
-
-
-
   return (
     <div>
       <MaterialTable
@@ -169,6 +166,7 @@ const KpPrevEnrolled = (props) => {
           { title: "Actions", field: "actions", filtering: false },
         ]}
         isLoading={isLoading}
+
         data={
           !isLoading && data && data?.records
             ? data?.records?.map?.((row) => ({
@@ -233,6 +231,7 @@ const KpPrevEnrolled = (props) => {
               }))
             : []
         }
+
         options={{
           headerStyle: {
             backgroundColor: "#014d88",
@@ -250,12 +249,16 @@ const KpPrevEnrolled = (props) => {
           pageSize: query?.pageSize || 10,
           debounceInterval: 400,
         }}
+
         page={data?.currentPage}
         totalCount={data?.totalRecords}
+
+
         onChangePage={(newPage) => {
           setQueryParams((prevFilters) => ({ ...prevFilters, page: newPage }));
           refetch(query);
         }}
+
         onChangeRowsPerPage={(newPageSize) => {
           setQueryParams((prevFilters) => ({
             ...prevFilters,

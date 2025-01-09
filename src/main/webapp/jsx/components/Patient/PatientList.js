@@ -221,9 +221,9 @@ const PatientList = (props) => {
             ? data?.records?.map?.((row) => ({
               name:
                 row?.firstName + " " + row?.surname || row?.otherName || "",
-              hospital_number: getHospitalNumber(row) || row?.hospitalNumber,
-              gender: row?.sex || row?.gender?.display,
-              age: calculateAge(row?.dateOfBirth),
+              hospital_number: getHospitalNumber?.(row) || row?.hospitalNumber || "",
+              gender: row?.sex || row?.gender?.display || "",
+              age: calculateAge?.(row?.dateOfBirth),
 
               actions: (
                 <div>
@@ -297,15 +297,19 @@ const PatientList = (props) => {
         }}
         page={data?.currentPage}
         totalCount={data?.totalRecords}
+
         onChangePage={(newPage) => {
           setQueryParams((prevFilters) => ({ ...prevFilters, page: newPage }));
           refetch(query);
         }}
+        
         isLoading={isLoading}
+
         onSearchChange={(searchTerm) => {
           setQueryParams((prevFilters) => ({ ...prevFilters, page:0, pageSize: 10, search: searchTerm }));
           refetch(query);
         }}
+
         onChangeRowsPerPage={(newPageSize) => {
           setQueryParams((prevFilters) => ({
             ...prevFilters,
@@ -314,7 +318,7 @@ const PatientList = (props) => {
           refetch(query);
         }}
 
-        key={JSON.stringify(query)}
+        // key={JSON.stringify(query)}
       />
     </div>
   );

@@ -61,7 +61,6 @@ function PatientCard(props) {
     history.location && history.location.state
       ? history.location.state.patientObj
       : {};
-
       
   const componentMap = {
     "recent-history": (

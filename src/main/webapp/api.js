@@ -6,5 +6,5 @@ export const url =
     : "/api/v1/";
 export const token =
   currentEnvironment === "development"
-    ? "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJndWVzdEBsYW1pc3BsdXMub3JnIiwiYXV0aCI6IlN1cGVyIEFkbWluIiwibmFtZSI6Ikd1ZXN0IEd1ZXN0IiwiZXhwIjoxNzM0NDYwMDQwfQ.mLLcDaJOV3vw4amDNqY1bq8McahO8XXTJ7951MJmo07ZqHR-x6P6pdRvpW7b8OfvOjuVgWuTFhlTGEp7bp-KdQ"
+    ? "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJndWVzdEBsYW1pc3BsdXMub3JnIiwiYXV0aCI6IlN1cGVyIEFkbWluIiwibmFtZSI6Ikd1ZXN0IEd1ZXN0IiwiZXhwIjoxNzM2NDQxODE1fQ.PmnGBlb-JP6yeIkwitUlIOH7KULOss4XdpT4TMxk0nDlEEm--z52BhDZTPrXDgepjot-QeejmehXMOrJhQU3dg"
     : new URLSearchParams(window.location.search).get("jwt");
