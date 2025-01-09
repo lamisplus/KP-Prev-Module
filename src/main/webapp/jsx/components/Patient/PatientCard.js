@@ -19,6 +19,9 @@ import {
   getLastName,
   getHospitalNumber,
 } from "../../utils";
+import { getPatientByIdKey } from "../../utils/queryKeys";
+import { useQuery } from "react-query";
+import { fetchPatientById } from "../../services/fetchPatientById";
 
 //Dtate Picker package
 Moment.locale("en");
@@ -61,9 +64,18 @@ const styles = (theme) => ({
 
 function PatientCard(props) {
   const { classes } = props;
-  const patientObj = props.patientObj;
 
-  
+  const { isLoading: isLoadingCurrentPatient, data } = useQuery(
+    [getPatientByIdKey, props?.patientObj?.id || props?.patientObj?.personId],
+    () => fetchPatientById(props?.patientObj?.id || props?.patientObj?.personId),
+    {
+      enabled: props?.patientObj?.id || props?.patientObj?.personId ? true : false,
+      staleTime: 100,
+      cacheTime: 100,
+    }
+  );
+
+  const patientObj = isLoadingCurrentPatient ?  props?.patientObj : data;
 
   return (
     <div className={classes.root}>
@@ -74,7 +86,7 @@ function PatientCard(props) {
               <Row className={"mt-1"}>
                 <Col md={12} className={classes.root2}>
                   <b style={{ fontSize: "25px", color: "rgb(153, 46, 98)" }}>
-                    {patientObj.firstName + " " + getLastName(patientObj)}
+                    {(patientObj?.firstName || "") + " " + (getLastName?.(patientObj) || "")}
                   </b>
                   <Link to={"/"}>
                     <ButtonMui
@@ -98,7 +110,7 @@ function PatientCard(props) {
                     {" "}
                     Patient ID :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {getHospitalNumber(patientObj)}
+                      {getHospitalNumber?.(patientObj) || patientObj?.hospitalNumber}
                     </b>
                   </span>
                 </Col>
@@ -116,7 +128,7 @@ function PatientCard(props) {
                     {" "}
                     Age :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {calculateAge(patientObj?.dob || patientObj?.dateOfBirth)}
+                      {calculateAge?.(patientObj?.dob || patientObj?.dateOfBirth)}
                     </b>
                   </span>
                 </Col>
@@ -125,9 +137,9 @@ function PatientCard(props) {
                     {" "}
                     Gender :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {patientObj.gender !== null
-                        ? patientObj.gender.display
-                        : ""}
+                      {
+                        patientObj?.gender?.display || patientObj?.sex
+                      }
                     </b>
                   </span>
                 </Col>
@@ -136,7 +148,7 @@ function PatientCard(props) {
                     {" "}
                     Phone Number :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {getPhoneNumber(patientObj.contactPoint)}
+                      {getPhoneNumber(patientObj?.contactPoint)}
                     </b>
                   </span>
                 </Col>
@@ -145,7 +157,7 @@ function PatientCard(props) {
                     {" "}
                     Address :{" "}
                     <b style={{ color: "#0B72AA" }}>
-                      {getAddress(patientObj.address)}{" "}
+                      {getAddress(patientObj?.address)}{" "}
                     </b>
                   </span>
                 </Col>

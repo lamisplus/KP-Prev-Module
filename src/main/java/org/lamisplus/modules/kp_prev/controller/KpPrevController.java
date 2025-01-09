@@ -4,6 +4,7 @@ import org.lamisplus.modules.kp_prev.domain.dto.*;
 
 import org.lamisplus.modules.kp_prev.domain.entity.KpPrev;
 import org.lamisplus.modules.kp_prev.service.*;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,6 +38,16 @@ private final KpPrevService kpPrevService;
       return ResponseEntity.ok(kpPrevService.createKpPrev(kpPrevInputDTO));
 
     }
+
+    @GetMapping(value = "/all-patients-not-registered", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<KpPrevMetaDataDto> getAllPatientNoRegisteredOnKpPrev (
+            @RequestParam (required = false ) String searchParam,
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        KpPrevMetaDataDto kpPrevMetaDataDto = kpPrevService.getAllPatients(searchParam, PageRequest.of(pageNo, pageSize));
+        return new ResponseEntity<>(kpPrevMetaDataDto, new HttpHeaders(), HttpStatus.OK);
+    }
+
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<KpPrevMetaDataDto> getAllPatients(
             @RequestParam(defaultValue = "*") String searchParam,

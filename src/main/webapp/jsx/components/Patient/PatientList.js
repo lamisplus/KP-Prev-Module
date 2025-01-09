@@ -27,6 +27,7 @@ import {
   getCombinedHtsPrepCodeKey,
   getPatientsKey,
 } from "../../utils/queryKeys";
+import { Link } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { MdDashboard } from "react-icons/md";
@@ -104,7 +105,7 @@ const PatientList = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -153,7 +154,7 @@ const PatientList = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -163,6 +164,8 @@ const PatientList = (props) => {
       },
     }
   );
+
+
 
   return (
     <div>
@@ -214,63 +217,67 @@ const PatientList = (props) => {
           ),
         }}
         data={
-          !isLoading && data &&
-          data?.records ?
-          data?.records?.map?.((row) => ({
-            name: row?.firstName + " " + row?.surname || row?.otherName || "",
-            hospital_number: getHospitalNumber(row),
-            gender: row?.gender !== null ? row.gender.display : "",
-            age: calculateAge(row?.dateOfBirth),
+          !isLoading && data && data?.records
+            ? data?.records?.map?.((row) => ({
+              name:
+                row?.firstName + " " + row?.surname || row?.otherName || "",
+              hospital_number: getHospitalNumber?.(row) || row?.hospitalNumber || "",
+              gender: row?.sex || row?.gender?.display || "",
+              age: calculateAge?.(row?.dateOfBirth),
 
-            actions: (
-              <div>
-                <ButtonGroup
-                  variant="contained"
-                  aria-label="split button"
-                  style={{
-                    backgroundColor: "rgb(153, 46, 98)",
-                    height: "30px",
-                    width: "215px",
-                  }}
-                  size="large"
-                  onClick={() => {
-                    setCurrentPatient(row);
-                  }}
-                  disabled={isLoadingCombinedCode}
-                >
-                  <Button
-                    color="primary"
-                    size="small"
-                    aria-label="select merge strategy"
-                    aria-haspopup="menu"
-                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                    disabled={isLoadingCombinedCode}
+              actions: (
+                <div>
+                  <Link
+                    to={{
+                      pathname: "/patient-history",
+                      state: { patientObj: row },
+                    }}
                   >
-                    <MdDashboard />
-                  </Button>
-                  <Button
-                    style={{ backgroundColor: "rgb(153, 46, 98)" }}
-                    disabled={isLoadingCombinedCode}
-                  >
-                    <span
+                    <ButtonGroup
+                      variant="contained"
+                      aria-label="split button"
                       style={{
-                        fontSize: "10px",
-                        color: "#fff",
-                        fontWeight: "bolder",
+                        backgroundColor: "rgb(153, 46, 98)",
+                        height: "30px",
+                        width: "215px",
                       }}
-                    >
-                      {isLoadingCombinedCode && currentPatient?.id === row?.id
-                        ? "Please Wait"
-                        : "Patient Dashboard"}
-                    </span>
-                  </Button>
-                </ButtonGroup>
-              </div>
-            ),
-          })): []
-        }
-       
+                      size="large"
 
+                    >
+                      <Button
+                        color="primary"
+                        size="small"
+                        aria-label="select merge strategy"
+                        aria-haspopup="menu"
+                        style={{ backgroundColor: "rgb(153, 46, 98)" }}
+
+                      >
+                        <MdDashboard />
+                      </Button>
+                      <Button
+                        style={{ backgroundColor: "rgb(153, 46, 98)" }}
+
+                      >
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color: "#fff",
+                            fontWeight: "bolder",
+                          }}
+                        >
+                          {isLoadingCombinedCode &&
+                            currentPatient?.id === row?.id
+                            ? "Please Wait"
+                            : "Patient Dashboard"}
+                        </span>
+                      </Button>
+                    </ButtonGroup>
+                  </Link>
+                </div>
+              ),
+            }))
+            : []
+        }
         options={{
           headerStyle: {
             backgroundColor: "#014d88",
@@ -290,11 +297,19 @@ const PatientList = (props) => {
         }}
         page={data?.currentPage}
         totalCount={data?.totalRecords}
+
         onChangePage={(newPage) => {
           setQueryParams((prevFilters) => ({ ...prevFilters, page: newPage }));
           refetch(query);
         }}
+        
         isLoading={isLoading}
+
+        onSearchChange={(searchTerm) => {
+          setQueryParams((prevFilters) => ({ ...prevFilters, page:0, pageSize: 10, search: searchTerm }));
+          refetch(query);
+        }}
+
         onChangeRowsPerPage={(newPageSize) => {
           setQueryParams((prevFilters) => ({
             ...prevFilters,
@@ -302,6 +317,8 @@ const PatientList = (props) => {
           }));
           refetch(query);
         }}
+
+        // key={JSON.stringify(query)}
       />
     </div>
   );

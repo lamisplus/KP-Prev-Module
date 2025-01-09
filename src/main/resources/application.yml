@@ -13,8 +13,8 @@ acrossHibernate:
     hibernate.show_sql: false
     hibernate.event.merge.enty_copy_observer: allow
 applicationInfo:
-  applicationId: covid
-  applicationName: COVID
+  applicationId: kp-prev
+  applicationName: Kp-PrEV
   buildDate: "@timestamp@"
   buildId: "@pom.version@-@build.revision@"
 build:

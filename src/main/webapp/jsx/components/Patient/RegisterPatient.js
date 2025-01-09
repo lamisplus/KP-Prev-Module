@@ -1,8 +1,12 @@
+/* eslint-disable valid-typeof */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import _ from "lodash";
 import MatButton from "@material-ui/core/Button";
 import Button from "@material-ui/core/Button";
-import { FormGroup, Label, Spinner, Input, Form, InputGroup } from "reactstrap";
+import { FormGroup, Label, Spinner, Input, Form } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -22,15 +26,12 @@ import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { TiArrowBack } from "react-icons/ti";
-import { FaPlus, FaAngleDown } from "react-icons/fa";
 import { token, url as baseUrl } from "../../../api";
-import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import "./patient.css";
 import { Modal } from "react-bootstrap";
-import "react-widgets/dist/css/react-widgets.css";
-import { DateTimePicker } from "react-widgets";
-import { Icon, List, Label as LabelSui } from "semantic-ui-react";
+import { Label as LabelSui } from "semantic-ui-react";
+import { queryClient } from "../../utils/queryClient";
 
 library.add(faCheckSquare, faCoffee, faEdit, faTrash);
 
@@ -59,9 +60,9 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
   },
   root: {
-    "& > *": {
-      margin: theme.spacing(1),
-    },
+    flexGrow: 1,
+    //maxWidth: 752,
+    //flexGrow: 1,
     "& .card-title": {
       color: "#fff",
       fontWeight: "bold",
@@ -104,9 +105,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const UserRegistration = (props) => {
+const RegisterPatient = (props) => {
   const [basicInfo, setBasicInfo] = useState({
     active: true,
+    streetAddress: "",
     address: [],
     contact: [],
     contactPoint: [],
@@ -141,12 +143,14 @@ const UserRegistration = (props) => {
     lastName: "",
     middleName: "",
   });
-  const [contacts, setContacts] = useState([]);
+
+  let contactArray = [];
+  const [allContacts, setAllContacts] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [disabledAgeBaseOnAge, setDisabledAgeBaseOnAge] = useState(false);
+  const [disabledAgeBaseOnAge] = useState(false);
   const [ageDisabled, setAgeDisabled] = useState(true);
   const [showRelative, setShowRelative] = useState(false);
-  //const [editRelative, setEditRelative] = useState(null);
+  const [patientFacilityId, setPatientFacilityId] = useState(null);
   const [genders, setGenders] = useState([]);
   const [maritalStatusOptions, setMaritalStatusOptions] = useState([]);
   const [educationOptions, setEducationOptions] = useState([]);
@@ -154,42 +158,20 @@ const UserRegistration = (props) => {
   const [relationshipOptions, setRelationshipOptions] = useState([]);
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
-  const [covidEffect, setCovidEffect] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [errors, setErrors] = useState({});
-  //const [topLevelUnitCountryOptions, settopLevelUnitCountryOptions]= useState([]);
+  const [topLevelUnitCountryOptions, settopLevelUnitCountryOptions] = useState(
+    []
+  );
   const [patientDTO, setPatientDTO] = useState({
     person: "",
-    vaccinationEnrollment: "",
+    hivEnrollment: "",
   });
   const userDetail =
     props.location && props.location.state ? props.location.state.user : null;
   const classes = useStyles();
   const history = useHistory();
   const location = useLocation();
-  //HIV INFORMATION
-  const [showContactCard, setShowContactCard] = useState(true);
-  const [vaccine, setVaccine] = useState([]);
-  //const [showRelativeCard, setShowRelativeCard] = useState(false);
-  const [objValues, setObjValues] = useState({
-    adverseEffect: "",
-    batchNumber: "",
-    doseNumber: "",
-    location: "",
-    patientId: "",
-    vaccinationFacility: "",
-    vaccine: "",
-    vaccineDate: "",
-    knownMedicalCondition: "",
-    medicalCondition: "",
-    occupation: "",
-    vaccineId: "",
-    visitDate: "",
-    patientId: "",
-    visitId: "",
-    workInHealthSector: "",
-  });
-
   //status for hospital Number
   const [hospitalNumStatus, setHospitalNumStatus] = useState(false);
   const [hospitalNumStatus2, setHospitalNumStatus2] = useState(false);
@@ -198,7 +180,101 @@ const UserRegistration = (props) => {
   const locationState = location.state;
   let patientId = null;
   patientId = locationState ? locationState.patientId : null;
-  let temp = { ...errors };
+
+  const loadState = (stateId) => {
+    axios
+      .get(
+        `${baseUrl}organisation-units/parent-organisation-units/${stateId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then((response) => {
+        setProvinces(response.data.sort());
+      })
+      .catch((error) => {
+        //console.log(error);
+      });
+  };
+
+  const getPatient = useCallback(async () => {
+    if (patientId) {
+      const response = await axios.get(`${baseUrl}patient/${patientId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const sexCodeset = await axios.get(
+        `${baseUrl}application-codesets/v2/SEX`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const patient = response.data;
+
+      console.log("get patient", patient?.contact?.contact);
+
+      setAllContacts(patient?.contact?.contact);
+      setPatientFacilityId(patient.facilityId);
+      const identifiers = patient.identifier;
+      const address = patient.address;
+      const contactPoint = patient?.contactPoint;
+      const hospitalNumber = identifiers?.identifier?.find(
+        (obj) => obj.type === "HospitalNumber"
+      );
+
+      const sex = _.find(sexCodeset.data, {
+        display: _.upperFirst(_.lowerCase(patient.sex)),
+      }).id;
+
+      const phone = phoneNumberFormatCheck(
+        contactPoint?.contactPoint?.find((obj) => obj.type === "phone")
+      );
+
+      const email = contactPoint?.contactPoint?.find(
+        (obj) => obj.type === "email"
+      );
+      const altphone = phoneNumberFormatCheck(
+        contactPoint?.contactPoint?.find((obj) => obj.type === "altphone")
+      );
+
+      const country =
+        address && address?.address && address?.address.length > 0
+          ? address.address[0]
+          : null;
+
+      if (country.stateId) {
+        loadState(country.stateId);
+      }
+
+      setBasicInfo({
+        active: true,
+        streetAddress: country.city,
+        address: [],
+        contact: [],
+        contactPoint: [],
+        dateOfBirth: "",
+        deceased: false,
+        deceasedDateTime: null,
+        hospitalNumber: hospitalNumber.value,
+        firstName: patient.firstName,
+        lastName: patient.surname,
+        genderId: "",
+        identifier: "",
+        otherName: "",
+        maritalStatusId: patient.maritalStatus?.id,
+        educationId: patient.education?.id,
+        employmentStatusId: patient.employmentStatus?.id,
+        dateOfRegistration: patient.dateOfRegistration,
+        isDateOfBirthEstimated: patient.dateOfBirth === "Actual" ? false : true,
+        age: calculate_age(patient.dateOfBirth),
+        phoneNumber: phone?.value,
+        altPhonenumber: altphone?.value,
+        dob: patient.dateOfBirth,
+        countryId: 1,
+        stateId: country.stateId,
+        district: parseInt(country.district),
+        landmark: country.line[0],
+        sexId: sex,
+        ninNumber: "",
+        email: email?.value,
+      });
+    }
+  }, [patientId]);
 
   useEffect(() => {
     loadGenders();
@@ -206,49 +282,22 @@ const UserRegistration = (props) => {
     loadEducation();
     loadOccupation();
     loadRelationships();
-    VACCINE();
+    loadTopLevelCountry();
     GetCountry();
     setStateByCountryId();
-    COVID_ADVERSE_EFFECT();
+    getPatient();
     if (basicInfo.dateOfRegistration < basicInfo.dob) {
       toast.error("Date of registration can not be earlier than date of birth");
     }
-  }, [basicInfo.dateOfRegistration]);
-  //covid/codeset?category=VACCINE
-  const VACCINE = () => {
-    axios
-      .get(`${baseUrl}covid/codeset?category=VACCINE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setVaccine(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const COVID_ADVERSE_EFFECT = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COVID_ADVERSE_EFFECT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setCovidEffect(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //COVID_ADVERSE_EFFECT
+  }, [getPatient]);
+
   const loadGenders = useCallback(async () => {
     try {
       const response = await axios.get(
         `${baseUrl}application-codesets/v2/SEX`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setGenders(response.data);
+      setGenders(response.data.sort());
     } catch (e) {}
   }, []);
   const loadMaritalStatus = useCallback(async () => {
@@ -257,7 +306,7 @@ const UserRegistration = (props) => {
         `${baseUrl}application-codesets/v2/MARITAL_STATUS`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setMaritalStatusOptions(response.data);
+      setMaritalStatusOptions(response.data.sort());
     } catch (e) {}
   }, []);
   const loadEducation = useCallback(async () => {
@@ -266,7 +315,7 @@ const UserRegistration = (props) => {
         `${baseUrl}application-codesets/v2/EDUCATION`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setEducationOptions(response.data);
+      setEducationOptions(response.data.sort());
     } catch (e) {}
   }, []);
   const loadOccupation = useCallback(async () => {
@@ -275,7 +324,7 @@ const UserRegistration = (props) => {
         `${baseUrl}application-codesets/v2/OCCUPATION`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setOccupationOptions(response.data);
+      setOccupationOptions(response.data.sort());
     } catch (e) {}
   }, []);
   const loadRelationships = useCallback(async () => {
@@ -284,13 +333,43 @@ const UserRegistration = (props) => {
         `${baseUrl}application-codesets/v2/RELATIONSHIP`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setRelationshipOptions(response.data);
+      setRelationshipOptions(response.data.sort());
     } catch (e) {}
   }, []);
-  // const loadTopLevelCountry = useCallback(async () => {
-  //     const response = await axios.get(`${baseUrl}organisation-units/parent-organisation-units/0`, { headers: {"Authorization" : `Bearer ${token}`} });
-  //     settopLevelUnitCountryOptions(response.data);
-  // }, []);
+  const loadTopLevelCountry = useCallback(async () => {
+    const response = await axios.get(
+      `${baseUrl}organisation-units/parent-organisation-units/0`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    settopLevelUnitCountryOptions(response.data.sort());
+  }, []);
+  const loadOrganisationUnitsByParentId = async (parentId) => {
+    const response = await axios.get(
+      `${baseUrl}organisation-units/parent-organisation-units/${parentId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  };
+  const calculate_age = (dob) => {
+    const today = new Date();
+    const dateParts = dob.split("-");
+    const birthDate = new Date(dob); // create a date object directlyfrom`dob1`argument
+    let age_now = today.getFullYear() - birthDate.getFullYear();
+
+    return age_now;
+  };
+  const phoneNumberFormatCheck = (phone) => {
+    //console.log("err", phone);
+    if (
+      phone !== undefined &&
+      typeof phone?.value !== null &&
+      typeof phone?.value !== "undefined" &&
+      phone?.value?.charAt(0) === "0"
+    ) {
+      phone.value = phone.value.replace("0", "234");
+    }
+    return phone;
+  };
   //Country List
   const GetCountry = () => {
     axios
@@ -317,6 +396,7 @@ const UserRegistration = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
+        //console.log(response.data);
         setStates(response.data.sort());
       })
       .catch((error) => {
@@ -333,7 +413,7 @@ const UserRegistration = (props) => {
         { headers: { Authorization: `Bearer ${token}` } }
       )
       .then((response) => {
-        setProvinces(response.data);
+        setProvinces(response.data.sort());
       })
       .catch((error) => {
         //console.log(error);
@@ -345,10 +425,10 @@ const UserRegistration = (props) => {
       const today = new Date();
       const birthDate = new Date(e.target.value);
       let age_now = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age_now--;
-      }
+      //   const m = today.getMonth() - birthDate.getMonth();
+      //   if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      //     age_now--;
+      //   }
       basicInfo.age = age_now;
       //setBasicInfo({...basicInfo, age: age_now});
     } else {
@@ -380,13 +460,12 @@ const UserRegistration = (props) => {
         toggle();
       }
     }
-    setBasicInfo({ ...basicInfo, age: Math.abs(e.target.value) });
+    setBasicInfo({ ...basicInfo, age: ageNumber });
   };
-  //End of Date of Birth and Age handling
-  //Handle Input Change for Basic Infor
+
   const handleInputChangeBasic = (e) => {
-    setErrors({ ...temp, [e.target.name]: "" });
     setBasicInfo({ ...basicInfo, [e.target.name]: e.target.value });
+
     if (e.target.name === "firstName" && e.target.value !== "") {
       const name = alphabetOnly(e.target.value);
       setBasicInfo({ ...basicInfo, [e.target.name]: name });
@@ -400,7 +479,9 @@ const UserRegistration = (props) => {
       setBasicInfo({ ...basicInfo, [e.target.name]: name });
     }
     if (e.target.name === "ninNumber" && e.target.value !== "") {
-      const ninNumberValue = checkNINLimit(e.target.value);
+      const ninNumberValue = checkNumberLimit(
+        e.target.value.replace(/\D/g, "")
+      );
       setBasicInfo({ ...basicInfo, [e.target.name]: ninNumberValue });
     }
     if (e.target.name === "hospitalNumber" && e.target.value !== "") {
@@ -419,7 +500,7 @@ const UserRegistration = (props) => {
         if (response.data !== true) {
           setHospitalNumStatus(false);
           errors.hospitalNumber = "";
-          setObjValues({ ...objValues, uniqueId: e.target.value });
+          //setObjValues({ ...objValues, uniqueId: e.target.value });
           setHospitalNumStatus2(true);
         } else {
           errors.hospitalNumber = "";
@@ -431,6 +512,7 @@ const UserRegistration = (props) => {
       getHosiptalNumber();
     }
   };
+
   //Function to show relatives
   const handleAddRelative = () => {
     setShowRelative(true);
@@ -441,10 +523,13 @@ const UserRegistration = (props) => {
   };
   /*****  Validation  Relationship Input*/
   const validateRelatives = () => {
+    const nigerianPhoneNumberRegex = /^(\+?234|0)([789]\d{9})$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     let temp = { ...errors };
     temp.firstName = relatives.firstName ? "" : "First Name is required";
-    temp.lastName = relatives.lastName ? "" : "Last Name  is required.";
-    temp.phone = relatives.phone ? "" : "Phone Number  is required.";
+    //temp.lastName = relatives.lastName ? "" : "Last Name  is required."
+    temp.phone = relatives.phone  && !nigerianPhoneNumberRegex.test(relatives.phone)? "Check Phone Number." : ""
+    temp.contactEmail = relatives.email  && !emailRegex.test(relatives.email)? "Check Email Address." : ""
     temp.relationshipId = relatives.relationshipId
       ? ""
       : "Relationship Type is required.";
@@ -452,9 +537,34 @@ const UserRegistration = (props) => {
     return Object.values(temp).every((x) => x === "");
   };
   //Function to add relatives
-  const handleSaveRelationship = (e) => {
+  const handleSaveRelationship = () => {
     if (validateRelatives()) {
-      setContacts([...contacts, relatives]);
+      const contact = {
+        address: {
+          line: [relatives.address],
+        },
+        contactPoint: {
+          type: "phone",
+          value: relatives.phone,
+        },
+        firstName: relatives.firstName,
+        fullName:
+          relatives.firstName +
+          " " +
+          relatives.middleName +
+          " " +
+          relatives.lastName,
+        relationshipId: relatives.relationshipId,
+        surname: relatives.lastName,
+        otherName: relatives.middleName,
+      };
+
+      if (allContacts === undefined) {
+        contactArray.push(contact);
+        setAllContacts(contactArray);
+      } else {
+        setAllContacts([...allContacts, contact]);
+      }
       setRelatives({
         address: "",
         phone: "",
@@ -467,17 +577,17 @@ const UserRegistration = (props) => {
     }
   };
   const handleDeleteRelative = (index) => {
-    contacts.splice(index, 1);
-    setContacts([...contacts]);
+    allContacts.splice(index, 1);
+    setAllContacts([...allContacts]);
   };
   const handleEditRelative = (relative, index) => {
     setRelatives(relative);
     setShowRelative(true);
-    contacts.splice(index, 1);
+    allContacts.splice(index, 1);
   };
   const getRelationship = (relationshipId) => {
     const relationship = relationshipOptions.find(
-      (obj) => obj.id == relationshipId
+      (obj) => obj.id === relationshipId
     );
     return relationship ? relationship.display : "";
   };
@@ -486,72 +596,44 @@ const UserRegistration = (props) => {
   };
   /*****  Validation  */
   const validate = () => {
+    let temp = { ...errors };
     temp.firstName = basicInfo.firstName ? "" : "First Name is required";
     temp.hospitalNumber = basicInfo.hospitalNumber
       ? ""
       : "Hospital Number  is required.";
     //temp.middleName = basicInfo.middleName ? "" : "Middle is required."
-    // temp.landmark = basicInfo.landmark ? "" : "This field is required."
+
     temp.lastName = basicInfo.lastName ? "" : "Last Name  is required.";
     temp.sexId = basicInfo.sexId ? "" : "Gender is required.";
     temp.dateOfRegistration = basicInfo.dateOfRegistration
       ? ""
       : "Date of Registration is required.";
-    //temp.educationId = basicInfo.educationId ? "" : "Education is required."
-    temp.address = basicInfo.address ? "" : "Address is required.";
-    temp.phoneNumber = basicInfo.phoneNumber
-      ? ""
-      : "Phone Number  is required.";
+    temp.educationId = basicInfo.educationId ? "" : "Education is required.";
+    temp.streetAddress = basicInfo.streetAddress ? "" : "Address is required.";
+    //temp.phoneNumber = basicInfo.phoneNumber ? "" : "Phone Number  is required."
     temp.countryId = basicInfo.countryId ? "" : "Country is required.";
     temp.stateId = basicInfo.stateId ? "" : "State is required.";
     temp.district = basicInfo.district ? "" : "Province/LGA is required.";
-    //VACCINATION FORM VALIDATION
-    temp.vaccine = objValues.vaccine ? "" : "This field is required";
-    temp.vaccineDate = objValues.vaccineDate ? "" : "This field is required";
-    //temp.doseNumber = objValues.doseNumber ? "" : "This field is required"
-    temp.location = objValues.location ? "" : "This field is required";
-    temp.batchNumber = objValues.batchNumber ? "" : "This field is required";
-    temp.adverseEffect = objValues.adverseEffect
+    temp.employmentStatusId = basicInfo.employmentStatusId
       ? ""
-      : "This field is required";
-
+      : "Employee Status  is required.";
     setErrors({ ...temp });
-    return Object.values(temp).every((x) => x == "");
+    return Object.values(temp).every((x) => x === "");
   };
+
   const handleSubmit = async (e) => {
-    console.log(handleSubmit);
     e.preventDefault();
+
     if (validate()) {
       setSaving(true);
-      let newConatctsInfo = [];
-      //Manipulate relatives contact  address:"",
-      const actualcontacts =
-        contacts &&
-        contacts.length > 0 &&
-        contacts.map((x) => {
-          const contactInfo = {
-            address: {
-              line: [x.address],
-            },
-            contactPoint: {
-              type: "phone",
-              value: x.phone,
-            },
-            firstName: x.firstName,
-            fullName: x.firstName + " " + x.middleName + " " + x.lastName,
-            relationshipId: x.relationshipId,
-            surname: x.lastName,
-            otherName: x.middleName,
-          };
 
-          newConatctsInfo.push(contactInfo);
-        });
+      //     });
       try {
         const patientForm = {
           active: true,
           address: [
             {
-              city: basicInfo.address,
+              city: basicInfo.streetAddress,
               countryId: basicInfo.countryId,
               district: basicInfo.district,
               line: [basicInfo.landmark],
@@ -560,7 +642,7 @@ const UserRegistration = (props) => {
               stateId: basicInfo.stateId,
             },
           ],
-          contact: newConatctsInfo,
+          contact: allContacts,
           contactPoint: [],
           dateOfBirth: basicInfo.dob,
           deceased: false,
@@ -582,9 +664,10 @@ const UserRegistration = (props) => {
           employmentStatusId: basicInfo.employmentStatusId,
           dateOfRegistration: basicInfo.dateOfRegistration,
           isDateOfBirthEstimated:
-            basicInfo.dateOfBirth == "Actual" ? false : true,
+            basicInfo.dateOfBirth === "Actual" ? false : true,
           ninNumber: basicInfo.ninNumber,
         };
+
         const phone = {
           type: "phone",
           value: basicInfo.phoneNumber,
@@ -604,32 +687,34 @@ const UserRegistration = (props) => {
           patientForm.contactPoint.push(altPhonenumber);
         }
         patientForm.contactPoint.push(phone);
-        //patientForm.id = patientId;
+        patientForm.id = patientId;
         patientDTO.person = patientForm;
-        patientDTO.vaccinationEnrollment = objValues;
-        const observationData = {
-          observation: {
-            data: {},
-            date: date.dateServiceOffered,
-            htsService: htsServices,
-            prepServices: prepServices,
-          },
-          commodityService: commodityService,
-          hivEducationProvided: hivEducationProvided,
-          bioMedicalServices: bioMedicalServices,
-          structuralServices: structuralServices,
-        };
 
-        const response = await axios.post(
-          `${baseUrl}/api/v1/kpprev`,
-          patientDTO,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        toast.success("Patient Register successfully", {
-          position: toast.POSITION.BOTTOM_CENTER,
-        });
-        setSaving(false);
-        history.push("/");
+        if (patientId) {
+          patientForm.id = null;
+          patientForm.facilityId = patientFacilityId;
+          const response = await axios.put(
+            `${baseUrl}patient/${patientId}`,
+            patientForm,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          await queryClient.refetchQueries();
+          toast.success("Patient Updated successfully");
+          setSaving(false);
+          history.push("/patient-vaccination-history", {
+            patientObj: response.data,
+          });
+        } else {
+          const response = await axios.post(`${baseUrl}patient`, patientForm, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          await queryClient.refetchQueries();
+          toast.success("Patient Register successfully");
+          setSaving(false);
+          history.push("/patient-vaccination-history", {
+            patientObj: response.data,
+          });
+        }
       } catch (error) {
         setSaving(false);
         if (error.response && error.response.data) {
@@ -665,190 +750,27 @@ const UserRegistration = (props) => {
       }
     }
   };
-
-  const [date, setDate] = useState({
-    dateServiceOffered: "",
-  });
-
-  const [htsServices, setHtsServices] = useState({
-    offeredHts: "",
-    acceptedHts: "",
-    hivTestResult: "",
-    referredForArt: "",
-  });
-  const [prepServices, setPrepServices] = useState({
-    offeredPrep: "",
-    acceptedPrep: "",
-    refferedForPrep: "",
-  });
-  const [commodityService, setCommodityService] = useState({
-    condomDispensed: "",
-    lubricantsDispensed: "",
-    oralQuickDispensed: "",
-    newNeedleDispensed: "",
-    oldNeedleRetrived: "",
-    nalxoneProvided: "",
-  });
-  const [hivEducationProvided, setHivEducationProvided] = useState({
-    iecMaterial: "",
-    interPersonalCommunication: "",
-    peerGroupCommunication: "",
-  });
-  const [bioMedicalServices, setbioMedicalServices] = useState({
-    stiScreening: "",
-    stiSyndromicManagement: "",
-    stiTreatment: "",
-    screenedForTb: "",
-    providedWithTpt: "",
-    screenedForViralHepatits: "",
-    viralHepatitsScreenResult: "",
-    vaccinationForViralHepatits: "",
-    offeredFamilyPlanningServices: "",
-    referredForFamilyPlanningServices: "",
-    providedWithDrugRehab: "",
-    offeredMhpss: "",
-    onMedicalAssistedTherapy: "",
-    recivedNalxoneForOverdoseTreatment: "",
-  });
-  const [structuralServices, setstructuralServices] = useState({
-    providedOrRefferedForEmpowerment: "",
-    legalAidServiceType: "",
-    peerGroupCommunication: "",
-  });
-  const [facilityRefferedToo, setFacilityRefferedToo] = useState({
-    facilityRefferedToStiScreening: "",
-    facilityRefferedToScreenedTo: "",
-    facilityRefferedToScreenedForViralHepatits: "",
-    facilityRefferedToViralHepatitsScreenResult: "",
-    facilityRefferedToVaccinationForViralHepatits: "",
-    facilityRefferedToOfferedFamilyPlanningServices: "",
-    facilityRefferedToReferredForFamilyPlanningServices: "",
-    facilityRefeRredToProvidedWithDrugRehab: "",
-    facilityRefferedToOfferedMhpss: "",
-    facilityRefferedToOnMedicalAssistedTherapy: "",
-    facilityRefferedToRecievedNalxoneForOverdoseTreatment: "",
-  });
-
-  const handleInputChan4Date = (e) => {
-    //console.log(e.target.value)
-    setErrors({ ...temp, [e.target.name]: "" });
-    setDate({ ...date, [e.target.name]: e.target.value });
-  };
-  const handleInputChangeReferred = (e) => {
-    //console.log(e.target.value)
-    setErrors({ ...temp, [e.target.name]: "" });
-    setFacilityRefferedToo({
-      ...facilityRefferedToo,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleInputChangeHtsService = (e) => {
-    //console.log(e.target.value)
-    setErrors({ ...temp, [e.target.name]: "" });
-    setHtsServices({ ...htsServices, [e.target.name]: e.target.value });
-  };
-  const handleInputChangePrepServices = (e) => {
-    //console.log(e.target.value)
-    setErrors({ ...temp, [e.target.name]: "" });
-    setPrepServices({ ...prepServices, [e.target.name]: e.target.value });
-  };
-  const handleInputChangeCommodityServices = (e) => {
-    //console.log(e.target.value)
-    setErrors({ ...temp, [e.target.name]: "" });
-    setCommodityService({
-      ...commodityService,
-      [e.target.name]: e.target.value,
-    });
-  };
-  const handleInputChangeHivEducationProvided = (e) => {
-    //console.log(e.target.value)
-    setErrors({ ...temp, [e.target.name]: "" });
-    setHivEducationProvided({
-      ...hivEducationProvided,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleInputChangebioMedicalServices = (e) => {
-    //console.log(e.target.value)
-    setErrors({ ...temp, [e.target.name]: "" });
-    setbioMedicalServices({
-      ...bioMedicalServices,
-      [e.target.name]: e.target.value,
-    });
-  };
-  const handleInputChangestructuralServices = (e) => {
-    //console.log(e.target.value)
-    setErrors({ ...temp, [e.target.name]: "" });
-    setstructuralServices({
-      ...structuralServices,
-      [e.target.name]: e.target.value,
-    });
-  };
   const alphabetOnly = (value) => {
     const result = value.replace(/[^a-z]/gi, "");
     return result;
   };
-  const handleInputChange = (e) => {
-    setErrors({ ...temp, [e.target.name]: "" });
-    setObjValues({ ...objValues, [e.target.name]: e.target.value });
-    if (e.target.name === "location" && objValues.location !== "Facility") {
-      objValues.vaccinationFacility = "";
-      setObjValues({ ...objValues, ["vaccinationFacility"]: "" });
-      setObjValues({ ...objValues, [e.target.name]: e.target.value });
-    }
-  };
+
   const checkPhoneNumber = (e, inputName) => {
     const NumberValue = checkNumberLimit(e.target.value.replace(/\D/g, ""));
     setRelatives({ ...relatives, [inputName]: NumberValue });
   };
-  // const checkPhoneNumberBasic=(e, inputName)=>{
-  //     const limit = 10;
-  //     setBasicInfo({...basicInfo,  [inputName]: e.slice(0, limit)});
-  // }
-  const checkNINLimit = (e) => {
-    const limit = 11;
-    const acceptedNumber = e.slice(0, limit);
-    return acceptedNumber;
-  };
-  //Handle CheckBox handleCheckBoxworkInHealthSector handleCheckBoxknownMedicalCondition
-  const handleCheckBoxworkInHealthSector = (e) => {
-    if (e.target.checked) {
-      setObjValues({ ...objValues, ["workInHealthSector"]: e.target.checked });
-      //setOvcEnrolled(true)
-    } else {
-      setObjValues({ ...objValues, ["workInHealthSector"]: false });
-    }
-  };
 
-  const handleInputChangePhoneNumber = (e, inputName) => {
-    const limit = 11;
-    const NumberValue = checkNumberLimit(e.target.value.replace(/\D/g, ""));
-    setBasicInfo({ ...basicInfo, [inputName]: NumberValue });
-  };
   const checkNumberLimit = (e) => {
     const limit = 11;
     const acceptedNumber = e.slice(0, limit);
     return acceptedNumber;
   };
-  const handleCheckBoxknownMedicalCondition = (e) => {
-    if (e.target.checked) {
-      setObjValues({
-        ...objValues,
-        ["knownMedicalCondition"]: e.target.checked,
-      });
-      //setOvcEnrolled(true)
-    } else {
-      setObjValues({ ...objValues, ["knownMedicalCondition"]: false });
-    }
+  const handleInputChangePhoneNumber = (e, inputName) => {
+    const limit = 11;
+    const NumberValue = checkNumberLimit(e.target.value.replace(/\D/g, ""));
+    setBasicInfo({ ...basicInfo, [inputName]: NumberValue });
   };
-  const onClickContactCard = () => {
-    setShowContactCard(!showContactCard);
-  };
-  const onClickRelativeCard = () => {
-    setShowRelative(!showRelative);
-  };
+
   const handleCancel = () => {
     history.push({ pathname: "/" });
   };
@@ -864,7 +786,7 @@ const UserRegistration = (props) => {
           <li className="breadcrumb-item active">
             <h4>
               {" "}
-              <Link to={"/"}>Kp-Prev /</Link> Patient Registration
+              <Link to={"/"}>Patient /</Link> Patient Registration
             </h4>
           </li>
         </ol>
@@ -932,6 +854,7 @@ const UserRegistration = (props) => {
                             min="1983-12-31"
                             max={moment(new Date()).format("YYYY-MM-DD")}
                             value={basicInfo.dateOfRegistration}
+                            //value={basicInfo.dateOfRegistration===""? moment(new Date()).format("YYYY-MM-DD") : basicInfo.dateOfRegistration}
                             onChange={handleInputChangeBasic}
                             style={{
                               border: "1px solid #014D88",
@@ -952,7 +875,7 @@ const UserRegistration = (props) => {
                         <FormGroup>
                           <Label for="patientId">
                             Hospital Number{" "}
-                            <span style={{ color: "red" }}> *</span>{" "}
+                            <span style={{ color: "red" }}> *</span>
                           </Label>
                           <input
                             className="form-control"
@@ -992,7 +915,7 @@ const UserRegistration = (props) => {
                           </Label>
                           <input
                             className="form-control"
-                            type="number"
+                            type="text"
                             name="ninNumber"
                             value={basicInfo.ninNumber}
                             id="ninNumber"
@@ -1004,6 +927,23 @@ const UserRegistration = (props) => {
                           />
                         </FormGroup>
                       </div>
+                      {/* <div className="form-group mb-3 col-md-4">
+                                                <FormGroup>
+                                                    <Label for="patientId">EMR Number <span style={{ color:"red"}}> *</span> </Label>
+                                                    <input
+                                                        className="form-control"
+                                                        type="text"
+                                                        name="emrNumber"
+                                                        id="emrNumber"
+                                                        disabled='true'
+                                                        value={1094328}
+                                                        //onChange={handleInputChangeBasic}
+                                                        style={{border: "1px solid #014D88",borderRadius:"0.2rem"}}HIV Enrollment
+                                                    />
+                                                   
+                                                </FormGroup>
+                                            
+                                            </div> */}
                     </div>
 
                     <div className="row">
@@ -1115,10 +1055,7 @@ const UserRegistration = (props) => {
                       </div>
                       <div className="form-group mb-2 col-md-2">
                         <FormGroup>
-                          <Label>
-                            Date Of Birth{" "}
-                            <span style={{ color: "red" }}> *</span>
-                          </Label>
+                          <Label>Date Of Birth</Label>
                           <div className="radio">
                             <label>
                               <input
@@ -1162,11 +1099,7 @@ const UserRegistration = (props) => {
                             name="dob"
                             min="1940-01-01"
                             id="dob"
-                            max={
-                              basicInfo.dateOfRegistration === ""
-                                ? moment(new Date()).format("YYYY-MM-DD")
-                                : basicInfo.dateOfRegistration
-                            }
+                            max={basicInfo?.dateOfRegistration || moment(new Date()).format("YYYY-MM-DD")}
                             value={basicInfo.dob}
                             onChange={handleDobChange}
                             style={{
@@ -1181,11 +1114,11 @@ const UserRegistration = (props) => {
                         <FormGroup>
                           <Label>Age</Label>
                           <input
-                            type="number"
+                            type="text"
                             name="age"
                             className="form-control"
                             id="age"
-                            min="5"
+                            min="1"
                             value={basicInfo.age}
                             disabled={ageDisabled}
                             onChange={handleAgeChange}
@@ -1195,18 +1128,20 @@ const UserRegistration = (props) => {
                             }}
                           />
                         </FormGroup>
-                        <p>
-                          <b style={{ color: "red" }}>
-                            {basicInfo.age !== "" && basicInfo.age < 5
-                              ? "The minimum age is 5"
-                              : " "}{" "}
-                          </b>
-                        </p>
+                        {basicInfo.age !== "" && basicInfo.age >= 80 ? (
+                          <span className={classes.error}>
+                            Are you sure of the age
+                          </span>
+                        ) : (
+                          ""
+                        )}
                       </div>
                     </div>
 
                     <div className={"row"}>
-                      <div className="form-group col-md-4">
+                      {/*                                            {watchShowAge >=0 &&
+                                            <>*/}
+                      <div className="form-group mb-3 col-md-3">
                         <FormGroup>
                           <Label>Marital Status</Label>
                           <select
@@ -1237,7 +1172,10 @@ const UserRegistration = (props) => {
 
                       <div className="form-group  col-md-4">
                         <FormGroup>
-                          <Label>Employment Status </Label>
+                          <Label>
+                            Employment Status{" "}
+                            <span style={{ color: "red" }}> *</span>
+                          </Label>
                           <select
                             className="form-control"
                             name="employmentStatusId"
@@ -1273,7 +1211,10 @@ const UserRegistration = (props) => {
 
                       <div className="form-group  col-md-4">
                         <FormGroup>
-                          <Label>Education Level </Label>
+                          <Label>
+                            Education Level{" "}
+                            <span style={{ color: "red" }}> *</span>
+                          </Label>
                           <select
                             className="form-control"
                             name="educationId"
@@ -1322,285 +1263,260 @@ const UserRegistration = (props) => {
                   <h5 className="card-title" style={{ color: "#fff" }}>
                     Contact Details
                   </h5>
-                  {showContactCard === false ? (
-                    <>
-                      <span
-                        className="float-end"
-                        style={{ cursor: "pointer" }}
-                        onClick={onClickContactCard}
-                      >
-                        <FaPlus />
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        className="float-end"
-                        style={{ cursor: "pointer" }}
-                        onClick={onClickContactCard}
-                      >
-                        <FaAngleDown />
-                      </span>{" "}
-                    </>
-                  )}
                 </div>
-                {showContactCard && (
-                  <div className="card-body">
-                    <div className={"row"}>
-                      <div className="form-group  col-md-4">
-                        <FormGroup>
-                          <Label>
-                            Phone Number{" "}
-                            <span style={{ color: "red" }}> *</span>
-                          </Label>
-                          {/* <PhoneInput
-                                                      containerStyle={{width:'100%',border: "1px solid #014D88"}}
-                                                      inputStyle={{width:'100%',borderRadius:'0px'}}
-                                                      country={'ng'}
-                                                      placeholder="(234)7099999999"
-                                                      maxLength={5}
-                                                      name="phoneNumber"
-                                                      id="phoneNumber"
-                                                      masks={{ng: '...-...-....', at: '(....) ...-....'}}
-                                                      value={basicInfo.phoneNumber}
-                                                    onChange={(e)=>{checkPhoneNumberBasic(e,'phoneNumber')}}
-                                                    //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}
-                                                  /> */}
-                          <Input
-                            type="text"
-                            name="phoneNumber"
-                            id="phoneNumber"
-                            onChange={(e) => {
-                              handleInputChangePhoneNumber(e, "phoneNumber");
-                            }}
-                            value={basicInfo.phoneNumber}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                            }}
-                            required
-                          />
-                          {errors.phoneNumber !== "" ? (
-                            <span className={classes.error}>
-                              {errors.phoneNumber}
-                            </span>
-                          ) : (
-                            ""
-                          )}
-                          {/* {basicInfo.phoneNumber.length >13 ||  basicInfo.phoneNumber.length <13? (
-                                                  <span className={classes.error}>{"The maximum and minimum required number is 13 digit"}</span>
-                                                  ) : "" } */}
-                        </FormGroup>
-                      </div>
 
-                      <div className="form-group col-md-4">
-                        <FormGroup>
-                          <Label>Alt. Phone Number</Label>
-                          {/* <PhoneInput
-                                                      containerStyle={{width:'100%',border: "1px solid #014D88"}}
-                                                      inputStyle={{width:'100%',borderRadius:'0px'}}
-                                                      country={'ng'}
-                                                      placeholder="(234)7099999999"
-                                                      value={basicInfo.altPhonenumber}
-                                                      masks={{ng: '...-...-....', at: '(....) ...-....'}}
-                                                      onChange={(e)=>{checkPhoneNumberBasic(e,'altPhonenumber')}}
-                                                      
-                                                  /> */}
-                          <Input
-                            type="text"
-                            name="altPhonenumber"
-                            id="altPhonenumber"
-                            onChange={(e) => {
-                              handleInputChangePhoneNumber(e, "altPhonenumber");
-                            }}
-                            value={basicInfo.altPhonenumber}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                            }}
-                            required
-                          />
-                          {/* {basicInfo.phoneNumber.length >13 ||  basicInfo.phoneNumber.length <13? (
-                                                  <span className={classes.error}>{"The maximum and minimum required number is 13 digit"}</span>
-                                                  ) : "" } */}
-                        </FormGroup>
-                      </div>
-
-                      <div className="form-group col-md-4">
-                        <FormGroup>
-                          <Label>Email</Label>
-                          <input
-                            className="form-control"
-                            type="email"
-                            name="email"
-                            id="email"
-                            onChange={handleInputChangeBasic}
-                            value={basicInfo.email}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                            }}
-                            required
-                          />
-                        </FormGroup>
-                      </div>
+                <div className="card-body">
+                  <div className={"row"}>
+                    <div className="form-group  col-md-4">
+                      <FormGroup>
+                        <Label>
+                          Phone Number <span style={{ color: "red" }}> *</span>
+                        </Label>
+                        {/* <PhoneInput
+                                                    containerStyle={{width:'100%',border: "1px solid #014D88"}}
+                                                    inputStyle={{width:'100%',borderRadius:'0px'}}
+                                                    country={'ng'}
+                                                    placeholder="(234)7099999999"
+                                                    maxLength={5}
+                                                    name="phoneNumber"
+                                                    id="phoneNumber"
+                                                    masks={{ng: '...-...-....', at: '(....) ...-....'}}
+                                                    value={basicInfo.phoneNumber}
+                                                   onChange={(e)=>{checkPhoneNumberBasic(e,'phoneNumber')}}
+                                                   
+                                                   //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}
+                                                /> */}
+                        <Input
+                          type="text"
+                          name="phoneNumber"
+                          id="phoneNumber"
+                          onChange={(e) => {
+                            handleInputChangePhoneNumber(e, "phoneNumber");
+                          }}
+                          value={basicInfo.phoneNumber}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                          }}
+                          required
+                        />
+                        {errors.phoneNumber !== "" ? (
+                          <span className={classes.error}>
+                            {errors.phoneNumber}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                        {/* {basicInfo.phoneNumber.length >13 ||  basicInfo.phoneNumber.length <13? (
+                                                <span className={classes.error}>{"The maximum and minimum required number is 13 digit"}</span>
+                                                ) : "" } */}
+                      </FormGroup>
                     </div>
 
-                    <div className="row">
-                      <div className="form-group  col-md-4">
-                        <FormGroup>
-                          <Label>
-                            Country <span style={{ color: "red" }}> *</span>
-                          </Label>
-                          <select
-                            className="form-control"
-                            type="text"
-                            name="countryId"
-                            id="countryId"
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                            }}
-                            value={basicInfo.countryId}
-                            disabled
-                            onChange={getStates}
-                          >
-                            <option value={""}>Select</option>
-                            {countries.map((value, index) => (
-                              <option key={index} value={value.id}>
-                                {value.name}
-                              </option>
-                            ))}
-                          </select>
-                          {errors.countryId !== "" ? (
-                            <span className={classes.error}>
-                              {errors.countryId}
-                            </span>
-                          ) : (
-                            ""
-                          )}
-                        </FormGroup>
-                      </div>
-
-                      <div className="form-group  col-md-4">
-                        <FormGroup>
-                          <Label>
-                            State <span style={{ color: "red" }}> *</span>
-                          </Label>
-                          <select
-                            className="form-control"
-                            type="text"
-                            name="stateId"
-                            id="stateId"
-                            value={basicInfo.stateId}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                            }}
-                            onChange={getProvinces}
-                          >
-                            <option value="">Select</option>
-                            {states.map((value, index) => (
-                              <option key={index} value={value.id}>
-                                {value.name}
-                              </option>
-                            ))}
-                          </select>
-                          {errors.stateId !== "" ? (
-                            <span className={classes.error}>
-                              {errors.stateId}
-                            </span>
-                          ) : (
-                            ""
-                          )}
-                        </FormGroup>
-                      </div>
-
-                      <div className="form-group  col-md-4">
-                        <FormGroup>
-                          <Label>
-                            Province/District/LGA{" "}
-                            <span style={{ color: "red" }}> *</span>
-                          </Label>
-                          <select
-                            className="form-control"
-                            type="text"
-                            name="district"
-                            id="district"
-                            value={basicInfo.district}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                            }}
-                            onChange={handleInputChangeBasic}
-                          >
-                            <option value="">Select</option>
-                            {provinces.map((value, index) => (
-                              <option key={index} value={value.id}>
-                                {value.name}
-                              </option>
-                            ))}
-                          </select>
-                          {errors.district !== "" ? (
-                            <span className={classes.error}>
-                              {errors.district}
-                            </span>
-                          ) : (
-                            ""
-                          )}
-                        </FormGroup>
-                      </div>
+                    <div className="form-group col-md-4">
+                      <FormGroup>
+                        <Label>Alt. Phone Number</Label>
+                        {/* <PhoneInput
+                                                    containerStyle={{width:'100%',border: "1px solid #014D88"}}
+                                                    inputStyle={{width:'100%',borderRadius:'0px'}}
+                                                    country={'ng'}
+                                                    placeholder="(234)7099999999"
+                                                    value={basicInfo.altPhonenumber}
+                                                    masks={{ng: '...-...-....', at: '(....) ...-....'}}
+                                                    onChange={(e)=>{checkPhoneNumberBasic(e,'altPhonenumber')}}
+                                                    
+                                                /> */}
+                        <Input
+                          type="text"
+                          name="altPhonenumber"
+                          id="altPhonenumber"
+                          onChange={(e) => {
+                            handleInputChangePhoneNumber(e, "altPhonenumber");
+                          }}
+                          value={basicInfo.altPhonenumber}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                          }}
+                          required
+                        />
+                      </FormGroup>
                     </div>
 
-                    <div className={"row"}>
-                      <div className="form-group  col-md-4">
-                        <FormGroup>
-                          <Label>
-                            Street Address{" "}
-                            <span style={{ color: "red" }}> *</span>
-                          </Label>
-                          <input
-                            className="form-control"
-                            type="text"
-                            name="address"
-                            id="address"
-                            value={basicInfo.address}
-                            onChange={handleInputChangeBasic}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                            }}
-                          />
-                          {errors.address !== "" ? (
-                            <span className={classes.error}>
-                              {errors.address}
-                            </span>
-                          ) : (
-                            ""
-                          )}
-                        </FormGroup>
-                      </div>
-
-                      <div className="form-group  col-md-4">
-                        <FormGroup>
-                          <Label>Landmark</Label>
-                          <input
-                            className="form-control"
-                            type="text"
-                            name="landmark"
-                            id="landmark"
-                            value={basicInfo.landmark}
-                            onChange={handleInputChangeBasic}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                            }}
-                          />
-                        </FormGroup>
-                      </div>
+                    <div className="form-group col-md-4">
+                      <FormGroup>
+                        <Label>Email</Label>
+                        <input
+                          className="form-control"
+                          type="email"
+                          name="email"
+                          id="email"
+                          onChange={handleInputChangeBasic}
+                          value={basicInfo.email}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                          }}
+                          required
+                        />
+                      </FormGroup>
                     </div>
                   </div>
-                )}
+
+                  <div className="row">
+                    <div className="form-group  col-md-4">
+                      <FormGroup>
+                        <Label>
+                          Country <span style={{ color: "red" }}> *</span>
+                        </Label>
+                        <select
+                          className="form-control"
+                          type="text"
+                          name="countryId"
+                          id="countryId"
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                          }}
+                          value={basicInfo.countryId}
+                          onChange={getStates}
+                          disabled
+                        >
+                          <option value={""}>Select</option>
+                          {countries.map((value, index) => (
+                            <option key={index} value={value.id}>
+                              {value.name}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.countryId !== "" ? (
+                          <span className={classes.error}>
+                            {errors.countryId}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </FormGroup>
+                    </div>
+
+                    <div className="form-group  col-md-4">
+                      <FormGroup>
+                        <Label>
+                          State <span style={{ color: "red" }}> *</span>
+                        </Label>
+                        <select
+                          className="form-control"
+                          type="text"
+                          name="stateId"
+                          id="stateId"
+                          value={basicInfo.stateId}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                          }}
+                          onChange={getProvinces}
+                        >
+                          <option value="">Select</option>
+                          {states.map((value, index) => (
+                            <option key={index} value={value.id}>
+                              {value.name}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.stateId !== "" ? (
+                          <span className={classes.error}>
+                            {errors.stateId}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </FormGroup>
+                    </div>
+
+                    <div className="form-group  col-md-4">
+                      <FormGroup>
+                        <Label>
+                          Province/District/LGA{" "}
+                          <span style={{ color: "red" }}> *</span>
+                        </Label>
+                        <select
+                          className="form-control"
+                          type="text"
+                          name="district"
+                          id="district"
+                          value={basicInfo.district}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                          }}
+                          onChange={handleInputChangeBasic}
+                        >
+                          <option value="">Select</option>
+                          {provinces.map((value, index) => (
+                            <option key={index} value={value.id}>
+                              {value.name}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.district !== "" ? (
+                          <span className={classes.error}>
+                            {errors.district}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </FormGroup>
+                    </div>
+                  </div>
+
+                  <div className={"row"}>
+                    <div className="form-group  col-md-4">
+                      <FormGroup>
+                        <Label>
+                          Street Address{" "}
+                          <span style={{ color: "red" }}> *</span>
+                        </Label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="streetAddress"
+                          id="streetAddress"
+                          value={basicInfo.streetAddress}
+                          onChange={handleInputChangeBasic}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                          }}
+                        />
+                        {errors.streetAddress !== "" ? (
+                          <span className={classes.error}>
+                            {errors.streetAddress}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </FormGroup>
+                    </div>
+
+                    <div className="form-group  col-md-4">
+                      <FormGroup>
+                        <Label>Landmark</Label>
+                        <input
+                          className="form-control"
+                          type="text"
+                          name="landmark"
+                          id="landmark"
+                          value={basicInfo.landmark}
+                          onChange={handleInputChangeBasic}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                          }}
+                        />
+                      </FormGroup>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="card">
@@ -1616,1454 +1532,293 @@ const UserRegistration = (props) => {
                   <h5 className="card-title" style={{ color: "#fff" }}>
                     Relationship / Next Of Kin
                   </h5>
-                  {showRelative === false ? (
-                    <>
-                      <span
-                        className="float-end"
-                        style={{ cursor: "pointer" }}
-                        onClick={onClickRelativeCard}
-                      >
-                        <FaPlus />
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        className="float-end"
-                        style={{ cursor: "pointer" }}
-                        onClick={onClickRelativeCard}
-                      >
-                        <FaAngleDown />
-                      </span>{" "}
-                    </>
-                  )}
                 </div>
-                {showRelative && (
-                  <div className="card-body">
-                    <div className="row">
-                      {contacts && contacts.length > 0 && (
-                        <div className="col-xl-12 col-lg-12">
-                          <table style={{ width: "100%" }} className="mb-3">
-                            <thead className="mb-3">
-                              <tr>
-                                <th>Relationship Type</th>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Address</th>
-                                <th>Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody className="mb-3">
-                              {contacts.map((item, index) => {
-                                return (
-                                  <tr key={item.index} className="mb-3">
-                                    <td>
-                                      {getRelationship(item.relationshipId)}
-                                    </td>
-                                    <td>
-                                      {item.firstName +
-                                        " " +
-                                        item.middleName +
-                                        " " +
-                                        item.lastName}
-                                    </td>
-                                    <td>{item.phone}</td>
-                                    <td>{item.address}</td>
-                                    <td>
-                                      <button
-                                        type="button"
-                                        className="btn btn-default btn-light btn-sm editRow"
-                                        onClick={() =>
-                                          handleEditRelative(item, index)
-                                        }
-                                      >
-                                        <FontAwesomeIcon icon="edit" />
-                                      </button>
-                                      &nbsp;&nbsp;
-                                      <button
-                                        type="button"
-                                        className="btn btn-danger btn-sm removeRow"
-                                        onClick={(e) =>
-                                          handleDeleteRelative(index)
-                                        }
-                                      >
-                                        <FontAwesomeIcon icon="trash" />
-                                      </button>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
+                <div className="card-body">
+                  <div className="row">
+                    {allContacts && allContacts.length > 0 && (
                       <div className="col-xl-12 col-lg-12">
-                        {showRelative && (
-                          <div className="card">
-                            <div className="card-body">
-                              <div className="row">
-                                <div className="form-group mb-3 col-md-3">
-                                  <FormGroup>
-                                    <Label for="relationshipType">
-                                      Relationship Type{" "}
-                                      <span style={{ color: "red" }}> *</span>
-                                    </Label>
-                                    <select
-                                      className="form-control"
-                                      name="relationshipId"
-                                      id="relationshipId"
-                                      value={relatives.relationshipId}
-                                      style={{
-                                        border: "1px solid #014D88",
-                                        borderRadius: "0.2rem",
-                                      }}
-                                      onChange={handleInputChangeRelatives}
+                        <table style={{ width: "100%" }} className="mb-3">
+                          <thead className="mb-3">
+                            <tr>
+                              <th>Relationship Type</th>
+                              <th>Name</th>
+                              <th>Phone</th>
+                              <th>Address</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="mb-3">
+                            {allContacts.map((item, index) => {
+                              return (
+                                <tr key={item.index} className="mb-3">
+                                  <td>
+                                    {getRelationship(item.relationshipId)}
+                                  </td>
+                                  <td>
+                                    {item?.firstName +
+                                      " " +
+                                      item?.otherName +
+                                      " " +
+                                      item?.surname}
+                                  </td>
+                                  <td>{item.contactPoint.value}</td>
+                                  <td>{item.address?.line[0]}</td>
+                                  <td>
+                                  
+                                    &nbsp;&nbsp;
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger btn-sm removeRow"
+                                      onClick={(e) =>
+                                        handleDeleteRelative(index)
+                                      }
                                     >
-                                      <option value={""}>Select</option>
-                                      {relationshipOptions.map(
-                                        (relative, index) => (
-                                          <option
-                                            key={relative.id}
-                                            value={relative.id}
-                                          >
-                                            {relative.display}
-                                          </option>
-                                        )
-                                      )}
-                                    </select>
-                                    {errors.relationshipId !== "" ? (
-                                      <span className={classes.error}>
-                                        {errors.relationshipId}
-                                      </span>
-                                    ) : (
-                                      ""
+                                      <FontAwesomeIcon icon="trash" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    <div className="col-xl-12 col-lg-12">
+                      {showRelative && (
+                        <div className="card">
+                          <div className="card-body">
+                            <div className="row">
+                              <div className="form-group mb-3 col-md-3">
+                                <FormGroup>
+                                  <Label for="relationshipType">
+                                    Relationship Type{" "}
+                                    <span style={{ color: "red" }}> *</span>
+                                  </Label>
+                                  <select
+                                    className="form-control"
+                                    name="relationshipId"
+                                    id="relationshipId"
+                                    value={relatives.relationshipId}
+                                    style={{
+                                      border: "1px solid #014D88",
+                                      borderRadius: "0.2rem",
+                                    }}
+                                    onChange={handleInputChangeRelatives}
+                                  >
+                                    <option value={""}>Select</option>
+                                    {relationshipOptions.map(
+                                      (relative, index) => (
+                                        <option
+                                          key={relative.id}
+                                          value={relative.id}
+                                        >
+                                          {relative.display}
+                                        </option>
+                                      )
                                     )}
-                                  </FormGroup>
-                                </div>
-
-                                <div className="form-group mb-3 col-md-3">
-                                  <FormGroup>
-                                    <Label for="cfirstName">
-                                      First Name{" "}
-                                      <span style={{ color: "red" }}> *</span>
-                                    </Label>
-                                    <input
-                                      className="form-control"
-                                      type="text"
-                                      name="firstName"
-                                      value={relatives.firstName}
-                                      id="firstName"
-                                      style={{
-                                        border: "1px solid #014D88",
-                                        borderRadius: "0.2rem",
-                                      }}
-                                      onChange={handleInputChangeRelatives}
-                                    />
-                                    {errors.firstName !== "" ? (
-                                      <span className={classes.error}>
-                                        {errors.firstName}
-                                      </span>
-                                    ) : (
-                                      ""
-                                    )}
-                                  </FormGroup>
-                                </div>
-
-                                <div className="form-group mb-3 col-md-3">
-                                  <FormGroup>
-                                    <Label>Middle Name</Label>
-                                    <input
-                                      className="form-control"
-                                      type="text"
-                                      name="middleName"
-                                      id="middleName"
-                                      value={relatives.middleName}
-                                      style={{
-                                        border: "1px solid #014D88",
-                                        borderRadius: "0.2rem",
-                                      }}
-                                      onChange={handleInputChangeRelatives}
-                                    />
-                                    {/* {errors.cmiddleName && <p>{errors.cmiddleName.message}</p>} */}
-                                  </FormGroup>
-                                </div>
-
-                                <div className="form-group mb-3 col-md-3">
-                                  <FormGroup>
-                                    <Label>
-                                      Last Name{" "}
-                                      <span style={{ color: "red" }}> *</span>
-                                    </Label>
-                                    <input
-                                      className="form-control"
-                                      type="text"
-                                      name="lastName"
-                                      id="lastName"
-                                      value={relatives.lastName}
-                                      style={{
-                                        border: "1px solid #014D88",
-                                        borderRadius: "0.2rem",
-                                      }}
-                                      onChange={handleInputChangeRelatives}
-                                    />
-                                    {errors.lastName !== "" ? (
-                                      <span className={classes.error}>
-                                        {errors.lastName}
-                                      </span>
-                                    ) : (
-                                      ""
-                                    )}
-                                  </FormGroup>
-                                </div>
+                                  </select>
+                                  {errors.relationshipId !== "" ? (
+                                    <span className={classes.error}>
+                                      {errors.relationshipId}
+                                    </span>
+                                  ) : (
+                                    ""
+                                  )}
+                                </FormGroup>
                               </div>
 
-                              <div className="row">
-                                <div className="form-group mb-3 col-md-3">
-                                  <FormGroup>
-                                    <Label for="contactPhoneNumber">
-                                      Phone Number
-                                    </Label>
-                                    {/* <PhoneInput
-                                                                            containerStyle={{width:'100%',border: "1px solid #014D88"}}
-                                                                            inputStyle={{width:'100%',borderRadius:'0px'}}
-                                                                            country={'ng'}
-                                                                            placeholder="(234)7099999999"
-                                                                            name="phone"
-                                                                            value={relatives.phone}
-                                                                            masks={{ng: '...-...-....', at: '(....) ...-....'}}
-                                                                            id="phone"
-                                                                           
-                                                                            onChange={(e)=>{checkPhoneNumber(e,'phone')}}
-                                                                        /> */}
-                                    <Input
-                                      type="text"
-                                      name="phone"
-                                      id="phone"
-                                      onChange={(e) => {
-                                        checkPhoneNumber(e, "phone");
-                                      }}
-                                      value={relatives.phone}
-                                      style={{
-                                        border: "1px solid #014D88",
-                                        borderRadius: "0.2rem",
-                                      }}
-                                      required
-                                    />
-                                    {errors.phone !== "" ? (
-                                      <span className={classes.error}>
-                                        {errors.phone}
-                                      </span>
-                                    ) : (
-                                      ""
-                                    )}
-                                  </FormGroup>
-                                </div>
-
-                                <div className="form-group mb-3 col-md-3">
-                                  <FormGroup>
-                                    <Label for="contactEmail">Email</Label>
-                                    <input
-                                      className="form-control"
-                                      type="email"
-                                      name="email"
-                                      id="email"
-                                      value={relatives.email}
-                                      style={{
-                                        border: "1px solid #014D88",
-                                        borderRadius: "0.2rem",
-                                      }}
-                                      onChange={handleInputChangeRelatives}
-                                      required
-                                    />
-                                    {/* {errors.contactEmail && <p>{errors.contactEmail.message}</p>} */}
-                                  </FormGroup>
-                                </div>
-
-                                <div className="form-group mb-3 col-md-3">
-                                  <FormGroup>
-                                    <Label for="contactAddress">Address</Label>
-                                    <input
-                                      className="form-control"
-                                      type="text"
-                                      name="address"
-                                      id="address"
-                                      value={relatives.address}
-                                      style={{
-                                        border: "1px solid #014D88",
-                                        borderRadius: "0.2rem",
-                                      }}
-                                      onChange={handleInputChangeRelatives}
-                                    />
-                                    {/* {errors.contactAddress && <p>{errors.contactAddress.message}</p>} */}
-                                  </FormGroup>
-                                </div>
+                              <div className="form-group mb-3 col-md-3">
+                                <FormGroup>
+                                  <Label for="cfirstName">
+                                    First Name{" "}
+                                    <span style={{ color: "red" }}> *</span>
+                                  </Label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    name="firstName"
+                                    value={relatives.firstName}
+                                    id="firstName"
+                                    style={{
+                                      border: "1px solid #014D88",
+                                      borderRadius: "0.2rem",
+                                    }}
+                                    onChange={handleInputChangeRelatives}
+                                  />
+                                  {errors.firstName !== "" ? (
+                                    <span className={classes.error}>
+                                      {errors.firstName}
+                                    </span>
+                                  ) : (
+                                    ""
+                                  )}
+                                </FormGroup>
                               </div>
 
-                              <div className="row">
-                                <div className="col-1">
-                                  <MatButton
-                                    type="button"
-                                    variant="contained"
-                                    color="primary"
-                                    className={classes.button}
-                                    onClick={handleSaveRelationship}
-                                  >
-                                    Add
-                                  </MatButton>
-                                </div>
+                              <div className="form-group mb-3 col-md-3">
+                                <FormGroup>
+                                  <Label>Middle Name</Label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    name="middleName"
+                                    id="middleName"
+                                    value={relatives.middleName}
+                                    style={{
+                                      border: "1px solid #014D88",
+                                      borderRadius: "0.2rem",
+                                    }}
+                                    onChange={handleInputChangeRelatives}
+                                  />
+                                  {/* {errors.cmiddleName && <p>{errors.cmiddleName.message}</p>} */}
+                                </FormGroup>
+                              </div>
 
-                                <div className="col-1">
-                                  <MatButton
-                                    type="button"
-                                    variant="contained"
-                                    color="secondary"
-                                    className={classes.button}
-                                    onClick={handleCancelSaveRelationship}
-                                  >
-                                    Cancel
-                                  </MatButton>
-                                </div>
+                              <div className="form-group mb-3 col-md-3">
+                                <FormGroup>
+                                  <Label>Last Name </Label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    name="lastName"
+                                    id="lastName"
+                                    value={relatives.lastName}
+                                    style={{
+                                      border: "1px solid #014D88",
+                                      borderRadius: "0.2rem",
+                                    }}
+                                    onChange={handleInputChangeRelatives}
+                                  />
+                                </FormGroup>
+                              </div>
+                            </div>
+
+                            <div className="row">
+                              <div className="form-group mb-3 col-md-3">
+                                <FormGroup>
+                                  <Label for="contactPhoneNumber">
+                                    Phone Number
+                                  </Label>
+                                  <Input
+                                    type="number"
+                                    name="phone"
+                                    id="phone"
+                                    onChange={(e) => {
+                                      checkPhoneNumber(e, "phone");
+                                    }}
+                                    value={relatives.phone}
+                                    style={{
+                                      border: "1px solid #014D88",
+                                      borderRadius: "0.2rem",
+                                    }}
+                                    required
+                                  />
+                                  {errors.phone !== "" ? (
+                                    <span className={classes.error}>
+                                      {errors.phone}
+                                    </span>
+                                  ) : (
+                                    ""
+                                  )}
+                                </FormGroup>
+                              </div>
+
+                              <div className="form-group mb-3 col-md-3">
+                                <FormGroup>
+                                  <Label for="contactEmail">Email</Label>
+                                  <input
+                                    className="form-control"
+                                    type="email"
+                                    name="email"
+                                    id="email"
+                                    value={relatives.email}
+                                    style={{
+                                      border: "1px solid #014D88",
+                                      borderRadius: "0.2rem",
+                                    }}
+                                    onChange={handleInputChangeRelatives}
+                                    required
+                                  />
+                                  {errors.contactEmail !== "" ? (
+                                    <span className={classes.error}>
+                                      {errors.contactEmail}
+                                    </span>
+                                  ) : (
+                                    ""
+                                  )}
+                                </FormGroup>
+                              </div>
+
+                              <div className="form-group mb-3 col-md-3">
+                                <FormGroup>
+                                  <Label for="contactAddress">Address</Label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    name="address"
+                                    id="address"
+                                    value={relatives.address?.city}
+                                    style={{
+                                      border: "1px solid #014D88",
+                                      borderRadius: "0.2rem",
+                                    }}
+                                    onChange={handleInputChangeRelatives}
+                                  />
+                                  {/* {errors.contactAddress && <p>{errors.contactAddress.message}</p>} */}
+                                </FormGroup>
+                              </div>
+                            </div>
+
+                            <div className="row">
+                              <div className="col-1">
+                                <MatButton
+                                  type="button"
+                                  variant="contained"
+                                  color="primary"
+                                  className={classes.button}
+                                  onClick={handleSaveRelationship}
+                                >
+                                  Add
+                                </MatButton>
+                              </div>
+
+                              <div className="col-1">
+                                <MatButton
+                                  type="button"
+                                  variant="contained"
+                                  color="secondary"
+                                  className={classes.button}
+                                  onClick={handleCancelSaveRelationship}
+                                >
+                                  Cancel
+                                </MatButton>
                               </div>
                             </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="row"></div>
-                    {/* <MatButton
-                                            type="button"
-                                            variant="contained"
-                                            color="primary"
-                                            className={classes.button}
-                                            startIcon={<AddIcon />}
-                                            onClick={handleAddRelative}
-                                            style={{backgroundColor:'#014d88',fontWeight:"bolder"}}
-                                        >
-                                            Add a Relative/Next Of Kin
-                                        </MatButton> */}
-                    {/* </div> */}
-                  </div>
-                )}
-              </div>
-              {/* Adding First DOSAGE FORM HERE */}
-              <div className="card">
-                <div
-                  className="card-header"
-                  style={{
-                    backgroundColor: "#014d88",
-                    color: "#fff",
-                    fontWeight: "bolder",
-                    borderRadius: "0.2rem",
-                  }}
-                >
-                  <h5 className="card-title" style={{ color: "#fff" }}>
-                    Key Population Prevention{" "}
-                  </h5>
-                </div>
-
-                {/* <div className="card d-flex"> */}
-
-                <div className="row d-flex">
-                  <h2>Service Provider </h2>
-                  <br />
-                  <br />
-                  <div className="form-group mb-3 col-md-4 ">
-                    <FormGroup>
-                      <Label>Date Of Service Provisions</Label>
-                      <Input
-                        type="date"
-                        name="dateServiceOffered"
-                        value={date.dateServiceOffered}
-                        onChange={handleInputChan4Date}
-                        id="dateServiceOffered"
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                      {errors.dateServiceOffered !== "" ? (
-                        <span className={classes.error}>
-                          {errors.dateServiceOffered}
-                        </span>
-                      ) : (
-                        ""
+                        </div>
                       )}
-                    </FormGroup>
+                    </div>
                   </div>
-                  {/* <div className='card'> */}
 
-                  <div
-                    className="card-header"
-                    style={{
-                      backgroundColor: "teal",
-                      color: "#fff",
-                      fontWeight: "bolder",
-                      borderRadius: "0.2rem",
-                    }}
+                  <div className="row"></div>
+                  <MatButton
+                    type="button"
+                    variant="contained"
+                    color="primary"
+                    className={classes.button}
+                    startIcon={<AddIcon />}
+                    onClick={handleAddRelative}
+                    style={{ backgroundColor: "#014d88", fontWeight: "bolder" }}
                   >
-                    <h2 style={{ color: "#fff" }}>HTS Services</h2>
-                  </div>
-                  <br />
-                  <br />
-                  <div className="form-group mb-3 col-xs-5 col-sm-5 col-md-5 col-lg-5 ">
-                    <FormGroup>
-                      <Label>Offered HTS</Label>
-                      <Input
-                        type="select"
-                        name="offeredHts"
-                        id="offeredHts"
-                        onChange={handleInputChangeHtsService}
-                        value={htsServices.offeredHts}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-xs-5 col-sm-5 col-md-5 col-lg-5 ">
-                    <FormGroup>
-                      <Label>Accepted HTS</Label>
-                      <Input
-                        type="select"
-                        name="acceptedHts"
-                        id="acceptedHts"
-                        onChange={handleInputChangeHtsService}
-                        value={htsServices.acceptedHts}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-xs-5 col-sm-5 col-md-5 col-lg-5 ">
-                    <FormGroup>
-                      <Label>Hiv Test Result</Label>
-                      <Input
-                        type="select"
-                        name="hivTestResult"
-                        id="hivTestResult"
-                        onChange={handleInputChangeHtsService}
-                        value={htsServices.hivTestResult}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-xs-5 col-sm-5 col-md-5 col-lg-5 ">
-                    <FormGroup>
-                      <Label>Reffered for ART</Label>
-                      <Input
-                        type="select"
-                        name="referredForArt"
-                        id="referredForArt"
-                        onChange={handleInputChangeHtsService}
-                        value={htsServices.referredForArt}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-
-                  {/* </div> */}
-
-                  <br />
-
-                  {/* <div className='card'> */}
-
-                  {/* <div className="row d-flex"> */}
-                  <LabelSui
-                    as="a"
-                    color="teal"
-                    style={{ width: "100%", height: "45px" }}
-                    ribbon
-                  >
-                    <h2 style={{ color: "#fff" }}>PreP Services</h2>
-                  </LabelSui>
-                  <br />
-                  <br />
-                  <div className="form-group mb-3 col-xs-5 col-sm-5 col-md-5 col-lg-5 ">
-                    <FormGroup>
-                      <Label>Offered Prep</Label>
-                      <Input
-                        type="select"
-                        name="offeredPrep"
-                        id="offeredPrep"
-                        onChange={handleInputChangePrepServices}
-                        value={prepServices.offeredPrep}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-xs-5 col-sm-5 col-md-5 col-lg-5 ">
-                    <FormGroup>
-                      <Label>Accepted PreP</Label>
-                      <Input
-                        type="select"
-                        name="acceptedPrep"
-                        id="acceptedPrep"
-                        onChange={handleInputChangePrepServices}
-                        value={prepServices.acceptedPrep}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-xs-5 col-sm-5 col-md-5 col-lg-5 ">
-                    <FormGroup>
-                      <Label>Reffered for Prep</Label>
-                      <Input
-                        type="select"
-                        name="referredForPrep"
-                        id="referredForPrep"
-                        onChange={handleInputChangePrepServices}
-                        value={prepServices.referredForPrep}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      >
-                        <option value="">Select</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                      </Input>
-                    </FormGroup>
-                  </div>
-                  {/* </div> */}
-
-                  {/* <div className='card'> */}
-                  <LabelSui
-                    as="a"
-                    color="teal"
-                    style={{ width: "100%", height: "45px" }}
-                    ribbon
-                  >
-                    <h2 style={{ color: "#fff" }}>Commodity Service</h2>
-                  </LabelSui>
-
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Condom Dispensed</Label>
-                      <Input
-                        type="number"
-                        name="condomDispensed"
-                        id="condomDispensed"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.condomDispensed}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Lubricants Dispensed</Label>
-                      <Input
-                        type="number"
-                        name="lubricantsDispensed"
-                        id="lubricantsDispensed"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.lubricantsDispensed}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Oral Quick/ HIVST dispensed</Label>
-                      <Input
-                        type="number"
-                        name="oralQuickDispensed"
-                        id="oralQuickDispensed"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.oralQuickDispensed}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>New Needles/Syringe Dispesend</Label>
-                      <Input
-                        type="number"
-                        name="newNeedleDispensed"
-                        id="newNeedleDispensed"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.newNeedleDispensed}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Old Needles/Syringe Retrived</Label>
-                      <Input
-                        type="number"
-                        name="oldNeedleRetrived"
-                        id="oldNeedleRetrived"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.oldNeedleRetrived}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                  <div className="form-group mb-3 col-md-4">
-                    <FormGroup>
-                      <Label>Nalxone Provided</Label>
-                      <Input
-                        type="number"
-                        name="nalxoneProvided"
-                        id="nalxoneProvided"
-                        onChange={handleInputChangeCommodityServices}
-                        value={commodityService.nalxoneProvided}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      ></Input>
-                    </FormGroup>
-                  </div>
-                  {/* </div> */}
-                  <div className="row d-flex">
-                    <LabelSui
-                      as="a"
-                      color="blue"
-                      style={{ width: "106%", height: "45px" }}
-                      ribbon
-                    >
-                      <h2 style={{ color: "#fff" }}>HIV Educaton Provided</h2>
-                    </LabelSui>
-
-                    <div className="form-group mb-3 col-md-4 ">
-                      <FormGroup>
-                        <Label>IEC material/Pamphelt</Label>
-                        <Input
-                          type="select"
-                          name="iecMaterial"
-                          id="iecMaterial"
-                          onChange={handleInputChangeHivEducationProvided}
-                          value={hivEducationProvided.iecMaterial}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value="">Select</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-
-                    <div className="form-group mb-3 col-md-4 ">
-                      <FormGroup>
-                        <Label>InterPersonal Communication</Label>
-                        <Input
-                          type="select"
-                          name="interPersonalCommunication"
-                          id="interPersonalCommunication"
-                          onChange={handleInputChangeHivEducationProvided}
-                          value={
-                            hivEducationProvided.interPersonalCommunication
-                          }
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value="">Select</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                    <div className="form-group mb-3 col-md-4 ">
-                      <FormGroup>
-                        <Label>Peer Group Communication</Label>
-                        <Input
-                          type="select"
-                          name="peerGroupCommunication"
-                          id="peerGroupCommunication"
-                          onChange={handleInputChangeHivEducationProvided}
-                          value={hivEducationProvided.peerGroupCommunication}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value="">Select</option>
-                          <option value="Yes">Yes</option>
-                          <option value="No">No</option>
-                        </Input>
-                      </FormGroup>
-                    </div>
-                  </div>
-                </div>
-                <br />
-                {/* <div className='card'> */}
-
-                <div className=" row d-flex">
-                  <div className="row d-flex">
-                    <LabelSui
-                      as="a"
-                      color="blue"
-                      style={{ width: "106%", height: "45px" }}
-                      ribbon
-                    >
-                      <h2 style={{ color: "#fff" }}>Biomedical Services</h2>
-                    </LabelSui>
-                    <br />
-                    <br />
-                    <div className="row">
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>STI Screening</Label>
-                          <Input
-                            type="select"
-                            name="stiScreening"
-                            id="stiScreening"
-                            value={bioMedicalServices.stiScreening}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value="">Select</option>
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                          </Input>
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.stiScreening === "1" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Input
-                            type="select"
-                            name="stiScreeningResponse"
-                            id="stiScreeningResponse"
-                            value={bioMedicalServices.stiScreeningResponse}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>STI Syndromic Management</Label>
-                          <Input
-                            type="select"
-                            name="stiSyndromicManagement"
-                            id="stiSyndromicManagement"
-                            value={bioMedicalServices.stiSyndromicManagement}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value="">Select</option>
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                          </Input>
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.stiSyndromicManagement === "1" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label>Facility Referred to</Label>
-                          <Input
-                            type="text"
-                            name="facilityReferredTo"
-                            id="facilityReferredTo"
-                            value={bioMedicalServices.facilityReferredTo}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>STI Treatment/ Referral</Label>
-                          <Input
-                            type="select"
-                            name="stiTreatment"
-                            id="stiTreatment"
-                            value={bioMedicalServices.stiTreatment}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="1"> Yes </option>
-                            <option value="0"> No </option>
-                          </Input>
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.stiTreatment === "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to Sti Screening </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToStiScreening"
-                            id="facilityRefferedToStiScreening"
-                            value={
-                              facilityRefferedToo.facilityRefferedToStiScreening
-                            }
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Screened for TB</Label>
-                          <Input
-                            type="select"
-                            name="screenedForTb"
-                            id="screenedForTb"
-                            value={bioMedicalServices.screenedForTb}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.screenedForTb === "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToScreenedTo"
-                            id="facilityRefferedToScreenedTo"
-                            value={
-                              facilityRefferedToo.facilityRefferedToScreenedTo
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Provided with TPT</Label>
-                          <Input
-                            type="select"
-                            name="providedWithTpt"
-                            id="providedWithTpt"
-                            value={bioMedicalServices.providedWithTpt}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Screened For Viral Heaptits</Label>
-                          <Input
-                            type="select"
-                            name="screenedForViralHepatits"
-                            id="screenedForViralHepatits"
-                            value={bioMedicalServices.screenedForViralHepatits}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="1"> Yes </option>
-                            <option value="0"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.screenedForViralHepatits ===
-                        "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToScreenedForViralHepatits"
-                            id="facilityRefferedToScreenedFclientVerificationObjorViralHepatits"
-                            value={
-                              facilityRefferedToo.facilityRefferedToScreenedForViralHepatits
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Viral Hepatits Screen Result</Label>
-                          <Input
-                            type="select"
-                            name="viralHepatitsScreenResult"
-                            id="viralHepatitsScreenResult"
-                            value={bioMedicalServices.viralHepatitsScreenResult}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Positive"> Positive </option>
-                            <option value="Negative"> Negative</option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.viralHepatitsScreenResult ===
-                        "Positive" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToViralHepatitsScreenResult"
-                            id="facilityRefferedToViralHepatitsScreenResult"
-                            value={
-                              facilityRefferedToo.facilityRefferedToViralHepatitsScreenResult
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Vaccination For Viral Hepatits</Label>
-                          <Input
-                            type="select"
-                            name="vaccinationForViralHepatits"
-                            id="vaccinationForViralHepatits"
-                            value={
-                              bioMedicalServices.vaccinationForViralHepatits
-                            }
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.vaccinationForViralHepatits ===
-                        "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToVaccinationForViralHepatits"
-                            id="facilityRefferedToVaccinationForViralHepatits"
-                            value={
-                              facilityRefferedToo.facilityRefferedToVaccinationForViralHepatits
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Offered Family Planning Services</Label>
-                          <Input
-                            type="select"
-                            name="offeredFamilyPlanningServices"
-                            id="offeredFamilyPlanningServices"
-                            value={
-                              bioMedicalServices.offeredFamilyPlanningServices
-                            }
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.offeredFamilyPlanningServices ===
-                        "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToOfferedFamilyPlanningServices"
-                            id="facilityRefferedToOfferedFamilyPlanningServices"
-                            value={
-                              facilityRefferedToo.facilityRefferedToOfferedFamilyPlanningServices
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Refferred For Family Planning Services</Label>
-                          <Input
-                            type="select"
-                            name="referredForFamilyPlanningServices"
-                            id="referredForFamilyPlanningServices"
-                            value={
-                              bioMedicalServices.referredForFamilyPlanningServices
-                            }
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.referredForFamilyPlanningServices ===
-                        "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToReferredForFamilyPlanningServices"
-                            id="facilityRefferedToReferredForFamilyPlanningServices"
-                            value={
-                              facilityRefferedToo.facilityRefferedToReferredForFamilyPlanningServices
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Provided With Drug Rehab</Label>
-                          <Input
-                            type="select"
-                            name="providedWithDrugRehab"
-                            id="providedWithDrugRehab"
-                            value={bioMedicalServices.providedWithDrugRehab}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.providedWithDrugRehab === "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefeRredToProvidedWithDrugRehab"
-                            id="facilityRefeRredToProvidedWithDrugRehab"
-                            value={
-                              facilityRefferedToo.facilityRefeRredToProvidedWithDrugRehab
-                            }
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Offered MHPSS</Label>
-                          <Input
-                            type="select"
-                            name="offeredMhpss"
-                            id="offeredMhpss"
-                            value={bioMedicalServices.offeredMhpss}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.offeredMhpss === "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label>Facility Refferred to </Label> Type of MHpss
-                          <Input
-                            type="text"
-                            name="facilityRefferedToOfferedMhpss"
-                            id="facilityRefferedToOfferedMhpss"
-                            value={
-                              facilityRefferedToo.facilityRefferedToOfferedMhpss
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>
-                            On Medical Assisted Therapy (MAT) for atleast
-                          </Label>
-                          <Input
-                            type="select"
-                            name="onMedicalAssistedTherapy"
-                            id="onMedicalAssistedTherapy"
-                            value={bioMedicalServices.onMedicalAssistedTherapy}
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                      {bioMedicalServices.onMedicalAssistedTherapy ===
-                        "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToOnMedicalAssistedTherapy"
-                            id="facilityRefferedToOnMedicalAssistedTherapy"
-                            value={
-                              facilityRefferedToo.facilityRefferedToOnMedicalAssistedTherapy
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div className="form-group mb-3 col-md-4">
-                        <FormGroup>
-                          <Label>Recived Nalxone for Overdose Treatment</Label>
-                          <Input
-                            type="select"
-                            name="recivedNalxoneForOverdoseTreatment"
-                            id="recivedNalxoneForOverdoseTreatment"
-                            value={
-                              bioMedicalServices.recivedNalxoneForOverdoseTreatment
-                            }
-                            onChange={handleInputChangebioMedicalServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          >
-                            <option value=""> Select </option>
-                            <option value="Yes"> Yes </option>
-                            <option value="No"> No </option>
-                          </Input>
-                          {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                        </FormGroup>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="row d-flex">
-                    <LabelSui
-                      as="a"
-                      color="blue"
-                      style={{ width: "106%", height: "45px" }}
-                      ribbon
-                    >
-                      <h2 style={{ color: "#fff" }}> Structural Services </h2>
-                    </LabelSui>
-                    <br />
-                    <br />
-                    <div className="form-group mb-3 col-md-4">
-                      <FormGroup>
-                        <Label>Provided or Reffered for Empowerment</Label>
-                        <Input
-                          type="select"
-                          name="providedOrRefferedForEmpowerment"
-                          id="providedOrRefferedForEmpowerment"
-                          value={
-                            structuralServices.recivedNalxoneForOverdoseTreatment
-                          }
-                          onChange={handleInputChangestructuralServices}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value=""> Select </option>
-                          <option value="1"> Yes </option>
-                          <option value="0"> No </option>
-                        </Input>
-                        {/* {errors.discontinuation !== "" ? (
-                    <span className={classes.error}>
-                      {errors.discontinuation}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                      </FormGroup>
-                      {structuralServices.recivedNalxoneForOverdoseTreatment ===
-                        "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedToRecievedNalxoneForOverdoseTreatment"
-                            id="facilityRefferedToRecievedNalxoneForOverdoseTreatment"
-                            value={
-                              facilityRefferedToo.facilityRefferedToRecievedNalxoneForOverdoseTreatment
-                            }
-                            onChange={handleInputChangestructuralServices}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group mb-3 col-md-4">
-                      <FormGroup>
-                        <Label>Legal Aid Service Type</Label>
-                        <Input
-                          type="select"
-                          name="legalAidServiceType"
-                          id="legalAidServiceType"
-                          value={structuralServices.legalAidServiceType}
-                          onChange={handleInputChangestructuralServices}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        >
-                          <option value=""> Select </option>
-                          <option value="1"> Yes </option>
-                          <option value="0"> No </option>
-                        </Input>
-                        {/* {errors.legalAidServiceType !== "" ? (
-                    <span className={classes.error}>
-                      {errors.legalAidServiceType}
-                    </span>
-                  ) : (
-                    ""
-                  )} */}
-                      </FormGroup>
-                      {structuralServices.legalAidServiceType === "Yes" && (
-                        <div className="form-group mb-3 col-md-4">
-                          <Label> Facility Refferred to </Label>
-                          <Input
-                            type="text"
-                            name="facilityRefferedLegalAidServiceType"
-                            id="facilityRefferedLegalAidServiceType"
-                            value={
-                              facilityRefferedToo.facilityRefferedLegalAidServiceType
-                            } //  min={enrollDate}
-                            onChange={handleInputChangeReferred}
-                            style={{
-                              border: "1px solid #014D88",
-                              borderRadius: "0.25rem",
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    Add a Relative/Next Of Kin
+                  </MatButton>
                   {/* </div> */}
                 </div>
               </div>
-              {/* END OF First DOSAGE */}
               {saving ? <Spinner /> : ""}
 
               <br />
+
               <MatButton
                 type="submit"
                 variant="contained"
@@ -3071,7 +1826,8 @@ const UserRegistration = (props) => {
                 className={classes.button}
                 startIcon={<SaveIcon />}
                 onClick={handleSubmit}
-                disabled={disabledAgeBaseOnAge}
+                hidden={disabledAgeBaseOnAge}
+                disabled={saving}
                 style={{ backgroundColor: "#014d88", fontWeight: "bolder" }}
               >
                 {!saving ? (
@@ -3126,4 +1882,4 @@ const UserRegistration = (props) => {
   );
 };
 
-export default UserRegistration;
+export default RegisterPatient;

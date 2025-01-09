@@ -166,12 +166,12 @@ const KpPrevEnrolled = (props) => {
           { title: "Actions", field: "actions", filtering: false },
         ]}
         isLoading={isLoading}
+
         data={
           !isLoading && data && data?.records
             ? data?.records?.map?.((row) => ({
                 dateServiceOffered: row.dateServiceOffered,
-                hospital_number:
-                  row.htsCode !== null ? row?.htsCode : row?.prepCode,
+                hospital_number:  row?.kpPatientHospitalNumber  || "",
                 prevCode: row?.prevCode || "",
                 htsServices: row?.htsServices.offered_hts !== "" ? "✅" : "❌",
                 prepServices:
@@ -231,6 +231,7 @@ const KpPrevEnrolled = (props) => {
               }))
             : []
         }
+
         options={{
           headerStyle: {
             backgroundColor: "#014d88",
@@ -248,12 +249,16 @@ const KpPrevEnrolled = (props) => {
           pageSize: query?.pageSize || 10,
           debounceInterval: 400,
         }}
+
         page={data?.currentPage}
         totalCount={data?.totalRecords}
+
+
         onChangePage={(newPage) => {
           setQueryParams((prevFilters) => ({ ...prevFilters, page: newPage }));
           refetch(query);
         }}
+
         onChangeRowsPerPage={(newPageSize) => {
           setQueryParams((prevFilters) => ({
             ...prevFilters,

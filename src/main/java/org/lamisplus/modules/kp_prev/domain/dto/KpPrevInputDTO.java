@@ -33,6 +33,17 @@ public class KpPrevInputDTO implements Serializable {
 	private String target_group;
 	private String prepCode;
 	private String patientIdentifier;
+	private String kpOfferedHts;
+	private String kpAcceptedHts;
+	private String kpHtsClientCode;
+	private String kpHtsFinalResult;
+	private String kpPatientArtNumber;
+	private String kpPatientHospitalNumber;
+	private String kpKnownPositive;
+	private String kpPatientTargetGroup;
+	private String kpPatientState;
+	private String kpPatientProvince;
+
 
 	
     @Convert(converter = LocalDateConverter.class)

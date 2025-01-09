@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Builder;
 import lombok.Data;
 
-
+@Builder
 @Data
 public class KpPrevMetaDataDto implements Serializable {
 	private  long totalRecords;

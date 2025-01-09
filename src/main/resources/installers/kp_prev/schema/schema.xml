@@ -40,7 +40,12 @@
 
                service_provider_name VARCHAR(255),
 
-                service_provider_signature VARCHAR(255),
+               service_provider_signature VARCHAR(255),
+
+
+
+
+
 
                 hts_services jsonb,
 
@@ -75,4 +80,25 @@
         </sql>
 
     </changeSet>
+
+    <changeSet failOnError="true" author="Emmanuel" id="20240507">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="kp_prev"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE kp_prev ADD COLUMN kp_offered_hts character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_hts_client_code character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_hts_final_result character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_patient_art_number character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_patient_hospital_number character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_known_positive character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_target_group character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_patient_state character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_patient_province character varying;
+            ALTER TABLE kp_prev ADD COLUMN kp_accepted_hts character varying;
+        </sql>
+
+    </changeSet>
+
+
 </databaseChangeLog>

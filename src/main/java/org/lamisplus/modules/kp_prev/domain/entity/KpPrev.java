@@ -2,7 +2,6 @@ package org.lamisplus.modules.kp_prev.domain.entity;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Date;
 
 import javax.persistence.*;
 
@@ -57,6 +56,39 @@ private LocalDate dateServiceOffered;
 @Column(name = "facility_id")
 private Long facilityId;
 
+@Column(name = "service_provider_signature")
+private String serviceProviderSignature;
+
+@Column(name = "kp_offered_hts")
+private String kpOfferedHts;
+
+@Column(name = "kp_accepted_hts")
+private String kpAcceptedHts;
+
+@Column(name = "kp_hts_client_code")
+private String kpHtsClientCode;
+
+@Column(name = "kp_hts_final_result")
+private String kpHtsFinalResult;
+
+@Column(name = "kp_patient_art_number")
+private String kpPatientArtNumber;
+
+@Column(name = "kp_patient_hospital_number")
+private String kpPatientHospitalNumber;
+
+@Column(name = "kp_known_positive")
+private String kpKnownPositive;
+
+@Column(name = "kp_target_group")
+private String kpPatientTargetGroup;
+
+@Column(name = "kp_patient_state")
+private String kpPatientState;
+
+@Column(name = "kp_patient_province")
+private String kpPatientProvince;
+
 
 @Type(type = "jsonb-node")
 @Column(columnDefinition = "jsonb", name = "entry_point", nullable = true)
@@ -91,8 +123,7 @@ private JsonNode structuralServices;
 private String serviceProviderName;
 
 
-@Column(name = "service_provider_signature")
-private String serviceProviderSignature;
+
 
 @Override
 public boolean isNew() {
